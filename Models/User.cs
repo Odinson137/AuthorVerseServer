@@ -1,5 +1,4 @@
-﻿using AuthorVerseServer.Enums;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace AuthorVerseServer.Models
 {

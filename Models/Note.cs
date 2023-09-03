@@ -1,9 +1,11 @@
 ﻿using AuthorVerseServer.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
     public class Note
     {
+        [Key]
         public int NoteId { get; set; }
         public User User { get; set; } = null!;
         public ChapterSection Section { get; set; } = null!;
