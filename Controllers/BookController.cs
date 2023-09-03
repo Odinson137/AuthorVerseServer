@@ -8,12 +8,10 @@ namespace AuthorVerseServer.Controllers
     [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
-        
+        [HttpGet]
         public ICollection<Book> GetBooks()
         {
             return new List<Book>() { new Book() };
         }
-
-        
     }
 }
