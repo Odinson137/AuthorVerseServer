@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using AuthorVerseServer.Data;
-using Microsoft.Extensions.Configuration;
+using System.Reflection.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +23,7 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
+
 var policyName = "AllowReactApp";
 builder.Services.AddCors(options =>
 {
@@ -35,6 +36,10 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+var scope = app.Services.CreateScope();
+var scopedContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+DataContext.Seed(scopedContext);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
