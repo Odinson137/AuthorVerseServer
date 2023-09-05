@@ -15,7 +15,7 @@ namespace AuthorVerseServer.Models
         [MaxLength(1000)]
         public string Description { get; set; } = null!;
         public User Author { get; set; } = null!;
-        public ICollection<BookGenre> BookGenres { get; set; } = null!;
+        public ICollection<Genre> Genres { get; set; } = null!;
         public ICollection<Comment>? Comments { get; set; }
         public ICollection<BookChapter> BookChapters { get; set; } = null!;
         public DateTime PublicationData { get; set; } // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги

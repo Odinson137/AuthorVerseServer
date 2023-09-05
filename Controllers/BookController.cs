@@ -28,7 +28,7 @@ namespace AuthorVerseServer.Controllers
                 Title = book.Title,
                 Description = book.Description,
                 Author = book.Author,
-                BookGenres = book.BookGenres,
+                Genres = book.Genres,
                 AgeRating = book.AgeRating
             }).ToListAsync();
 

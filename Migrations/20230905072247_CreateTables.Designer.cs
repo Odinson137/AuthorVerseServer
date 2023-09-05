@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230903163259_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20230905072247_CreateTables")]
+    partial class CreateTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,9 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("int");
 
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int?>("BookCoverImageId")
                         .HasColumnType("int");
 
@@ -56,6 +59,8 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("BookId");
+
+                    b.HasIndex("AuthorId");
 
                     b.HasIndex("BookCoverImageId");
 
@@ -83,21 +88,6 @@ namespace AuthorVerseServer.Migrations
                     b.HasIndex("BookId");
 
                     b.ToTable("BookChapter");
-                });
-
-            modelBuilder.Entity("AuthorVerseServer.Models.BookGenre", b =>
-                {
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GenreId")
-                        .HasColumnType("int");
-
-                    b.HasKey("BookId", "GenreId");
-
-                    b.HasIndex("GenreId");
-
-                    b.ToTable("BookGenre");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
@@ -208,18 +198,18 @@ namespace AuthorVerseServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SectionChoiceId"));
 
-                    b.Property<int?>("ChapterSectionSectionId")
+                    b.Property<int>("ChapterSectionId")
                         .HasColumnType("int");
 
                     b.Property<int>("ChoiceText")
                         .HasColumnType("int");
 
-                    b.Property<int>("TargetChapterId")
+                    b.Property<int>("TargetSectionId")
                         .HasColumnType("int");
 
                     b.HasKey("SectionChoiceId");
 
-                    b.HasIndex("ChapterSectionSectionId");
+                    b.HasIndex("ChapterSectionId");
 
                     b.ToTable("SectionChoice");
                 });
@@ -311,7 +301,7 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("BookState")
                         .HasColumnType("int");
 
-                    b.Property<int?>("LastChapterBookChapterId")
+                    b.Property<int>("LastBookChapterId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -321,11 +311,26 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.HasIndex("LastChapterBookChapterId");
+                    b.HasIndex("LastBookChapterId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("UserBooks");
+                });
+
+            modelBuilder.Entity("BookGenre", b =>
+                {
+                    b.Property<int>("BooksBookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GenresGenreId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BooksBookId", "GenresGenreId");
+
+                    b.HasIndex("GenresGenreId");
+
+                    b.ToTable("BookGenre");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -463,9 +468,15 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.Book", b =>
                 {
+                    b.HasOne("AuthorVerseServer.Models.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId");
+
                     b.HasOne("AuthorVerseServer.Models.Image", "BookCover")
                         .WithMany()
                         .HasForeignKey("BookCoverImageId");
+
+                    b.Navigation("Author");
 
                     b.Navigation("BookCover");
                 });
@@ -475,25 +486,6 @@ namespace AuthorVerseServer.Migrations
                     b.HasOne("AuthorVerseServer.Models.Book", null)
                         .WithMany("BookChapters")
                         .HasForeignKey("BookId");
-                });
-
-            modelBuilder.Entity("AuthorVerseServer.Models.BookGenre", b =>
-                {
-                    b.HasOne("AuthorVerseServer.Models.Book", "Book")
-                        .WithMany("BookGenres")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AuthorVerseServer.Models.Genre", "Genre")
-                        .WithMany()
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("Genre");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
@@ -530,9 +522,13 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.SectionChoice", b =>
                 {
-                    b.HasOne("AuthorVerseServer.Models.ChapterSection", null)
+                    b.HasOne("AuthorVerseServer.Models.ChapterSection", "ChapterSection")
                         .WithMany("SectionChoices")
-                        .HasForeignKey("ChapterSectionSectionId");
+                        .HasForeignKey("ChapterSectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChapterSection");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
@@ -552,9 +548,11 @@ namespace AuthorVerseServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AuthorVerseServer.Models.BookChapter", "LastChapter")
+                    b.HasOne("AuthorVerseServer.Models.BookChapter", "LastBookChapter")
                         .WithMany()
-                        .HasForeignKey("LastChapterBookChapterId");
+                        .HasForeignKey("LastBookChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AuthorVerseServer.Models.User", null)
                         .WithMany("UserBooks")
@@ -562,7 +560,22 @@ namespace AuthorVerseServer.Migrations
 
                     b.Navigation("Book");
 
-                    b.Navigation("LastChapter");
+                    b.Navigation("LastBookChapter");
+                });
+
+            modelBuilder.Entity("BookGenre", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BooksBookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AuthorVerseServer.Models.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresGenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -619,8 +632,6 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.Book", b =>
                 {
                     b.Navigation("BookChapters");
-
-                    b.Navigation("BookGenres");
 
                     b.Navigation("Comments");
                 });

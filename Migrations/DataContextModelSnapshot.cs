@@ -87,21 +87,6 @@ namespace AuthorVerseServer.Migrations
                     b.ToTable("BookChapter");
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.BookGenre", b =>
-                {
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GenreId")
-                        .HasColumnType("int");
-
-                    b.HasKey("BookId", "GenreId");
-
-                    b.HasIndex("GenreId");
-
-                    b.ToTable("BookGenre");
-                });
-
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
                 {
                     b.Property<int>("SectionId")
@@ -330,6 +315,21 @@ namespace AuthorVerseServer.Migrations
                     b.ToTable("UserBooks");
                 });
 
+            modelBuilder.Entity("BookGenre", b =>
+                {
+                    b.Property<int>("BooksBookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GenresGenreId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BooksBookId", "GenresGenreId");
+
+                    b.HasIndex("GenresGenreId");
+
+                    b.ToTable("BookGenre");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -485,25 +485,6 @@ namespace AuthorVerseServer.Migrations
                         .HasForeignKey("BookId");
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.BookGenre", b =>
-                {
-                    b.HasOne("AuthorVerseServer.Models.Book", "Book")
-                        .WithMany("BookGenres")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AuthorVerseServer.Models.Genre", "Genre")
-                        .WithMany()
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("Genre");
-                });
-
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.BookChapter", null)
@@ -579,6 +560,21 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("LastBookChapter");
                 });
 
+            modelBuilder.Entity("BookGenre", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BooksBookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AuthorVerseServer.Models.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresGenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -633,8 +629,6 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.Book", b =>
                 {
                     b.Navigation("BookChapters");
-
-                    b.Navigation("BookGenres");
 
                     b.Navigation("Comments");
                 });

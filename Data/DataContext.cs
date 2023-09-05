@@ -16,31 +16,10 @@ namespace AuthorVerseServer.Data
         public DbSet<UserBook> UserBooks { get; set; }
         public DbSet<Genre> Genres { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<BookGenre>()
-                .HasKey(bg => new { bg.BookId, bg.GenreId });
-
-            modelBuilder.Entity<BookGenre>()
-                .HasOne(bg => bg.Book)
-                .WithMany(b => b.BookGenres)
-                .HasForeignKey(bg => bg.BookId);
-
-            modelBuilder.Entity<BookGenre>()
-                .HasOne(bg => bg.Genre)
-                .WithMany()
-                .HasForeignKey(bg => bg.GenreId);
-
-            base.OnModelCreating(modelBuilder);
-        }
-
         public static void Seed(DataContext context)
         {
             if (!context.Books.Any())
             {
-                context.Books.RemoveRange(context.Books);
-                context.Users.RemoveRange(context.Users);
-                context.Genres.RemoveRange(context.Genres);
                 //context.ChangeTracker.AutoDetectChangesEnabled = false;
 
                 var genreNames = new List<string>
@@ -69,9 +48,8 @@ namespace AuthorVerseServer.Data
                 {
                     var genre = new Genre { Name = genreName };
                     genres.Add(genre);
+                    context.Add(genre);
                 }
-
-                context.AddRange(genres);
 
                 User admin = new User()
                 {
@@ -105,21 +83,16 @@ namespace AuthorVerseServer.Data
                         Description = book.Value,
                         PublicationData = DateTime.Now,
                         AgeRating = Enums.AgeRating.All,
-                        Permission = Enums.PublicationPermission.Approved
+                        Permission = Enums.PublicationPermission.Approved,
+                        Genres = new List<Genre>()
                     };
 
-                    var bookGenres = new List<BookGenre>();
-
-                    for (int i = 0; i < 3; i++) 
+                    for (int i = 0; i < 3; i++)
                     {
-                        var randomGenre = genres[random.Next(0, 16)];
-                        var bookGenre = new BookGenre()
-                        {
-                            Book = Book,
-                            Genre = randomGenre
-                        };
-                        bookGenres.Add(bookGenre);
+                        var genre = genres[random.Next(0, 16)];
+                        Book.Genres.Add(genre);
                     }
+
 
                     BookChapter chapter = new BookChapter()
                     {

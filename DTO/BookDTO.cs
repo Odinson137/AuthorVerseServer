@@ -10,7 +10,7 @@ namespace AuthorVerseServer.DTO
         public string Title { get; set; }
         public string Description { get; set; }
         public User Author { get; set; }
-        public ICollection<BookGenre> BookGenres { get; set; }
+        public ICollection<Genre> Genres { get; set; }
         public AgeRating AgeRating { get; set; }
     }
 }
