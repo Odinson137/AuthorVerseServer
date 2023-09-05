@@ -28,7 +28,7 @@ namespace AuthorVerseServer.Controllers
                 Title = book.Title,
                 Description = book.Description,
                 Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
-                Genres = book.Genres,
+                Genres = book.Genres.Select(genre => new GenreDTO() { GenreId = genre.GenreId, Name = genre.Name }).ToList(),
                 AgeRating = book.AgeRating
             }).ToListAsync();
 
@@ -36,9 +36,13 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("Genres")]
-        public async Task<ICollection<Genre>> GetGenre()
+        public async Task<ICollection<GenreDTO>> GetGenre()
         {
-            var genres = await _context.Genres.AsNoTracking().ToListAsync();
+            var genres = await _context.Genres.AsNoTracking().Select(genre => new GenreDTO() 
+            { 
+                GenreId = genre.GenreId,
+                Name = genre.Name
+            }).ToListAsync();
 
             return genres;
         }
