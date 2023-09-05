@@ -19,20 +19,28 @@ namespace AuthorVerseServer.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpGet("Books")]
         public async Task<ICollection<BookDTO>> GetBooks()
         {
-            var books = await _context.Books.Select(book => new BookDTO()
-            { 
+            var books = await _context.Books.AsNoTracking().Include(book => book.Genres).Select(book => new BookDTO()
+            {
                 BookId = book.BookId,
                 Title = book.Title,
                 Description = book.Description,
-                Author = book.Author,
+                Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
                 Genres = book.Genres,
                 AgeRating = book.AgeRating
             }).ToListAsync();
 
             return books;
+        }
+
+        [HttpGet("Genres")]
+        public async Task<ICollection<Genre>> GetGenre()
+        {
+            var genres = await _context.Genres.AsNoTracking().ToListAsync();
+
+            return genres;
         }
     }
 }
