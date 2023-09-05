@@ -51,7 +51,7 @@ namespace AuthorVerseServer.Controllers
             return book;
         }
 
-        [HttpGet("Genres/{bookId}")]
+        [HttpGet("Comments/{bookId}")]
         public async Task<ICollection<CommentDTO>> GetBookComments(int bookId)
         {
             var comments = await _context.Comments.AsNoTracking()
