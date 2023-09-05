@@ -9,5 +9,6 @@ namespace AuthorVerseServer.Models
         public string? Description { get; set; }
         [InverseProperty("User")]
         public ICollection<UserBook>? UserBooks { get; set; }
+        public ICollection<Comment>? Comments { get; set; }
     }
 }

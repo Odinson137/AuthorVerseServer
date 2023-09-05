@@ -51,21 +51,21 @@ namespace AuthorVerseServer.Controllers
             return book;
         }
 
-        //[HttpGet("Genres/{bookId}")]
-        //public async Task<ICollection<CommentDTO>> GetBookComments(int bookId)
-        //{
-        //    var comments = await _context.Comments.AsNoTracking()
-        //        .Include(comment => comment.User)
-        //        .Where(comments => comments.BookId == bookId)
-        //        .Select(comment => new CommentDTO()
-        //        {
-        //            CommentId = comment.CommentId,
-        //            Commentator = new UserDTO { Id = comment.User.Id, UserName = comment.User.UserName }
-        //        })
-        //    .ToListAsync();
+        [HttpGet("Genres/{bookId}")]
+        public async Task<ICollection<CommentDTO>> GetBookComments(int bookId)
+        {
+            var comments = await _context.Comments.AsNoTracking()
+                .Include(comment => comment.Commentator)
+                .Where(comments => comments.BookId == bookId)
+                .Select(comment => new CommentDTO()
+                {
+                    CommentId = comment.CommentId,
+                    Commentator = new UserDTO { Id = comment.Commentator.Id, UserName = comment.Commentator.UserName }
+                })
+            .ToListAsync();
 
-        //    return comments;
-        //}
+            return comments;
+        }
 
         [HttpGet("Genres")]
         public async Task<ICollection<GenreDTO>> GetGenre()
