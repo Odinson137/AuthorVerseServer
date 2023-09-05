@@ -323,10 +323,10 @@ namespace AuthorVerseServer.Migrations
                 {
                     UserBookId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BookId = table.Column<int>(type: "int", nullable: false),
                     BookState = table.Column<int>(type: "int", nullable: false),
-                    LastBookChapterId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    LastBookChapterId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -335,7 +335,8 @@ namespace AuthorVerseServer.Migrations
                         name: "FK_UserBooks_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserBooks_BookChapter_LastBookChapterId",
                         column: x => x.LastBookChapterId,

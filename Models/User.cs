@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
@@ -6,6 +7,7 @@ namespace AuthorVerseServer.Models
     {
         public Image? Logo { get; set; }
         public string? Description { get; set; }
+        [InverseProperty("User")]
         public ICollection<UserBook>? UserBooks { get; set; }
     }
 }

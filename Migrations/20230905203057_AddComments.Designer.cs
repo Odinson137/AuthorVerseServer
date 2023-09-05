@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230905072247_CreateTables")]
-    partial class CreateTables
+    [Migration("20230905203057_AddComments")]
+    partial class AddComments
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -137,7 +137,6 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CommentatorId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Permission")
@@ -153,7 +152,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("CommentatorId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Genre", b =>
@@ -305,6 +304,7 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserBookId");
@@ -511,9 +511,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasOne("AuthorVerseServer.Models.User", "Commentator")
                         .WithMany()
-                        .HasForeignKey("CommentatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CommentatorId");
 
                     b.Navigation("Book");
 
@@ -554,13 +552,17 @@ namespace AuthorVerseServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AuthorVerseServer.Models.User", null)
+                    b.HasOne("AuthorVerseServer.Models.User", "User")
                         .WithMany("UserBooks")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Book");
 
                     b.Navigation("LastBookChapter");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BookGenre", b =>

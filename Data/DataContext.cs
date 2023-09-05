@@ -15,6 +15,7 @@ namespace AuthorVerseServer.Data
         public DbSet<Book> Books { get; set; }
         public DbSet<UserBook> UserBooks { get; set; }
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         public static void Seed(DataContext context)
         {
