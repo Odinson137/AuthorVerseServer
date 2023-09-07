@@ -1,8 +1,10 @@
 ﻿using AuthorVerseServer.Enums;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
+    [Index("User1"), Index("User2")]
     public class Friendship
     {
         [Key]

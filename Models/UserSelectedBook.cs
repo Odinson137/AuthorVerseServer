@@ -1,10 +1,12 @@
 ﻿using AuthorVerseServer.Enums;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
-    public class UserBook
+    [Index("UserId")]
+    public class UserSelectedBook
     {
         [Key]
         public int UserBookId { get; set; }

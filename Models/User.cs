@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
@@ -7,8 +8,8 @@ namespace AuthorVerseServer.Models
     {
         public Image? Logo { get; set; }
         public string? Description { get; set; }
-        [InverseProperty("User")]
-        public ICollection<UserBook>? UserBooks { get; set; }
+        public ICollection<UserSelectedBook> UserSelectedBook { get; set; } = new List<UserSelectedBook>();
+        public ICollection<Book> Books { get; set; } = new List<Book>();
         public ICollection<Comment>? Comments { get; set; }
     }
 }

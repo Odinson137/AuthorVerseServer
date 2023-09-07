@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230905203817_AddNotes")]
-    partial class AddNotes
+    [Migration("20230907095453_CreateTables")]
+    partial class CreateTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,7 +37,11 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("AuthorId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<double>("AverageRating")
+                        .HasColumnType("float");
 
                     b.Property<int?>("BookCoverImageId")
                         .HasColumnType("int");
@@ -62,9 +66,13 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("AuthorId");
 
+                    b.HasIndex("AverageRating");
+
                     b.HasIndex("BookCoverImageId");
 
-                    b.HasIndex("BookId", "Title", "PublicationData");
+                    b.HasIndex("PublicationData");
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Books");
                 });
@@ -77,8 +85,11 @@ namespace AuthorVerseServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookChapterId"));
 
-                    b.Property<int?>("BookId")
+                    b.Property<int>("BookId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("PublicationData")
                         .HasColumnType("datetime2");
@@ -98,7 +109,7 @@ namespace AuthorVerseServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SectionId"));
 
-                    b.Property<int?>("BookChapterId")
+                    b.Property<int>("BookChapterId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ImageId")
@@ -140,7 +151,16 @@ namespace AuthorVerseServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("DisLikes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Likes")
+                        .HasColumnType("int");
+
                     b.Property<int>("Permission")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -204,7 +224,7 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("Permission")
                         .HasColumnType("int");
 
-                    b.Property<int>("SectionId")
+                    b.Property<int>("Sectionid")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -212,11 +232,12 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("NoteId");
 
-                    b.HasIndex("SectionId");
+                    b.HasIndex("Sectionid");
 
                     b.HasIndex("UserId");
 
@@ -320,7 +341,7 @@ namespace AuthorVerseServer.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.UserBook", b =>
+            modelBuilder.Entity("AuthorVerseServer.Models.UserSelectedBook", b =>
                 {
                     b.Property<int>("UserBookId")
                         .ValueGeneratedOnAdd()
@@ -349,7 +370,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserBooks");
+                    b.ToTable("UserSelectedBooks");
                 });
 
             modelBuilder.Entity("BookGenre", b =>
@@ -503,8 +524,10 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.Book", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId");
+                        .WithMany("Books")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AuthorVerseServer.Models.Image", "BookCover")
                         .WithMany()
@@ -517,20 +540,28 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookChapter", b =>
                 {
-                    b.HasOne("AuthorVerseServer.Models.Book", null)
+                    b.HasOne("AuthorVerseServer.Models.Book", "Book")
                         .WithMany("BookChapters")
-                        .HasForeignKey("BookId");
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
                 {
-                    b.HasOne("AuthorVerseServer.Models.BookChapter", null)
+                    b.HasOne("AuthorVerseServer.Models.BookChapter", "BookChapter")
                         .WithMany("ChapterSections")
-                        .HasForeignKey("BookChapterId");
+                        .HasForeignKey("BookChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AuthorVerseServer.Models.Image", "Image")
                         .WithMany()
                         .HasForeignKey("ImageId");
+
+                    b.Navigation("BookChapter");
 
                     b.Navigation("Image");
                 });
@@ -557,14 +588,16 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.Note", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.ChapterSection", "Section")
-                        .WithMany()
-                        .HasForeignKey("SectionId")
+                        .WithMany("Notes")
+                        .HasForeignKey("Sectionid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AuthorVerseServer.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Section");
 
@@ -591,7 +624,7 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Logo");
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.UserBook", b =>
+            modelBuilder.Entity("AuthorVerseServer.Models.UserSelectedBook", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.Book", "Book")
                         .WithMany()
@@ -606,7 +639,7 @@ namespace AuthorVerseServer.Migrations
                         .IsRequired();
 
                     b.HasOne("AuthorVerseServer.Models.User", "User")
-                        .WithMany("UserBooks")
+                        .WithMany("UserSelectedBook")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -698,14 +731,18 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
                 {
+                    b.Navigation("Notes");
+
                     b.Navigation("SectionChoices");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
                 {
+                    b.Navigation("Books");
+
                     b.Navigation("Comments");
 
-                    b.Navigation("UserBooks");
+                    b.Navigation("UserSelectedBook");
                 });
 #pragma warning restore 612, 618
         }

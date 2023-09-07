@@ -1,9 +1,11 @@
 ﻿using AuthorVerseServer.Enums;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
+    [Index("BookId"), Index("CommentatorId")]
     public class Comment
     {
         [Key]
@@ -15,6 +17,9 @@ namespace AuthorVerseServer.Models
         [ForeignKey("BookId")]
         public Book Book { get; set; } = null!;
         public string Text { get; set; } = null!;
+        public int Likes { get; set; }
+        public int DisLikes { get; set; }
+        public int Rating { get; set; }
         public DateTime CommentCreatedDateTime { get; set; }
         public PublicationPermission Permission { get; set; }
     }

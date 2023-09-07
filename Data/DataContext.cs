@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection.Metadata;
 
 namespace AuthorVerseServer.Data
 {
@@ -13,10 +14,19 @@ namespace AuthorVerseServer.Data
         }
 
         public DbSet<Book> Books { get; set; }
-        public DbSet<UserBook> UserBooks { get; set; }
+        public DbSet<UserSelectedBook> UserSelectedBooks { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
+
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<User>()
+        //        .HasMany(e => e.Books)
+        //        .WithOne(e => e.Author)
+        //        .HasForeignKey(e => e.AuthorId)
+        //        .IsRequired();
+        //}
 
         public static void Seed(DataContext context)
         {
