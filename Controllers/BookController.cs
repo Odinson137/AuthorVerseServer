@@ -74,6 +74,34 @@ namespace AuthorVerseServer.Controllers
             return books;
         }
 
+        [HttpGet("Page/{intPage?}")]
+        public async Task<ICollection<BookDTO>> GetLastBooks(int intPage = 0)
+        {
+            var books = await _context.Books
+                .AsNoTracking()
+                .Skip(intPage * 5)
+                .Take(5)
+                .Select(book => new BookDTO()
+                {
+                    BookId = book.BookId,
+                    Title = book.Title,
+                    Author = new UserDTO()
+                    {
+                        Id = book.AuthorId,
+                        UserName = book.Author.UserName,
+                    },
+                    Genres = book.Genres.Select(genre => new GenreDTO()
+                    {
+                        GenreId = genre.GenreId,
+                        Name = genre.Name
+                    }).ToList(),
+                    AgeRating = book.AgeRating,
+                    BookCover = book.BookCover
+                }).ToListAsync();
+
+            return books;
+        }
+
         [HttpGet("{bookId}")]
         public async Task<BookDTO> GetBook(int bookId)
         {
