@@ -30,6 +30,17 @@ namespace AuthorVerseServer.Data
 
         public static void Seed(DataContext context)
         {
+            string folderPath = @"./bookImage";
+
+            string[] fileNames = Directory.GetFiles(folderPath);
+            List<string> files = new List<string>(10);
+            
+            foreach (string fileName in fileNames)
+            {
+                string name = Path.GetFileName(fileName);
+                files.Add(name);
+            }
+
             if (!context.Books.Any())
             {
                 //context.ChangeTracker.AutoDetectChangesEnabled = false;
@@ -86,6 +97,7 @@ namespace AuthorVerseServer.Data
 
                 Random random = new Random();
 
+                int num = 0;
                 foreach (var book in bookDescriptions)
                 {
                     var Book = new Book()
@@ -96,8 +108,10 @@ namespace AuthorVerseServer.Data
                         PublicationData = DateTime.Now,
                         AgeRating = Enums.AgeRating.All,
                         Permission = Enums.PublicationPermission.Approved,
-                        Genres = new List<Genre>()
+                        Genres = new List<Genre>(),
+                        BookCover = new Image() { Url = files[num] }
                     };
+                    num++;
 
                     for (int i = 0; i < 3; i++)
                     {

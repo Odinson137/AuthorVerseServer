@@ -15,6 +15,7 @@ namespace AuthorVerseServer.Controllers
         {
             _context = context;
         }
+
         [HttpGet("{bookId}")]
         public async Task<ICollection<CommentDTO>> GetBookComments(int bookId)
         {
