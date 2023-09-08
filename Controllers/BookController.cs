@@ -19,7 +19,7 @@ namespace AuthorVerseServer.Controllers
             _context = context;
         }
 
-        [HttpGet("Books")]
+        [HttpGet]
         public async Task<ICollection<BookDTO>> GetBooks()
         {
             var books = await _context.Books.AsNoTracking().Include(book => book.Genres).Select(book => new BookDTO()
@@ -35,14 +35,14 @@ namespace AuthorVerseServer.Controllers
             return books;
         }
 
-        [HttpGet("Books/Count")]
+        [HttpGet("Count")]
         public async Task<int> GetCountBooks()
         {
             int bookCount = await _context.Books.CountAsync();
             return bookCount;
         }
 
-        [HttpGet("Books/Popular")]
+        [HttpGet("Popular")]
         public async Task<ICollection<PopularBook>> GetPopularBooks()
         {
             var books = await _context.Books
@@ -58,7 +58,7 @@ namespace AuthorVerseServer.Controllers
             return books;
         }
 
-        [HttpGet("Books/Last")]
+        [HttpGet("Last")]
         public async Task<ICollection<PopularBook>> GetLastBooks()
         {
             var books = await _context.Books
@@ -74,7 +74,7 @@ namespace AuthorVerseServer.Controllers
             return books;
         }
 
-        [HttpGet("Genres/{bookId}")]
+        [HttpGet("{bookId}")]
         public async Task<BookDTO> GetBook(int bookId)
         {
             var book = await _context.Books.AsNoTracking().Include(book => book.Genres).Select(book => new BookDTO()
@@ -85,37 +85,9 @@ namespace AuthorVerseServer.Controllers
                 Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
                 Genres = book.Genres.Select(genre => new GenreDTO() { GenreId = genre.GenreId, Name = genre.Name }).ToList(),
                 AgeRating = book.AgeRating
-            }).Where(book => book.BookId == bookId).FirstOrDefaultAsync() ?? new BookDTO { Title = "Error" };
+            }).Where(book => book.BookId == bookId).FirstOrDefaultAsync();
 
             return book;
-        }
-
-        [HttpGet("Comments/{bookId}")]
-        public async Task<ICollection<CommentDTO>> GetBookComments(int bookId)
-        {
-            var comments = await _context.Comments.AsNoTracking()
-                .Include(comment => comment.Commentator)
-                .Where(comments => comments.BookId == bookId)
-                .Select(comment => new CommentDTO()
-                {
-                    CommentId = comment.CommentId,
-                    Commentator = new UserDTO { Id = comment.Commentator.Id, UserName = comment.Commentator.UserName }
-                })
-            .ToListAsync();
-
-            return comments;
-        }
-
-        [HttpGet("Genres")]
-        public async Task<ICollection<GenreDTO>> GetGenre()
-        {
-            var genres = await _context.Genres.AsNoTracking().Select(genre => new GenreDTO()
-            {
-                GenreId = genre.GenreId,
-                Name = genre.Name
-            }).ToListAsync();
-
-            return genres;
         }
     }
 }
