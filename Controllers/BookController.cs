@@ -35,6 +35,45 @@ namespace AuthorVerseServer.Controllers
             return books;
         }
 
+        [HttpGet("Books/Count")]
+        public async Task<int> GetCountBooks()
+        {
+            int bookCount = await _context.Books.CountAsync();
+            return bookCount;
+        }
+
+        [HttpGet("Books/Popular")]
+        public async Task<ICollection<PopularBook>> GetPopularBooks()
+        {
+            var books = await _context.Books
+                .AsNoTracking()
+                .OrderByDescending(book => book.AverageRating)
+                .Take(10)
+                .Select(book => new PopularBook()
+                {
+                    BookId = book.BookId,
+                    BookCover = book.BookCover
+                }).ToListAsync();
+
+            return books;
+        }
+
+        [HttpGet("Books/Last")]
+        public async Task<ICollection<PopularBook>> GetLastBooks()
+        {
+            var books = await _context.Books
+                .AsNoTracking()
+                .OrderByDescending(book => book.PublicationData)
+                .Take(10)
+                .Select(book => new PopularBook()
+                {
+                    BookId = book.BookId,
+                    BookCover = book.BookCover
+                }).ToListAsync();
+
+            return books;
+        }
+
         [HttpGet("Genres/{bookId}")]
         public async Task<BookDTO> GetBook(int bookId)
         {

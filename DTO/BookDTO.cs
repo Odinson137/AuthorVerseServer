@@ -13,4 +13,10 @@ namespace AuthorVerseServer.DTO
         public ICollection<GenreDTO>? Genres { get; set; }
         public AgeRating AgeRating { get; set; }
     }
+
+    public class PopularBook
+    {
+        public int BookId { get; set; }
+        public Image BookCover { get; set; } = null!;
+    }
 }
