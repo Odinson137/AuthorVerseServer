@@ -1,5 +1,6 @@
 ﻿using AuthorVerseServer.Data;
 using AuthorVerseServer.DTO;
+using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,18 @@ namespace AuthorVerseServer.Controllers
             }).ToListAsync();
 
             return genres;
+        }
+
+        [HttpPost("{name}")]
+        public async Task<string> AddGenre(string name)
+        {
+            await _context.Genres.AddAsync(new Genre()
+            {
+                Name = name
+            });
+
+            return "Genre succecsully installed";
+            
         }
     }
 }

@@ -19,6 +19,7 @@ namespace AuthorVerseServer.Models
         public User Author { get; set; } = null!;
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Character> Characters { get; set; } = new List<Character>();
         public ICollection<BookChapter> BookChapters { get; set; } = new List<BookChapter>();
         public DateTime PublicationData { get; set; } // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги
         public double AverageRating { get; set; }
