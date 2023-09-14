@@ -18,7 +18,8 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ICollection<GenreDTO>> GetGenre()
+        [ProducesResponseType(200, Type = typeof(ICollection<GenreDTO>))]
+        public async Task<IActionResult> GetGenre()
         {
             var genres = await _context.Genres.AsNoTracking().Select(genre => new GenreDTO()
             {
@@ -26,18 +27,19 @@ namespace AuthorVerseServer.Controllers
                 Name = genre.Name
             }).ToListAsync();
 
-            return genres;
+            return Ok(genres);
         }
 
         [HttpPost("{name}")]
-        public async Task<string> AddGenre(string name)
+        [ProducesResponseType(200, Type = typeof(string))]
+        public async Task<IActionResult> AddGenre(string name)
         {
             await _context.Genres.AddAsync(new Genre()
             {
                 Name = name
             });
 
-            return "Genre succecsully installed";
+            return Ok("Genre succecsully installed");
             
         }
     }

@@ -1,6 +1,8 @@
 ﻿using AuthorVerseServer.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Reflection.Metadata;
 
@@ -19,32 +21,32 @@ namespace AuthorVerseServer.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
         public DbSet<Character> Characters { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<User>()
-        //        .HasMany(e => e.Books)
-        //        .WithOne(e => e.Author)
-        //        .HasForeignKey(e => e.AuthorId)
-        //        .IsRequired();
-        //}
+            modelBuilder.Entity<User>().Ignore(u => u.Friendships);
+            modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
+        }
 
         public static void Seed(DataContext context)
         {
-            string folderPath = @"./bookImage";
-
-            string[] fileNames = Directory.GetFiles(folderPath);
-            List<string> files = new List<string>(10);
-            
-            foreach (string fileName in fileNames)
-            {
-                string name = Path.GetFileName(fileName);
-                files.Add(name);
-            }
+            //context.Database.EnsureDeleted();
+            //context.Database.EnsureCreated();
 
             if (!context.Books.Any())
             {
-                //context.ChangeTracker.AutoDetectChangesEnabled = false;
+                string folderPath = @"./bookImage";
+
+                string[] fileNames = Directory.GetFiles(folderPath);
+                List<string> files = new List<string>(10);
+
+                foreach (string fileName in fileNames)
+                {
+                    string name = Path.GetFileName(fileName);
+                    files.Add(name);
+                }
+
 
                 var genreNames = new List<string>
                     {
@@ -99,31 +101,33 @@ namespace AuthorVerseServer.Data
                 Random random = new Random();
 
                 int num = 0;
-                foreach (var book in bookDescriptions)
+                for (int b = 0;  b < 100; b++)
                 {
-                    var Book = new Book()
+                    foreach (var book in bookDescriptions)
                     {
-                        Title = book.Key,
-                        Author = admin,
-                        Description = book.Value,
-                        PublicationData = DateTime.Now,
-                        AgeRating = Enums.AgeRating.All,
-                        Permission = Enums.PublicationPermission.Approved,
-                        Genres = new List<Genre>(),
-                        BookCover = new Image() { Url = files[num] }
-                    };
-                    num++;
+                        var Book = new Book()
+                        {
+                            Title = book.Key + b.ToString(),
+                            Author = admin,
+                            Description = book.Value + b.ToString(),
+                            PublicationData = DateTime.Now,
+                            AgeRating = Enums.AgeRating.All,
+                            Permission = Enums.PublicationPermission.Approved,
+                            Genres = new List<Genre>(),
+                            BookCover = new Image() { Url = files[num] }
+                        };
+                        num++;
 
-                    for (int i = 0; i < 3; i++)
-                    {
-                        var genre = genres[random.Next(0, 16)];
-                        Book.Genres.Add(genre);
-                    }
+                        for (int i = 0; i < 3; i++)
+                        {
+                            var genre = genres[random.Next(0, 16)];
+                            Book.Genres.Add(genre);
+                        }
 
 
-                    BookChapter chapter = new BookChapter()
-                    {
-                        ChapterSections = new List<ChapterSection>()
+                        BookChapter chapter = new BookChapter()
+                        {
+                            ChapterSections = new List<ChapterSection>()
                         {
                             new ChapterSection()
                             {
@@ -131,12 +135,12 @@ namespace AuthorVerseServer.Data
                                 Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
                             }
                         },
-                        PublicationData = DateTime.Now
-                    };
+                            PublicationData = DateTime.Now
+                        };
 
-                    BookChapter chapter2 = new BookChapter()
-                    {
-                        ChapterSections = new List<ChapterSection>()
+                        BookChapter chapter2 = new BookChapter()
+                        {
+                            ChapterSections = new List<ChapterSection>()
                         {
                             new ChapterSection()
                             {
@@ -144,12 +148,15 @@ namespace AuthorVerseServer.Data
                                 Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
                             }
                         },
-                        PublicationData = DateTime.Now
-                    };
+                            PublicationData = DateTime.Now
+                        };
 
-                    Book.BookChapters = new List<BookChapter>() { chapter, chapter2 };
+                        Book.BookChapters = new List<BookChapter>() { chapter, chapter2 };
 
-                    context.Add(Book);
+                        context.Add(Book);
+                    }
+
+                    num = 0;
                 }
 
                 context.SaveChanges();

@@ -1,4 +1,4 @@
-﻿using System;
+﻿//using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -79,6 +79,7 @@ namespace AuthorVerseServer.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     LogoImageId = table.Column<int>(type: "int", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -97,6 +98,11 @@ namespace AuthorVerseServer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AspNetUsers_Image_LogoImageId",
                         column: x => x.LogoImageId,
@@ -263,6 +269,33 @@ namespace AuthorVerseServer.Migrations
                         principalTable: "Genres",
                         principalColumn: "GenreId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Characters",
+                columns: table => new
+                {
+                    CharacterId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    BookChapterId = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CharacterImageImageId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Characters", x => x.CharacterId);
+                    table.ForeignKey(
+                        name: "FK_Characters_Books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Books",
+                        principalColumn: "BookId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Characters_Image_CharacterImageImageId",
+                        column: x => x.CharacterImageImageId,
+                        principalTable: "Image",
+                        principalColumn: "ImageId");
                 });
 
             migrationBuilder.CreateTable(
@@ -443,6 +476,11 @@ namespace AuthorVerseServer.Migrations
                 column: "LogoImageId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_UserId",
+                table: "AspNetUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
@@ -493,6 +531,21 @@ namespace AuthorVerseServer.Migrations
                 name: "IX_ChapterSection_ImageId",
                 table: "ChapterSection",
                 column: "ImageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_BookChapterId",
+                table: "Characters",
+                column: "BookChapterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_BookId",
+                table: "Characters",
+                column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_CharacterImageImageId",
+                table: "Characters",
+                column: "CharacterImageImageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_BookId",
@@ -555,6 +608,9 @@ namespace AuthorVerseServer.Migrations
 
             migrationBuilder.DropTable(
                 name: "BookGenre");
+
+            migrationBuilder.DropTable(
+                name: "Characters");
 
             migrationBuilder.DropTable(
                 name: "Comments");

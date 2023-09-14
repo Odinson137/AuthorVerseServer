@@ -11,11 +11,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString))
-{
-    // В случае, если переменная окружения не установлена, можно использовать стандартное значение.
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-}
 
 builder.Services.AddDbContext<DataContext>(options =>
 {

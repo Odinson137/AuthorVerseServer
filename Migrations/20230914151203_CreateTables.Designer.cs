@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230907095453_CreateTables")]
+    [Migration("20230914151203_CreateTables")]
     partial class CreateTables
     {
         /// <inheritdoc />
@@ -131,6 +131,37 @@ namespace AuthorVerseServer.Migrations
                     b.HasIndex("ImageId");
 
                     b.ToTable("ChapterSection");
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.Character", b =>
+                {
+                    b.Property<int>("CharacterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CharacterId"));
+
+                    b.Property<int>("BookChapterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CharacterImageImageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CharacterId");
+
+                    b.HasIndex("BookChapterId");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("CharacterImageImageId");
+
+                    b.ToTable("Characters");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Comment", b =>
@@ -322,6 +353,9 @@ namespace AuthorVerseServer.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -337,6 +371,8 @@ namespace AuthorVerseServer.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -566,6 +602,23 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Image");
                 });
 
+            modelBuilder.Entity("AuthorVerseServer.Models.Character", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.Book", "Book")
+                        .WithMany("Characters")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AuthorVerseServer.Models.Image", "CharacterImage")
+                        .WithMany()
+                        .HasForeignKey("CharacterImageImageId");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("CharacterImage");
+                });
+
             modelBuilder.Entity("AuthorVerseServer.Models.Comment", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.Book", "Book")
@@ -620,6 +673,10 @@ namespace AuthorVerseServer.Migrations
                     b.HasOne("AuthorVerseServer.Models.Image", "Logo")
                         .WithMany()
                         .HasForeignKey("LogoImageId");
+
+                    b.HasOne("AuthorVerseServer.Models.User", null)
+                        .WithMany("Friends")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Logo");
                 });
@@ -721,6 +778,8 @@ namespace AuthorVerseServer.Migrations
                 {
                     b.Navigation("BookChapters");
 
+                    b.Navigation("Characters");
+
                     b.Navigation("Comments");
                 });
 
@@ -741,6 +800,8 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Books");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("Friends");
 
                     b.Navigation("UserSelectedBook");
                 });
