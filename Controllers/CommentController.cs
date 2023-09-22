@@ -17,8 +17,8 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("{bookId}")]
-        [ProducesResponseType(200, Type = typeof(ICollection<CommentDTO>))]
-        public async Task<IActionResult> GetBookComments(int bookId)
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<ICollection<CommentDTO>>> GetBookComments(int bookId)
         {
             var comments = await _context.Comments.AsNoTracking()
                 .Include(comment => comment.Commentator)
@@ -30,7 +30,7 @@ namespace AuthorVerseServer.Controllers
                 })
             .ToListAsync();
 
-            return Ok(comments);
+            return comments;
         }
     }
 }

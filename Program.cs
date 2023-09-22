@@ -29,6 +29,20 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        var builtInFactory = options.InvalidModelStateResponseFactory;
+
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var logger = context.HttpContext.RequestServices
+                                .GetRequiredService<ILogger<Program>>();
+
+            return builtInFactory(context);
+        };
+    });
+
 var app = builder.Build();
 
 var scope = app.Services.CreateScope();

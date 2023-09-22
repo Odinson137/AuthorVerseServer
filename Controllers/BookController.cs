@@ -21,8 +21,8 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(ICollection<BookDTO>))]
-        public async Task<IActionResult> GetBooks()
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<ICollection<BookDTO>>> GetBooks()
         {
             var books = await _context.Books.AsNoTracking().Include(book => book.Genres).Select(book => new BookDTO()
             {
@@ -34,19 +34,20 @@ namespace AuthorVerseServer.Controllers
                 AgeRating = book.AgeRating
             }).ToListAsync();
 
-            return Ok(books);
+            return books;
         }
 
         [HttpGet("Count")]
-        [ProducesResponseType(200, Type = typeof(int))]
-        public async Task<IActionResult> GetCountBooks()
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<int>> GetCountBooks()
         {
             int bookCount = await _context.Books.CountAsync();
-            return Ok(bookCount);
+            return bookCount;
         }
 
         [HttpGet("Popular")]
-        public async Task<IActionResult> GetPopularBooks()
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<ICollection<PopularBook>>> GetPopularBooks()
         {
             var books = await _context.Books
                 .AsNoTracking()
@@ -58,11 +59,12 @@ namespace AuthorVerseServer.Controllers
                     BookCover = book.BookCover
                 }).ToListAsync();
 
-            return Ok(books);
+            return books;
         }
 
         [HttpGet("Last")]
-        public async Task<IActionResult> GetLastBooks()
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<PopularBook>> GetLastBooks()
         {
             var books = await _context.Books
                 .AsNoTracking()
@@ -74,12 +76,12 @@ namespace AuthorVerseServer.Controllers
                     BookCover = book.BookCover ?? new Image() { Url = "" }
                 }).ToListAsync();
 
-            return Ok(books);
+            return Ok(1);
         }
 
         [HttpGet("Page/{intPage?}")]
-        [ProducesResponseType(200, Type = typeof(List<BookDTO>))]
-        public async Task<IActionResult> GetLastBooks(int intPage = 0)
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<List<BookDTO>>> GetLastBooks(int intPage = 0)
         {
             var books = await _context.Books
                 .AsNoTracking()
@@ -103,12 +105,12 @@ namespace AuthorVerseServer.Controllers
                     BookCover = book.BookCover
                 }).ToListAsync();
 
-            return Ok(books);
+            return books;
         }
 
         [HttpGet("{bookId}")]
-        [ProducesResponseType(200, Type = typeof(BookDTO))]
-        public async Task<IActionResult> GetBook(int bookId)
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<BookDTO>> GetBook(int bookId)
         {
             var book = await _context.Books.AsNoTracking().Include(book => book.Genres).Select(book => new BookDTO()
             {
@@ -125,7 +127,7 @@ namespace AuthorVerseServer.Controllers
                 return NotFound("This book not found");
             }
 
-            return Ok(book);
+            return book;
         }
     }
 }
