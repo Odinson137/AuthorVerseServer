@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using AuthorVerseServer.Data;
+using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IBookChapter, BookChapterRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
