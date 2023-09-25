@@ -66,7 +66,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("Last")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<PopularBook>> GetLastBooks()
+        public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks()
         {
             var books = await _context.Books
                 .AsNoTracking()
@@ -78,7 +78,7 @@ namespace AuthorVerseServer.Controllers
                     BookCover = book.BookCover ?? new Image() { Url = "" }
                 }).ToListAsync();
 
-            return Ok(1);
+            return books;
         }
 
         [HttpGet("Page/{intPage?}")]

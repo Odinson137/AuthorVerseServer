@@ -1,5 +1,6 @@
-﻿using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
+﻿using AuthorVerseServer.Data;
+using AuthorVerseServer.DTO;
+using AuthorVerseServer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorVerseServer.Controllers
@@ -9,23 +10,27 @@ namespace AuthorVerseServer.Controllers
     public class BookChapterController : ControllerBase
     {
         private readonly IBookChapter _bookChapter;
-
-        public BookChapterController(IBookChapter bookChapter)
+        private readonly DataContext _context;
+        public BookChapterController(DataContext context, IBookChapter bookChapter)
         {
+            _context = context;
             _bookChapter = bookChapter;
         }
 
         [HttpGet]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<BookChapter>>> GetBookChapter()
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<ICollection<BookChapterDTO>>> GetBookChapter()
         {
             var bookChapters = await _bookChapter.GetBookChapterAsync();
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (bookChapters == null)
+                return NotFound();
 
-            return Ok(bookChapters);//Ок нужен чтобы работал код
+            return Ok(bookChapters);
         }
-        
-}
+
+
+
+    }
 }
