@@ -14,15 +14,28 @@ namespace AuthorVerseServer.Controllers
     [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
+        private readonly IBook _book;
         public DataContext _context { get; set; }
 
-        public BookController(DataContext context)
+        public BookController(DataContext context, IBook book)
         {
             _context = context;
+            _book = book;
         }
 
-
         [HttpGet]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<ICollection<Book>>> GetBooks()
+        {
+            var books = await _book.GetBookAsync();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(books);
+        }
+
+        /*[HttpGet]
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<BookDTO>>> GetBooks()
         {
@@ -37,7 +50,7 @@ namespace AuthorVerseServer.Controllers
             }).ToListAsync();
 
             return books;
-        }
+        }*/
 
         [HttpGet("Count")]
         [ProducesResponseType(200)]

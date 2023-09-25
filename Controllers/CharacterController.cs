@@ -1,32 +1,34 @@
 ﻿using AuthorVerseServer.Data;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
 
 namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    public class CharacterController : ControllerBase
     {
-        private readonly IUser _user;
-        public UserController(IUser user)
+        private readonly ICharacter _character;
+
+        public CharacterController(ICharacter character)
         {
-            _user = user;
+            _character = character;
+
         }
 
         [HttpGet]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<User>>> GetUser()
+        public async Task<ActionResult<ICollection<Character>>> GetCharacter()
         {
-            var users = await _user.GetUserAsync();
+            var characters = await _character.GetCharacterAsync();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(users);//Ок нужен чтобы работал код
+            return Ok(characters);
         }
     }
 }

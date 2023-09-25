@@ -29,8 +29,5 @@ namespace AuthorVerseServer.Controllers
 
             return Ok(bookChapters);
         }
-
-
-
     }
 }
