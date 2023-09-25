@@ -17,7 +17,10 @@ namespace AuthorVerseServer.Data
 
         public DbSet<Book> Books { get; set; }
         public DbSet<BookChapter> BookChapters { get; set; }
+        public DbSet<ChapterSection> ChapterSections { get; set; }
         public DbSet<UserSelectedBook> UserSelectedBooks { get; set; }
+        public DbSet<SectionChoice> SectionChoices { get; set; }
+        public DbSet<Friendship> Friendships{ get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
@@ -26,8 +29,12 @@ namespace AuthorVerseServer.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Friendship>().Ignore(u => u.User1);
+
             modelBuilder.Entity<User>().Ignore(u => u.Friendships);
             modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
+
+            modelBuilder.Entity<Friendship>().HasNoKey();
         }
 
         public static void Seed(DataContext context)

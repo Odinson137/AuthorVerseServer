@@ -4,6 +4,7 @@ using AuthorVerseServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230924120448_AddChapterSectionRepository")]
+    partial class AddChapterSectionRepository
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -204,29 +207,6 @@ namespace AuthorVerseServer.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
-                {
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("User1Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("User2Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("User2Id1")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasIndex("User1Id");
-
-                    b.HasIndex("User2Id");
-
-                    b.HasIndex("User2Id1");
-
-                    b.ToTable("Friendships");
-                });
-
             modelBuilder.Entity("AuthorVerseServer.Models.Genre", b =>
                 {
                     b.Property<int>("GenreId")
@@ -316,7 +296,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("ChapterSectionId");
 
-                    b.ToTable("SectionChoices");
+                    b.ToTable("SectionChoice");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
@@ -656,15 +636,6 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Commentator");
-                });
-
-            modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
-                {
-                    b.HasOne("AuthorVerseServer.Models.User", "User2")
-                        .WithMany()
-                        .HasForeignKey("User2Id1");
-
-                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Note", b =>

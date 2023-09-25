@@ -1,5 +1,7 @@
 ﻿using AuthorVerseServer.Data;
 using AuthorVerseServer.DTO;
+using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,14 +11,28 @@ namespace AuthorVerseServer.Controllers
     [Route("api/[controller]")]
     public class CommentController : ControllerBase
     {
+        private readonly IComment _comment;
         public DataContext _context { get; set; }
 
-        public CommentController(DataContext context)
+        public CommentController(DataContext context, IComment comment)
         {
             _context = context;
+            _comment = comment;
         }
 
-        [HttpGet("{bookId}")]
+        [HttpGet]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<ICollection<Comment>>> GetComment()
+        {
+            var comments = await _comment.GetCommentAsync();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(comments);
+        }
+
+        /*[HttpGet("{bookId}")]
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<CommentDTO>>> GetBookComments(int bookId)
         {
@@ -31,6 +47,6 @@ namespace AuthorVerseServer.Controllers
             .ToListAsync();
 
             return comments;
-        }
+        }*/
     }
 }

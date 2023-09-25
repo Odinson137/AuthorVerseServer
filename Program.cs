@@ -8,7 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IChapterSection, ChapterSectionRepository>();
+builder.Services.AddScoped<IComment, CommentRepository>();
 builder.Services.AddScoped<IBookChapter, BookChapterRepository>();
+builder.Services.AddScoped<IGenre, GenreRepository>();
+builder.Services.AddScoped<IUserSelectedBook, UserSelectedBookRepository>();
+builder.Services.AddScoped<ISectionChoice, SectionChoiceRepository>();
+builder.Services.AddScoped<IBook, BookRepository>();
+builder.Services.AddScoped<ICharacter, CharacterRepository>();
+builder.Services.AddScoped<INote, NoteRepository>();
+builder.Services.AddScoped<IUser, UserRepository>();
+/*builder.Services.AddScoped<IFriendship, FriendshipRepository>();*/
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

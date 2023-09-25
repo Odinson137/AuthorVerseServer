@@ -5,18 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
 {
-    public class BookChapterRepository: IBookChapter
+    public class BookRepository : IBook
     {
         private readonly DataContext _context;
-        public BookChapterRepository(DataContext context)
+        public BookRepository(DataContext context)
         {
             _context = context;
         }
 
-        public async Task<ICollection<BookChapter>> GetBookChapterAsync()
+        public async Task<ICollection<Book>> GetBookAsync()
         {
-            return await _context.BookChapters.OrderBy(bc => bc.BookId).ToListAsync();
+            return await _context.Books.OrderBy(g => g.BookId).ToListAsync();
         }
     }
 }
-
