@@ -14,7 +14,6 @@ namespace AuthorVerseServer.Models
         public string? Text { get; set; } // либо это
         public Image? Image { get; set; } // либо это
         public int NextSectionId { get; set; }
-        public ICollection<Note>? Notes { get; set; }
         public ICollection<SectionChoice>? SectionChoices { get; set; }
     }
 }

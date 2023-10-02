@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230924101819_AddBookChapterDbSet")]
-    partial class AddBookChapterDbSet
+    [Migration("20231002194841_CreateTables")]
+    partial class CreateTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -130,7 +130,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("ImageId");
 
-                    b.ToTable("ChapterSection");
+                    b.ToTable("ChapterSections");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Character", b =>
@@ -207,6 +207,29 @@ namespace AuthorVerseServer.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
+                {
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("User1Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("User2Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("User2Id1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.HasIndex("User2Id1");
+
+                    b.ToTable("Friendships");
+                });
+
             modelBuilder.Entity("AuthorVerseServer.Models.Genre", b =>
                 {
                     b.Property<int>("GenreId")
@@ -249,13 +272,13 @@ namespace AuthorVerseServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NoteId"));
 
+                    b.Property<int>("BookChapterid")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("NoteCreatedDateTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Permission")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Sectionid")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -264,13 +287,11 @@ namespace AuthorVerseServer.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("NoteId");
 
-                    b.HasIndex("Sectionid");
-
-                    b.HasIndex("UserId");
+                    b.HasIndex("BookChapterid");
 
                     b.ToTable("Notes");
                 });
@@ -296,7 +317,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("ChapterSectionId");
 
-                    b.ToTable("SectionChoice");
+                    b.ToTable("SectionChoices");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
@@ -395,14 +416,11 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserBookId");
 
                     b.HasIndex("BookId");
-
-                    b.HasIndex("LastBookChapterId");
 
                     b.HasIndex("UserId");
 
@@ -621,11 +639,9 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.Comment", b =>
                 {
-                    b.HasOne("AuthorVerseServer.Models.Book", "Book")
+                    b.HasOne("AuthorVerseServer.Models.Book", null)
                         .WithMany("Comments")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BookId");
 
                     b.HasOne("AuthorVerseServer.Models.User", "Commentator")
                         .WithMany("Comments")
@@ -633,28 +649,23 @@ namespace AuthorVerseServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Book");
-
                     b.Navigation("Commentator");
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id1");
+
+                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Note", b =>
                 {
-                    b.HasOne("AuthorVerseServer.Models.ChapterSection", "Section")
+                    b.HasOne("AuthorVerseServer.Models.BookChapter", null)
                         .WithMany("Notes")
-                        .HasForeignKey("Sectionid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AuthorVerseServer.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Section");
-
-                    b.Navigation("User");
+                        .HasForeignKey("BookChapterid");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.SectionChoice", b =>
@@ -684,26 +695,16 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.UserSelectedBook", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.Book", "Book")
-                        .WithMany()
+                        .WithMany("UserSelectedBooks")
                         .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AuthorVerseServer.Models.BookChapter", "LastBookChapter")
-                        .WithMany()
-                        .HasForeignKey("LastBookChapterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AuthorVerseServer.Models.User", "User")
-                        .WithMany("UserSelectedBook")
+                        .WithMany("UserSelectedBooks")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Book");
-
-                    b.Navigation("LastBookChapter");
 
                     b.Navigation("User");
                 });
@@ -781,17 +782,19 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Characters");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("UserSelectedBooks");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookChapter", b =>
                 {
                     b.Navigation("ChapterSections");
+
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
                 {
-                    b.Navigation("Notes");
-
                     b.Navigation("SectionChoices");
                 });
 
@@ -803,7 +806,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.Navigation("Friends");
 
-                    b.Navigation("UserSelectedBook");
+                    b.Navigation("UserSelectedBooks");
                 });
 #pragma warning restore 612, 618
         }

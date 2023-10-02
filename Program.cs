@@ -2,6 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using AuthorVerseServer.Data;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Repository;
+using Microsoft.AspNetCore.Identity;
+using AuthorVerseServer.Models;
+using AuthorVerseServer.Enums;
+using AuthorVerseServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,11 +60,22 @@ builder.Services.AddControllers()
         };
     });
 
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+});
+
+
 var app = builder.Build();
+
+await Seed.SeedData(app);
 
 var scope = app.Services.CreateScope();
 var scopedContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-DataContext.Seed(scopedContext);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

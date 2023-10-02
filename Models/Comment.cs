@@ -14,8 +14,6 @@ namespace AuthorVerseServer.Models
         [ForeignKey("CommentatorId")]
         public User Commentator { get; set; } = null!;
         public int BookId { get; set; }
-        [ForeignKey("BookId")]
-        public Book Book { get; set; } = null!;
         public string Text { get; set; } = null!;
         public int Likes { get; set; }
         public int DisLikes { get; set; }

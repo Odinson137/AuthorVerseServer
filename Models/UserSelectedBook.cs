@@ -1,11 +1,10 @@
 ﻿using AuthorVerseServer.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
-    [Index("UserId")]
+    [Index("UserId"), Index("BookId")]
     public class UserSelectedBook
     {
         [Key]
@@ -13,13 +12,8 @@ namespace AuthorVerseServer.Models
         public string UserId { get; set; }
         public User User { get; set; }
         public int BookId { get; set; }
-
-        [ForeignKey("BookId")]
-        public Book Book { get; set; } = null!;
+        public Book Book { get; set; }
         public BookState BookState { get; set; }
-
         public int LastBookChapterId { get; set; }
-        [ForeignKey("LastBookChapterId")]
-        public BookChapter? LastBookChapter { get; set; }
     }
 }

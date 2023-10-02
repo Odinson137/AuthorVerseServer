@@ -16,8 +16,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task<ICollection<BookChapterDTO>> GetBookChapterAsync()
         {
-<<<<<<< HEAD
-            return await context.BookChapters.OrderBy(p => p.BookId).Select(x => new BookChapterDTO()
+            return await _context.BookChapters.OrderBy(p => p.BookId).Select(x => new BookChapterDTO()
             {
                 BookChapterId = x.BookChapterId,
                 BookId = x.BookId,
@@ -25,9 +24,6 @@ namespace AuthorVerseServer.Repository
                 PublicationData = x.PublicationData,
             }
             ).ToListAsync();
-=======
-            return await _context.BookChapters.OrderBy(bc => bc.BookId).ToListAsync();
->>>>>>> 98aa98ac915488b23ad69ea3a3d06058f80da620
         }
     }
 }

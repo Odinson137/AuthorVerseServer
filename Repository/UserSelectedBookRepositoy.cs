@@ -15,7 +15,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task<ICollection<UserSelectedBook>> GetUserSelectedBookAsync()
         {
-            return await _context.UserSelectedBooks.OrderBy(g => g.UserBookId).ToListAsync();
+            return await _context.UserSelectedBooks.ToListAsync();
         }
     }
 }
