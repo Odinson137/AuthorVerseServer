@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231002194841_CreateTables")]
-    partial class CreateTables
+    [Migration("20231003153512_CreatesTables")]
+    partial class CreatesTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -212,20 +212,17 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("User1Id")
-                        .HasColumnType("int");
+                    b.Property<string>("User1Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("User2Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("User2Id1")
+                    b.Property<string>("User2Id")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasIndex("User1Id");
 
                     b.HasIndex("User2Id");
-
-                    b.HasIndex("User2Id1");
 
                     b.ToTable("Friendships");
                 });
@@ -320,6 +317,23 @@ namespace AuthorVerseServer.Migrations
                     b.ToTable("SectionChoices");
                 });
 
+            modelBuilder.Entity("AuthorVerseServer.Models.Tag", b =>
+                {
+                    b.Property<int>("TagId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TagId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TagId");
+
+                    b.ToTable("Tag");
+                });
+
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -342,6 +356,9 @@ namespace AuthorVerseServer.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -350,6 +367,9 @@ namespace AuthorVerseServer.Migrations
 
                     b.Property<int?>("LogoImageId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -440,6 +460,21 @@ namespace AuthorVerseServer.Migrations
                     b.HasIndex("GenresGenreId");
 
                     b.ToTable("BookGenre");
+                });
+
+            modelBuilder.Entity("BookTag", b =>
+                {
+                    b.Property<int>("BooksBookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagsTagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BooksBookId", "TagsTagId");
+
+                    b.HasIndex("TagsTagId");
+
+                    b.ToTable("BookTag");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -656,7 +691,9 @@ namespace AuthorVerseServer.Migrations
                 {
                     b.HasOne("AuthorVerseServer.Models.User", "User2")
                         .WithMany()
-                        .HasForeignKey("User2Id1");
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User2");
                 });
@@ -720,6 +757,21 @@ namespace AuthorVerseServer.Migrations
                     b.HasOne("AuthorVerseServer.Models.Genre", null)
                         .WithMany()
                         .HasForeignKey("GenresGenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BookTag", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BooksBookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AuthorVerseServer.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsTagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -8,10 +8,10 @@ namespace AuthorVerseServer.Models
     public class Friendship
     {
         public string User1Id { get; set; }
-        [ForeignKey("User1Id")]
+        //[ForeignKey("User1Id")]
         public User User1 { get; set; } = null!;
         public string User2Id { get; set; }
-        [ForeignKey("User2Id")]
+        //[ForeignKey("User2Id")]
         public User User2 { get; set; } = null!;
         public FriendshipStatus Status { get; set; }
     }

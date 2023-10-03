@@ -61,13 +61,6 @@ namespace AuthorVerseServer.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
 
-            //modelBuilder.Entity<User>()
-            //    .HasMany(u => u.Friends)
-            //    .WithMany(u => u.Friends)
-            //    .UsingEntity<Friendship>(
-            //        l => l.HasOne<Tag>().WithMany().HasForeignKey(x => x.User1Id),
-            //        r => r.HasOne<Book>().WithMany().HasForeignKey(x => x.User2Id)
-            //    );
         }
     }
 }
