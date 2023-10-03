@@ -17,6 +17,7 @@ namespace AuthorVerseServer.Models
         public string Description { get; set; } = null!;
         public string AuthorId { get; set; } = null!;
         public User Author { get; set; } = null!;
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Character> Characters { get; set; } = new List<Character>();

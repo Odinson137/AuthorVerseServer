@@ -8,9 +8,6 @@ namespace AuthorVerseServer.Data
 {
     public class DataContext : IdentityDbContext<User>
     {
-        private RoleManager<IdentityRole> _roleManager;
-        private UserManager<IdentityRole> _userManager;
-
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
             //ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
@@ -63,6 +60,14 @@ namespace AuthorVerseServer.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+            //modelBuilder.Entity<User>()
+            //    .HasMany(u => u.Friends)
+            //    .WithMany(u => u.Friends)
+            //    .UsingEntity<Friendship>(
+            //        l => l.HasOne<Tag>().WithMany().HasForeignKey(x => x.User1Id),
+            //        r => r.HasOne<Book>().WithMany().HasForeignKey(x => x.User2Id)
+            //    );
         }
     }
 }

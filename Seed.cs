@@ -66,6 +66,18 @@ namespace AuthorVerseServer
                         "Биография",
                         "Фэнтези"
                     };
+                    var tagNames = new List<string>()
+                    {
+                        "Book",
+                        "AudioBook",
+                        "Manga",
+                        "Stories",
+                        "Comics",
+                        "Children's literature",
+                        "Dramas",
+                        "Poetry",
+                        "Documental literature",
+                    };
 
                     var genres = new List<Genre>();
 
@@ -74,6 +86,15 @@ namespace AuthorVerseServer
                         var genre = new Genre { Name = genreName };
                         genres.Add(genre);
                         context.Add(genre);
+                    }
+
+                    var tags = new List<Tag>();
+
+                    foreach (var tagName in tagNames)
+                    {
+                        var tag = new Tag { Name = tagName };
+                        tags.Add(tag);
+                        context.Add(tag);
                     }
 
                     var role = new IdentityRole("Admin");
@@ -139,7 +160,6 @@ namespace AuthorVerseServer
                                 PublicationData = DateTime.Now,
                                 AgeRating = Enums.AgeRating.All,
                                 Permission = Enums.PublicationPermission.Approved,
-                                Genres = new List<Genre>(),
                                 BookCover = new Image() { Url = files[num] }
                             };
                             num++;
@@ -150,6 +170,11 @@ namespace AuthorVerseServer
                                 Book.Genres.Add(genre);
                             }
 
+                            for (int i = 0; i < 3; i++)
+                            {
+                                var genre = genres[random.Next(0, 16)];
+                                Book.Genres.Add(genre);
+                            }
 
                             BookChapter chapter = new BookChapter()
                             {
