@@ -6,6 +6,8 @@ namespace AuthorVerseServer.Models
     
     public class User : IdentityUser
     {
+        public string? Name { get; set; }
+        public string? LastName { get; set; }
         public Image? Logo { get; set; }
         public string? Description { get; set; }
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>();
