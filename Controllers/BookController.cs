@@ -25,6 +25,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet]
         [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<Book>>> GetBooks()
         {
             var books = await _book.GetBookAsync();
@@ -34,23 +35,6 @@ namespace AuthorVerseServer.Controllers
 
             return Ok(books);
         }
-
-        /*[HttpGet]
-        [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<BookDTO>>> GetBooks()
-        {
-            var books = await _context.Books.AsNoTracking().Include(book => book.Genres).Select(book => new BookDTO()
-            {
-                BookId = book.BookId,
-                Title = book.Title,
-                Description = book.Description,
-                Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
-                Genres = book.Genres.Select(genre => new GenreDTO() { GenreId = genre.GenreId, Name = genre.Name }).ToList(),
-                AgeRating = book.AgeRating
-            }).ToListAsync();
-
-            return books;
-        }*/
 
         [HttpGet("Count")]
         [ProducesResponseType(200)]
@@ -71,7 +55,7 @@ namespace AuthorVerseServer.Controllers
                 .Select(book => new PopularBook()
                 {
                     BookId = book.BookId,
-                    BookCover = book.BookCover
+                    BookCover = book.BookCover.Url
                 }).ToListAsync();
 
             return books;
@@ -88,7 +72,7 @@ namespace AuthorVerseServer.Controllers
                 .Select(book => new PopularBook()
                 {
                     BookId = book.BookId,
-                    BookCover = book.BookCover ?? new Image() { Url = "" }
+                    BookCover = (book.BookCover ?? new Image() { Url = "" }).Url
                 }).ToListAsync();
 
             return books;
@@ -109,7 +93,7 @@ namespace AuthorVerseServer.Controllers
                     Author = new UserDTO()
                     {
                         Id = book.AuthorId,
-                        UserName = book.Author.UserName,
+                        UserName = book.Author.UserName ?? "No name",
                     },
                     Genres = book.Genres.Select(genre => new GenreDTO()
                     {
@@ -125,6 +109,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("{bookId}")]
         [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         public async Task<ActionResult<BookDTO>> GetBook(int bookId)
         {
             var book = await _context.Books.AsNoTracking().Include(book => book.Genres).Select(book => new BookDTO()

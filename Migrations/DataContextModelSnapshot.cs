@@ -71,7 +71,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("Title");
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookChapter", b =>
@@ -95,7 +95,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("BookChapters");
+                    b.ToTable("BookChapters", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
@@ -127,7 +127,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("ImageId");
 
-                    b.ToTable("ChapterSections");
+                    b.ToTable("ChapterSections", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Character", b =>
@@ -158,7 +158,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("CharacterImageImageId");
 
-                    b.ToTable("Characters");
+                    b.ToTable("Characters", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Comment", b =>
@@ -201,7 +201,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("CommentatorId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
@@ -221,7 +221,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("User2Id");
 
-                    b.ToTable("Friendships");
+                    b.ToTable("Friendships", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Genre", b =>
@@ -238,7 +238,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasKey("GenreId");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Image", b =>
@@ -255,7 +255,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasKey("ImageId");
 
-                    b.ToTable("Image");
+                    b.ToTable("Image", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Note", b =>
@@ -287,7 +287,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("BookChapterid");
 
-                    b.ToTable("Notes");
+                    b.ToTable("Notes", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.SectionChoice", b =>
@@ -311,7 +311,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("ChapterSectionId");
 
-                    b.ToTable("SectionChoices");
+                    b.ToTable("SectionChoices", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Tag", b =>
@@ -328,7 +328,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasKey("TagId");
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tag", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
@@ -441,7 +441,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserSelectedBooks");
+                    b.ToTable("UserSelectedBooks", (string)null);
                 });
 
             modelBuilder.Entity("BookGenre", b =>
@@ -456,7 +456,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("GenresGenreId");
 
-                    b.ToTable("BookGenre");
+                    b.ToTable("BookGenre", (string)null);
                 });
 
             modelBuilder.Entity("BookTag", b =>
@@ -471,7 +471,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("TagsTagId");
 
-                    b.ToTable("BookTag");
+                    b.ToTable("BookTag", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

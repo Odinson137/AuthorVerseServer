@@ -21,6 +21,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet]
         [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<Character>>> GetCharacter()
         {
             var characters = await _character.GetCharacterAsync();

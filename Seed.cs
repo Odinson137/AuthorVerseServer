@@ -14,10 +14,16 @@ namespace AuthorVerseServer
             {
                 var context = serviceScope.ServiceProvider.GetService<DataContext>();
 
-                if (!context.Roles.Any())
+                var pendingMigrations = context.Database.GetPendingMigrations();
+                if (pendingMigrations.Any())
                 {
                     await context.Database.EnsureDeletedAsync();
+                    await context.Database.MigrateAsync();
                     await context.Database.EnsureCreatedAsync();
+                }
+
+                if (!context.Roles.Any())
+                {
 
                     User admin = new User()
                     {

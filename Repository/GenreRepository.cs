@@ -17,5 +17,18 @@ namespace AuthorVerseServer.Repository
         {
             return await _context.Genres.OrderBy(g => g.GenreId).ToListAsync();
         }
+
+        public async Task AddGenre(string name)
+        {
+            await _context.Genres.AddAsync(new Genre()
+            {
+                Name = name
+            });
+        }
+
+        public async Task Save()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

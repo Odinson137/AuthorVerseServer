@@ -22,6 +22,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet]
         [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<Comment>>> GetComment()
         {
             var comments = await _comment.GetCommentAsync();
@@ -32,21 +33,6 @@ namespace AuthorVerseServer.Controllers
             return Ok(comments);
         }
 
-        /*[HttpGet("{bookId}")]
-        [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<CommentDTO>>> GetBookComments(int bookId)
-        {
-            var comments = await _context.Comments.AsNoTracking()
-                .Include(comment => comment.Commentator)
-                .Where(comments => comments.BookId == bookId)
-                .Select(comment => new CommentDTO()
-                {
-                    CommentId = comment.CommentId,
-                    Commentator = new UserDTO { Id = comment.Commentator.Id, UserName = comment.Commentator.UserName }
-                })
-            .ToListAsync();
-
-            return comments;
-        }*/
+        
     }
 }

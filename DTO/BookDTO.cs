@@ -12,13 +12,13 @@ namespace AuthorVerseServer.DTO
         public UserDTO Author { get; set; } = null!;
         public ICollection<GenreDTO>? Genres { get; set; }
         public AgeRating AgeRating { get; set; }
-        public Image? BookCover { get; set; } = null!;
+        public Image? BookCover { get; set; }
     }
 
     public class PopularBook
     {
         public int BookId { get; set; }
-        public Image? BookCover { get; set; } = null!;
+        public string? BookCover { get; set; }
     }
 
     //public class BookPage

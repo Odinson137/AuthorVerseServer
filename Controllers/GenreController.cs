@@ -12,18 +12,18 @@ namespace AuthorVerseServer.Controllers
     public class GenreController : ControllerBase
     {
         private readonly IGenre _genre;
+        //public DataContext _context { get; set; }
 
-        public DataContext _context { get; set; }
-
-        public GenreController(DataContext context, IGenre genre)
+        public GenreController(IGenre genre) // DataContext context, 
         {
-            _context = context;
+            //_context = context;
             _genre = genre;
 
         }
 
         [HttpGet]
         [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<Genre>>> GetGenre()
         {
             var genres = await _genre.GetGenreAsync();
@@ -34,30 +34,12 @@ namespace AuthorVerseServer.Controllers
             return Ok(genres);
         }
 
-        /*[HttpGet]
-        [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<GenreDTO>>> GetGenre()
-        {
-            var genres = await _context.Genres.AsNoTracking().Select(genre => new GenreDTO()
-            {
-                GenreId = genre.GenreId,
-                Name = genre.Name
-            }).ToListAsync();
-
-            return genres;
-        }*/
-
         [HttpPost("{name}")]
         [ProducesResponseType(200)]
         public async Task<ActionResult<string>> AddGenre(string name)
         {
-            await _context.Genres.AddAsync(new Genre()
-            {
-                Name = name
-            });
-
-            _context.SaveChanges();
-
+            await _genre.AddGenre(name);
+            await _genre.Save();
             return "Genre succecsully installed";
             
         }

@@ -17,6 +17,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet]
         [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<ChapterSection>>> GetChapterSection()
         {
             var chapterSections = await _chapterSection.GetChapterSectionAsync();
