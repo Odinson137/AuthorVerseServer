@@ -48,14 +48,6 @@ services.AddCors(options =>
             .AllowAnyHeader()
             .AllowCredentials();
     });
-
-    options.AddPolicy("AllowTestApp", builder =>
-    {
-        builder.WithOrigins("http://localhost:7270")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
 });
 
 services.AddControllers()
@@ -81,27 +73,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
 
-services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-})
-.AddCookie()
-.AddGoogle(googleOptions =>
-{
-    googleOptions.ClientId = "889710296756-p7s354u3bd1eg57b22kfijourbr3evn2.apps.googleusercontent.com";
-    googleOptions.ClientSecret = "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";
-    googleOptions.CallbackPath = "/api/User/signin-google";
-
-    googleOptions.CorrelationCookie.SameSite = SameSiteMode.None;
-
-    //googleOptions.Scope.Add("https://www.googleapis.com/auth/userinfo.profile");
-    googleOptions.SaveTokens = true;
-    googleOptions.Scope.Add("openid");
-    googleOptions.Scope.Add("profile");
-    googleOptions.Scope.Add("email");
-});
-
 var app = builder.Build();
 
 await Seed.SeedData(app);
@@ -124,6 +95,5 @@ app.UseCookiePolicy();
 app.MapControllers();
 
 app.UseCors(policyName);
-
 
 app.Run();

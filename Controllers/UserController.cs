@@ -2,12 +2,11 @@
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Xml.Linq;
+using AuthorVerseServer.Services;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -16,11 +15,10 @@ namespace AuthorVerseServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUser _user;
-        private readonly SignInManager<User> _signInManager;
-        public UserController(IUser user, SignInManager<User> signInManager)
+        
+        public UserController(IUser user)
         {
             _user = user;
-            _signInManager = signInManager;
         }
 
         [HttpGet]
@@ -44,49 +42,39 @@ namespace AuthorVerseServer.Controllers
             return true;
         }
 
-        // Настройка параметров аутентификации Google
-        //var authenticationProperties = _signInManager.ConfigureExternalAuthenticationProperties("Google",
-        //    Url.Action("signin-google", "User", null, Request.Scheme));
-
-        //// Добавление запрошенных разрешений к scope
-        //authenticationProperties.Parameters.Add("scope", "openid profile email");
-
-        //// Инициирование аутентификации через Google
-        //return Challenge(authenticationProperties, "Google");
-
-        [HttpGet("google")]
-        public IActionResult GoogleLogin()
-        {
-            var redirectUrl = Url.Action("signin-google", "User", null, Request.Scheme);
-
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
-
-            // Генерация параметра correlation
-            //properties.Items["correlation"] = Guid.NewGuid().ToString("N");
-
-            return Challenge(properties, "Google");
-        }
-
         [HttpPost("signin-google")]
         [AllowAnonymous]
         [ProducesResponseType(200)]
-        public async Task<bool> GoogleSignInCallback()
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<UserGoogleVerify>> GoogleSignInCallback([FromBody] AuthRequestModel token)
         {
-            Console.WriteLine("Check");
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
 
-            if (info == null)
+            User? user = await _user.GetUser(userInfo.Email);
+            if (user == null)
             {
-                return false;
+                (bool result, User createUser) = await _user.CreateUser(userInfo);
+                if (!result)
+                {
+                    return BadRequest("Failed to create user");
+                }
+
+                await _user.Save();
+                user = createUser;
             }
 
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-
-            if (result.Succeeded)
+            UserGoogleVerify userGoogle = new UserGoogleVerify()
             {
-                return true;
-            }
-            return false;
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Token = "123456789Yura-Top",
+                IconUrl = userInfo.Picture
+            };
+
+            return Ok(userGoogle);
         }
+
+
     }
 }
