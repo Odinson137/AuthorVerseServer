@@ -48,10 +48,7 @@ namespace AuthorVerseServer.Repository
 
         private static bool IsValidUsername(string username)
         {
-            // Регулярное выражение для проверки строки на буквы или цифры
             Regex regex = new Regex("^[a-zA-Z0-9]*$");
-
-            // Проверка строки на соответствие регулярному выражению
             return regex.IsMatch(username);
         }
 

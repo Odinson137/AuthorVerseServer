@@ -15,10 +15,12 @@ namespace AuthorVerseServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUser _user;
-        
-        public UserController(IUser user)
+        private readonly IConfiguration _configuration;
+
+        public UserController(IUser user, IConfiguration configuration)
         {
             _user = user;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -68,7 +70,7 @@ namespace AuthorVerseServer.Controllers
                 Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
-                Token = "123456789Yura-Top",
+                Token = CreateJWTtokenService.GenerateJwtToken(user, _configuration),
                 IconUrl = userInfo.Picture
             };
 

@@ -1,9 +1,8 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.Models;
+﻿using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthorVerseServer
+namespace AuthorVerseServer.Data
 {
     public class Seed
     {
