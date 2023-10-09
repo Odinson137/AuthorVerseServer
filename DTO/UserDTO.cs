@@ -19,6 +19,20 @@
         public string? IconUrl { get; set; }
         public string Email { get; set; } = null!;
         public string Token { get; set; } = null!;
+    }
 
+    public class UserMicrosoftVerify
+    {
+        public string Id { get; set; } = null!;
+        public string UserName { get; set; } = null!;
+        public string Token { get; set; } = null!;
+    }
+
+    public class UserProfile
+    {
+        public string GivenName { get; set; }
+        public string Surname { get; set; }
+        public string UserPrincipalName { get; set; }
+        public string Id { get; set; }
     }
 }

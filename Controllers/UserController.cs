@@ -48,20 +48,19 @@ namespace AuthorVerseServer.Controllers
         [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserGoogleVerify>> GoogleSignInCallback([FromBody] AuthRequestModel token)
+        public async Task<ActionResult<UserGoogleVerify>> SignInWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
 
-            User? user = await _user.GetUser(userInfo.Email);
+            User? user = await _user.GetUserByUserName(userInfo.Name);
             if (user == null)
             {
-                (bool result, User createUser) = await _user.CreateUser(userInfo);
+                (bool result, User createUser) = await _user.CreateGoogleUser(userInfo);
                 if (!result)
                 {
                     return BadRequest("Failed to create user");
                 }
 
-                await _user.Save();
                 user = createUser;
             }
 
@@ -77,6 +76,30 @@ namespace AuthorVerseServer.Controllers
             return Ok(userGoogle);
         }
 
+        [HttpPost("signin-microsoft")]
+        public async Task<IActionResult> SignInWithMicrosoft([FromBody] UserProfile userInfo)
+        {
+            User? user = await _user.GetUserByUserName(userInfo.UserPrincipalName);
+            if (user == null)
+            {
+                (bool result, User createUser) = await _user.CreateMicrosoftUser(userInfo);
+                if (!result)
+                {
+                    return BadRequest("Failed to create user");
+                }
 
+                user = createUser;
+            }
+
+            UserGoogleVerify userGoogle = new UserGoogleVerify()
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Token = CreateJWTtokenService.GenerateJwtToken(user, _configuration),
+            };
+
+            return Ok(userGoogle);
+        }
     }
 }
