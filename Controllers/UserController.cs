@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
+using Newtonsoft.Json.Linq;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -37,11 +38,53 @@ namespace AuthorVerseServer.Controllers
             return Ok(users);
         }
 
-        [HttpPost]
+        [HttpPost("Login")]
         [ProducesResponseType(200)]
-        public async Task<bool> Login()
+        public async Task<IActionResult> Login(UserLoginDTO authUser)
         {
-            return true;
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var user = await _user.GetUserByName(authUser.UserName);
+
+            if (user != null)
+            {
+                var passwordCheck = await _user.CheckUserPassword(user, authUser.Password);
+                if (passwordCheck)
+                {
+                    var Token = CreateJWTtokenService.GenerateJwtToken(user, _configuration);
+                    return Ok(new { Token, user });                                        
+                }
+                //Password is incorrect
+                return BadRequest("Password is not correct");
+            }
+            //User not found
+            return BadRequest("User do not exist");
+        }
+
+        [HttpPost("Registration")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Registration(UserLoginDTO registeredUser)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var user = await _user.GetUserByName(registeredUser.UserName);
+            if (user != null)
+            {
+                return BadRequest("Thisn name is alredy taken");
+            }
+
+            var newUser = new User()
+            {
+                UserName = registeredUser.UserName,
+                Email = registeredUser.Email,
+                
+            };
+            var test = await _user.CreateUser(newUser, registeredUser.Password);
+
+            if (test == test.Errors)
+                return BadRequest("Password type is incorrect");
+
+            return Ok(newUser);
         }
 
         [HttpPost("signin-google")]

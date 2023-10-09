@@ -1,4 +1,5 @@
 ﻿using AuthorVerseServer.Data;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Google.Apis.Auth;
@@ -20,7 +21,22 @@ namespace AuthorVerseServer.Repository
             _userManager = userManager;
         }
 
-        public async Task<User?> GetUser(string email)
+        public async Task<User> GetUserByName(string Name)
+        {
+            return await _userManager.FindByNameAsync(Name);
+        }
+
+        public async Task<IdentityResult> CreateUser(User newUser, string password)
+        {
+            return await _userManager.CreateAsync(newUser, password);
+        }
+
+        public async Task<bool> CheckUserPassword(User user, string password)
+        {
+            return await _userManager.CheckPasswordAsync(user, password);
+        }
+
+        public async Task<User?> GetUser(string email)//Переименовать!!!!!!
         {
             User? user = await _userManager.FindByEmailAsync(email);
             return user;

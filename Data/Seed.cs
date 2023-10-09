@@ -11,6 +11,7 @@ namespace AuthorVerseServer.Data
         {
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
+
                 var context = serviceScope.ServiceProvider.GetService<DataContext>();
 
                 var pendingMigrations = context.Database.GetPendingMigrations();
@@ -37,7 +38,7 @@ namespace AuthorVerseServer.Data
                     var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-                    await userManager.CreateAsync(admin, "password@123");
+                    await userManager.CreateAsync(admin, "Password@123");
 
                     await context.Users.AddAsync(admin);
 
