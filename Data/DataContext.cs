@@ -23,6 +23,7 @@ namespace AuthorVerseServer.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
         public DbSet<Character> Characters { get; set; }
+        public DbSet<MicrosoftUser> MicrosoftUsers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -59,7 +60,6 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(b => b.BookId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
-
 
         }
     }

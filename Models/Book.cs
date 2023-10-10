@@ -27,7 +27,7 @@ namespace AuthorVerseServer.Models
         public DateTime PublicationData { get; set; } // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги
         public double AverageRating { get; set; }
         public AgeRating AgeRating { get; set; }
-        public Image? BookCover { get; set; } 
+        public string? BookCover { get; set; } 
         public PublicationPermission Permission { get; set; }
     }
 }

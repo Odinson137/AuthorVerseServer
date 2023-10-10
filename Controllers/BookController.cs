@@ -55,7 +55,7 @@ namespace AuthorVerseServer.Controllers
                 .Select(book => new PopularBook()
                 {
                     BookId = book.BookId,
-                    BookCover = book.BookCover.Url
+                    BookCoverUrl = book.BookCover
                 }).ToListAsync();
 
             return books;
@@ -72,7 +72,7 @@ namespace AuthorVerseServer.Controllers
                 .Select(book => new PopularBook()
                 {
                     BookId = book.BookId,
-                    BookCover = (book.BookCover ?? new Image() { Url = "" }).Url
+                    BookCoverUrl = book.BookCover ?? ""
                 }).ToListAsync();
 
             return books;
@@ -101,7 +101,7 @@ namespace AuthorVerseServer.Controllers
                         Name = genre.Name
                     }).ToList(),
                     AgeRating = book.AgeRating,
-                    BookCover = book.BookCover
+                    BookCoverUrl = book.BookCover
                 }).ToListAsync();
 
             return books;

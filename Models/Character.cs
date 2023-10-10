@@ -14,9 +14,7 @@ namespace AuthorVerseServer.Models
         [ForeignKey("BookId")]
         public Book Book { get; set; } = null!;
         public int BookChapterId { get; set; }
-        //[ForeignKey("BookChapterId")]
-        //public BookChapter BookChapter { get; set; } = null!;
         public string? Description { get; set; }
-        public Image? CharacterImage { get; set; }
+        public string? CharacterImageUrl { get; set; }
     }
 }

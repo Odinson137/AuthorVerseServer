@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.Models;
+﻿using AuthorVerseServer.Enums;
+using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,16 +31,17 @@ namespace AuthorVerseServer.Data
                         Description = "Люблю жизнь, она моя, она нагнула меня, но я не отчаиваюсь, живу",
                         Name = "Юри",
                         LastName = "Brown",
-                        Logo = new Image() { Url = "hashtag.png" },
+                        LogoUrl = "hashtag.png",
+                        Method = RegistrationMethod.Email,
                         Email = "buryy132@gmail.com",
                     };
 
                     var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                     var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-                    await userManager.CreateAsync(admin, "password@123");
+                    await userManager.CreateAsync(admin, "Password@123");
 
-                    await context.Users.AddAsync(admin);
+                    //await context.Users.AddAsync(admin);
 
                     string folderPath = @"./bookImage";
 
@@ -102,8 +104,11 @@ namespace AuthorVerseServer.Data
                         context.Add(tag);
                     }
 
-                    var role = new IdentityRole("Admin");
-                    await roleManager.CreateAsync(role);
+                    if (!await roleManager.RoleExistsAsync("Admin"))
+                    {
+                        var role = new IdentityRole("Admin");
+                        await roleManager.CreateAsync(role);
+                    }
 
                     await userManager.AddToRoleAsync(admin, "Admin");
 
@@ -143,7 +148,9 @@ namespace AuthorVerseServer.Data
                             UserName = $"JS_User_{b}",
                             Description = "Люблю Ярика",
                             Email = "Kekus132@gmail.com",
-                            Logo = new Image() { Url = "java-script.png" },
+                            Method = RegistrationMethod.Email,
+                            EmailConfirmed = true,
+                            LogoUrl = "java-script.png",
                             Name = usersName[n],
                             LastName = usersLastName[n],
                         };
@@ -165,7 +172,7 @@ namespace AuthorVerseServer.Data
                                 PublicationData = DateTime.Now,
                                 AgeRating = Enums.AgeRating.All,
                                 Permission = Enums.PublicationPermission.Approved,
-                                BookCover = new Image() { Url = files[num] }
+                                BookCover = files[num]
                             };
                             num++;
 

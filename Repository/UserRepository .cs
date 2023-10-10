@@ -1,5 +1,6 @@
 ﻿using AuthorVerseServer.Data;
 using AuthorVerseServer.DTO;
+using AuthorVerseServer.Enums;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Google.Apis.Auth;
@@ -16,8 +17,6 @@ namespace AuthorVerseServer.Repository
         private readonly DataContext _context;
         private readonly UserManager<User> _userManager;
 
-        private static string allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-
         public UserRepository(DataContext context, UserManager<User> userManager)
         {
             _context = context;
@@ -26,8 +25,21 @@ namespace AuthorVerseServer.Repository
 
         public async Task<User?> GetUserByEmail(string email)
         {
-            User? user = await _userManager.FindByEmailAsync(email);
-            return user;
+            return await _userManager.FindByNameAsync(email);
+        }
+        public async Task<User?> GetUserByUsesrName(string name)
+        {
+            return await _userManager.FindByNameAsync(name);
+        }
+
+        public async Task<IdentityResult> CreateUser(User newUser, string password)
+        {
+            return await _userManager.CreateAsync(newUser, password);
+        }
+
+        public async Task<bool> CheckUserPassword(User user, string password)
+        {
+            return await _userManager.CheckPasswordAsync(user, password);
         }
 
         public async Task<User?> GetUserByUserName(string userName)
@@ -36,52 +48,20 @@ namespace AuthorVerseServer.Repository
             return user;
         }
 
-        public async Task<(bool, User)> CreateGoogleUser(GoogleJsonWebSignature.Payload info)
+        public async Task<bool> CreateForeignUser(User user)
         {
-            User user = new User()
-            {
-                UserName = GenerateRandomUsername(),
-                Name = info.GivenName,
-                LastName = info.FamilyName,
-                Email = info.Email,
-                EmailConfirmed = true,
-                Logo = new Image()
-                {
-                    Url = info.Picture
-                }
-            };
-
             var result = await _userManager.CreateAsync(user);
-            return (result.Succeeded, user);
+            return result.Succeeded;
         }
 
-        public static string GenerateRandomUsername()
+        public async Task CreateMicrosoftUser(MicrosoftUser microsoftUser)
         {
-            const string prefix = "User";
-
-            Random random = new Random();
-            StringBuilder usernameBuilder = new StringBuilder(prefix);
-
-            for (int i = 0; i < 10; i++)
-            {
-                char randomChar = allowedCharacters[random.Next(allowedCharacters.Length)];
-                usernameBuilder.Append(randomChar);
-            }
-
-            return usernameBuilder.ToString();
+            await _context.MicrosoftUsers.AddAsync(microsoftUser);
         }
 
-        public async Task<(bool, User)> CreateMicrosoftUser(UserProfile info)
+        public async Task<MicrosoftUser?> GetMicrosoftUser(string azureName)
         {
-            User user = new User()
-            {
-                UserName = GenerateRandomUsername(),
-                Name = info.GivenName,
-                LastName = info.Surname,
-            };
-
-            var result = await _userManager.CreateAsync(user);
-            return (result.Succeeded, user);
+            return await _context.MicrosoftUsers.Include(x => x.User).FirstOrDefaultAsync(x => x.AzureName == azureName);
         }
 
         public async Task<ICollection<User>> GetUserAsync()
@@ -93,7 +73,6 @@ namespace AuthorVerseServer.Repository
         {
             await _context.SaveChangesAsync();
         }
-
     }
 }
 
