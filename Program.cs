@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using AuthorVerseServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -27,6 +28,8 @@ services.AddScoped<IBook, BookRepository>();
 services.AddScoped<ICharacter, CharacterRepository>();
 services.AddScoped<INote, NoteRepository>();
 services.AddScoped<IUser, UserRepository>();
+services.AddTransient<MailService>();
+services.AddTransient<CreateJWTtokenService>();
 /*builder.Services.AddScoped<IFriendship, FriendshipRepository>();*/
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
