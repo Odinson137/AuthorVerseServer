@@ -5,6 +5,15 @@ VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorVerseServer", "AuthorVerseServer.csproj", "{1AD71428-6B69-48CB-B418-89D4468EE248}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AythorVerseServer.Tests", "AythorVerseServer.Tests", "{E280C927-892B-43CD-AEF6-9FECAD289D74}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unit", "Unit", "{BEAD70C7-01C3-4DEB-9B70-D03C246D4504}"
+	ProjectSection(SolutionItems) = preProject
+		BookRepositoryTests.cs = BookRepositoryTests.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integration", "Integration", "{7D46D8FF-7659-4503-8B6A-551E95617E40}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +27,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BEAD70C7-01C3-4DEB-9B70-D03C246D4504} = {E280C927-892B-43CD-AEF6-9FECAD289D74}
+		{7D46D8FF-7659-4503-8B6A-551E95617E40} = {E280C927-892B-43CD-AEF6-9FECAD289D74}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9323D99B-45EB-4697-82E4-F80DC0206D0B}
