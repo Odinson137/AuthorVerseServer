@@ -10,10 +10,8 @@ namespace AuthorVerseServer.Controllers
     public class BookChapterController : ControllerBase
     {
         private readonly IBookChapter _bookChapter;
-        private readonly DataContext _context;
-        public BookChapterController(DataContext context, IBookChapter bookChapter)
+        public BookChapterController(IBookChapter bookChapter)
         {
-            _context = context;
             _bookChapter = bookChapter;
         }
 

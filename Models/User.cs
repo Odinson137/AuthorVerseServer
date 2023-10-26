@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
-    
     public class User : IdentityUser
     {
         public string? Name { get; set; }

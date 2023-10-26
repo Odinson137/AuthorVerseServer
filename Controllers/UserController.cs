@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
 using AuthorVerseServer.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -14,16 +15,18 @@ namespace AuthorVerseServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUser _user;
+        private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
 
-        public UserController(IUser user, IConfiguration configuration)
+        public UserController(IUser user, IConfiguration configuration, UserManager<User> userManager)
         {
             _user = user;
             _configuration = configuration;
+            _userManager = userManager;
         }
 
+        // не нужна для тестов
         [HttpGet]
-        [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<User>>> GetUser()
@@ -43,11 +46,11 @@ namespace AuthorVerseServer.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = await _user.GetUserByUserName(authUser.UserName);
+            User? user = await _userManager.FindByNameAsync(authUser.UserName);
 
             if (user != null)
             {
-                var passwordCheck = await _user.CheckUserPassword(user, authUser.Password);
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, authUser.Password);
                 if (passwordCheck)
                 {
                     var Token = CreateJWTtokenService.GenerateJwtToken(user, _configuration);
@@ -70,7 +73,9 @@ namespace AuthorVerseServer.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var checkUser = await _user.GetUserByUserName(registeredUser.UserName);
+            User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
+            //var checkUser = await _user.GetUserByUserName(registeredUser.UserName);
+            
             if (checkUser != null)
             {
                 return BadRequest("Thisn name is alredy taken");
@@ -83,7 +88,8 @@ namespace AuthorVerseServer.Controllers
                 Method = RegistrationMethod.Email
             };
 
-            var result = await _user.CreateUser(newUser, registeredUser.Password);
+            var result = await _userManager.CreateAsync(newUser, registeredUser.Password);
+            //var result = await _user.CreateUser(newUser, );
 
             if (!result.Succeeded)
                 return BadRequest("Password type is incorrect");
@@ -100,7 +106,7 @@ namespace AuthorVerseServer.Controllers
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
 
-            User? user = await _user.GetUserByEmail(userInfo.Email);
+            User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user != null)
             {
                 return BadRequest("This user has already existed");
@@ -117,8 +123,10 @@ namespace AuthorVerseServer.Controllers
                 LogoUrl = userInfo.Picture
             };
 
-            bool result = await _user.CreateForeignUser(createUser);
-            if (!result)
+            var result = await _userManager.CreateAsync(createUser);
+
+            //bool result = await _user.CreateForeignUser(createUser);
+            if (!result.Succeeded)
             {
                 return BadRequest("Failed to create user");
             }
@@ -142,7 +150,7 @@ namespace AuthorVerseServer.Controllers
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
 
-            User? user = await _user.GetUserByEmail(userInfo.Email);
+            User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user == null)
             {
                 return BadRequest("User not found");
@@ -203,8 +211,8 @@ namespace AuthorVerseServer.Controllers
                 LastName = userInfo.Surname,
             };
 
-            bool result = await _user.CreateForeignUser(user);
-            if (!result)
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
             {
                 return BadRequest("Failed to create user");
             }
