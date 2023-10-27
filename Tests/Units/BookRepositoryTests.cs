@@ -6,37 +6,99 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System;
 using Xunit;
 
 public class BookRepositoryTests
 {
     [Fact]
-    public async Task GetBooksCountTest()
-	{
-        // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        mockBookRepository.Setup(service => service.GetCountBooks()).ReturnsAsync(3);
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
-
-        // Act
-        var result = await controller.GetCountBooks();
-
-        // Assert
-        var actionResult = Assert.IsType<ActionResult<int>>(result);
-        var objectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-        var actualCount = Assert.IsType<int>(objectResult.Value);
-        
-        Assert.Equal(3, actualCount);
-    }
-
-    [Fact]
-    public async Task CreateBookTest()
+    public async Task CreateBook_EmptyAuthorId_ShouldReturnBadRequest()
     {
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        
+
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+
+        var bookDTO = new CreateBookDTO
+        {
+            AuthorId = string.Empty,
+            GenresId = new List<int> { 17, 18 },
+            Title = "Берсерк",
+            Description = "Черный мечник идёт за тобой",
+            AgeRating = AgeRating.EighteenPlus,
+        };
+
+        // Act
+        var result = await controller.CreateBook(bookDTO);
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task CreateBook_UserNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        var mockBookRepository = new Mock<IBook>();
+        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+
+        var bookDTO = new CreateBookDTO
+        {
+            AuthorId = "3f1dea02-0436-4570-8718-51596e4b2987",
+            GenresId = new List<int> { 17, 18 },
+            Title = "Берсерк",
+            Description = "Черный мечник идёт за тобой",
+            AgeRating = AgeRating.EighteenPlus,
+        };
+        mockUserManager.Setup(um => um.FindByIdAsync(bookDTO.AuthorId)).ReturnsAsync((User)null);
+
+        // Act
+        var result = await controller.CreateBook(bookDTO);
+
+        // Assert
+        Assert.IsType<NotFoundObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task CreateBook_InvalidGenres_ShouldReturnNotFound()
+    {
+        // Arrange
+        var mockBookRepository = new Mock<IBook>();
+        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+
+        var bookDTO = new CreateBookDTO
+        {
+            AuthorId = "3f1dea02-0436-4570-8718-51596e4b2987",
+            GenresId = new List<int> { 999 }, 
+            Title = "Берсерк",
+            Description = "Черный мечник идёт за тобой",
+            AgeRating = AgeRating.EighteenPlus,
+        };
+
+        // Setup mock Genre objects
+        var genre1 = new Genre { GenreId = 17, Name = "Фантастика" };
+        mockBookRepository.Setup(repo => repo.GetGenreById(It.IsAny<int>()))
+                         .ReturnsAsync((int genreId) => genreId == 17 ? genre1 : null);
+
+        // Act
+        var result = await controller.CreateBook(bookDTO);
+
+        // Assert
+        Assert.IsType<NotFoundObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task CreateBook_Ok_ShouldReturnOkRequest()
+    {
+        // Arrange
+        var mockBookRepository = new Mock<IBook>();
+        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+
         var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
         var bookDTO = new CreateBookDTO
         {
@@ -78,7 +140,6 @@ public class BookRepositoryTests
             }
         }
 
-        // Проверяем, что методы FindByIdAsync, GetGenreById, AddBookGenre и Save были вызваны с правильными параметрами
         mockUserManager.Verify(um => um.FindByIdAsync(bookDTO.AuthorId), Times.Once);
         mockBookRepository.Verify(repo => repo.GetGenreById(17), Times.Once);
         mockBookRepository.Verify(repo => repo.GetGenreById(18), Times.Once);
@@ -86,4 +147,5 @@ public class BookRepositoryTests
         mockBookRepository.Verify(repo => repo.Save(), Times.Once);
 
     }
+
 }

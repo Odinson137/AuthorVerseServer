@@ -113,7 +113,7 @@ namespace AuthorVerseServer.Controllers
         [HttpPost("reg-google")]
         [AllowAnonymous]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(MessageDTO))]
         public async Task<ActionResult<UserGoogleVerify>> RegWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);

@@ -127,6 +127,9 @@ namespace AuthorVerseServer.Controllers
                         };
 
                         await _book.AddBookGenre(bookGenre);
+                    } else
+                    {
+                        return NotFound("Genre not found");
                     }
                 }
             }
