@@ -119,12 +119,30 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCookiePolicy();
 
 app.MapControllers();
+
+
+//app.MapGet("/api/images/{fileName}", async context =>
+//{
+//    var fileName = context.Request.RouteValues["fileName"] as string;
+//    var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "api", "images", fileName);
+
+//    if (File.Exists(filePath))
+//    {
+//        await context.Response.SendFileAsync(filePath);
+//    }
+//    else
+//    {
+//        context.Response.StatusCode = StatusCodes.Status404NotFound;
+//    }
+//});
 
 app.UseCors(policyName);
 

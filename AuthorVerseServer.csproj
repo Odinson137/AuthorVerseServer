@@ -39,4 +39,19 @@
     <Folder Include="Tests\Intagration\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\Api\Images\37569307.webp" />
+    <None Include="wwwroot\Api\Images\3f56fdacff697f8b003b7882aae2f179.webp" />
+    <None Include="wwwroot\Api\Images\8748cb1354b3ac23f9f05a39f87da339ed50ddbf_hq.webp" />
+    <None Include="wwwroot\Api\Images\91+tKDwDQFL._AC_UF1000,1000_QL80_.webp" />
+    <None Include="wwwroot\Api\Images\912iiFEK2wL.webp" />
+    <None Include="wwwroot\Api\Images\9780593380352.webp" />
+    <None Include="wwwroot\Api\Images\breadcrumbs.webp" />
+    <None Include="wwwroot\Api\Images\Free-Fantasy-Book-Cover-Template-2x.webp" />
+    <None Include="wwwroot\Api\Images\optimized_large_thumb_stage.webp" />
+    <None Include="wwwroot\Api\Images\TESS.webp" />
+    <None Include="wwwroot\Api\UserImages\hashtag.png" />
+    <None Include="wwwroot\Api\UserImages\java-script.png" />
+  </ItemGroup>
+
 </Project>

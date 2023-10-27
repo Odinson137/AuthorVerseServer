@@ -55,7 +55,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("Last")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks()
+        public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks([FromQuery] string imageTitle)
         {
             return Ok(await _book.GetLastBooks());
         }
