@@ -20,7 +20,6 @@ namespace AuthorVerseServer.Data
         public DbSet<SectionChoice> SectionChoices { get; set; }
         public DbSet<Friendship> Friendships{ get; set; }
         public DbSet<Genre> Genres { get; set; }
-        public DbSet<BookGenre> BookGenres { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
         public DbSet<Character> Characters { get; set; }
@@ -36,7 +35,6 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
 
             modelBuilder.Entity<Friendship>().HasNoKey();
-            modelBuilder.Entity<BookGenre>().HasNoKey();
 
             modelBuilder.Entity<Book>()
                 .HasMany(c => c.Comments)

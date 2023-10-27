@@ -55,7 +55,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("Last")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks([FromQuery] string imageTitle)
+        public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks()
         {
             return Ok(await _book.GetLastBooks());
         }
@@ -82,7 +82,7 @@ namespace AuthorVerseServer.Controllers
             return book;
         }
 
-        [HttpPost]
+        [HttpPost("Create")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -120,13 +120,7 @@ namespace AuthorVerseServer.Controllers
 
                     if (genre != null)
                     {
-                        var bookGenre = new BookGenre
-                        {
-                            Book = book,
-                            Genre = genre
-                        };
-
-                        await _book.AddBookGenre(bookGenre);
+                        book.Genres.Add(genre);
                     } else
                     {
                         return NotFound("Genre not found");

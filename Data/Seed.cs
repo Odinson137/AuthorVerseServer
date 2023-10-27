@@ -43,7 +43,7 @@ namespace AuthorVerseServer.Data
 
                     //await context.Users.AddAsync(admin);
 
-                    string folderPath = @"./wwwroot";
+                    string folderPath = @"./wwwroot/api/images/";
 
                     string[] fileNames = Directory.GetFiles(folderPath);
                     List<string> files = new List<string>(10);

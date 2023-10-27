@@ -118,9 +118,9 @@ namespace AuthorVerseServer.Repository
             return await _context.Genres.FindAsync(id);
         }
 
-        public async Task AddBookGenre(BookGenre bookGenre)
-        {
-            await _context.BookGenres.AddAsync(bookGenre);
-        }
+        //public async Task AddBookGenre(BookGenre bookGenre)
+        //{
+        //    await _context.BookGenres.AddAsync(bookGenre);
+        //}
     }
 }

@@ -36,10 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Tests\Intagration\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="wwwroot\Api\Images\37569307.webp" />
     <None Include="wwwroot\Api\Images\3f56fdacff697f8b003b7882aae2f179.webp" />
     <None Include="wwwroot\Api\Images\8748cb1354b3ac23f9f05a39f87da339ed50ddbf_hq.webp" />

@@ -14,7 +14,7 @@ public interface IBook
     Task<BookDTO?> GetBookById(int bookId);
     Task CreateBook(Book book);
     Task<Genre?> GetGenreById(int id);
-    Task AddBookGenre(BookGenre bookGenre);
+    //Task AddBookGenre(BookGenre bookGenre);
     Task Save();
     //Task AddBookGenre(Book book, ICollection<int> genresId);
     Task<IDbContextTransaction> BeginTransactionAsync();
