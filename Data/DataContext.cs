@@ -38,8 +38,14 @@ namespace AuthorVerseServer.Data
 
             modelBuilder.Entity<Book>()
                 .HasMany(c => c.Comments)
-                .WithOne()
+                .WithOne(c => c.Book)
                 .HasForeignKey(c => c.BookId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<User>()
+                .HasMany(c => c.Comments)
+                .WithOne(c => c.Commentator)
+                .HasForeignKey(c => c.CommentatorId)
                 .IsRequired(false);
 
             modelBuilder.Entity<Book>()

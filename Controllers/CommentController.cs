@@ -2,6 +2,8 @@
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,12 +14,13 @@ namespace AuthorVerseServer.Controllers
     public class CommentController : ControllerBase
     {
         private readonly IComment _comment;
-        public DataContext _context { get; set; }
+        private readonly UserManager<User> _userManager;
 
-        public CommentController(DataContext context, IComment comment)
+        public CommentController(IComment comment, UserManager<User> userManager)
         {
-            _context = context;
             _comment = comment;
+            _userManager = userManager;
+
         }
 
         [HttpGet]
@@ -33,6 +36,15 @@ namespace AuthorVerseServer.Controllers
             return Ok(comments);
         }
 
-        
+        [HttpPost("Create")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<int>> CreateComment([FromBody] CreateCommentDTO commentDTO)
+        {
+
+            return Ok(0);
+        }
+
     }
 }

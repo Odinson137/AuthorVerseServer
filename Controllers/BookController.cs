@@ -86,7 +86,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<string>> CreateBook([FromBody] CreateBookDTO bookDTO)
+        public async Task<ActionResult<int>> CreateBook([FromBody] CreateBookDTO bookDTO)
         {
             if (string.IsNullOrEmpty(bookDTO.AuthorId))
             {
@@ -130,7 +130,12 @@ namespace AuthorVerseServer.Controllers
 
             await _book.Save();
 
-            return Ok("Book created");
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Book not create");
+            }
+
+            return Ok(book.BookId);
         }
     }
 }

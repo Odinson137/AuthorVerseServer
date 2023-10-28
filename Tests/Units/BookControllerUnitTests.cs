@@ -6,7 +6,6 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
 using Xunit;
 
 public class BookControllerUnitTests
@@ -47,7 +46,7 @@ public class BookControllerUnitTests
 
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "3f1dea02-0436-4570-8718-51596e4b2987",
+            AuthorId = "admin",
             GenresId = new List<int> { 17, 18 },
             Title = "Берсерк",
             Description = "Черный мечник идёт за тобой",
@@ -73,7 +72,7 @@ public class BookControllerUnitTests
 
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "3f1dea02-0436-4570-8718-51596e4b2987",
+            AuthorId = "admin",
             GenresId = new List<int> { 999 }, 
             Title = "Берсерк",
             Description = "Черный мечник идёт за тобой",
@@ -102,7 +101,7 @@ public class BookControllerUnitTests
         var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "3f1dea02-0436-4570-8718-51596e4b2987",
+            AuthorId = "admin",
             GenresId = new List<int> { 17, 18 },
             Title = "Берсерк",
             Description = "Черный мечник идёт за тобой",
@@ -122,13 +121,12 @@ public class BookControllerUnitTests
         var result = await controller.CreateBook(bookDTO);
 
         // Assert
-        var objectResult = Assert.IsType<ActionResult<string>>(result);
+        var objectResult = Assert.IsType<ActionResult<int>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
 
         mockUserManager.Verify(um => um.FindByIdAsync(bookDTO.AuthorId), Times.Once);
         mockBookRepository.Verify(repo => repo.GetGenreById(17), Times.Once);
         mockBookRepository.Verify(repo => repo.GetGenreById(18), Times.Once);
-        //mockBookRepository.Verify(repo => repo.AddBookGenre(It.IsAny<BookGenre>()), Times.Exactly(2));
         mockBookRepository.Verify(repo => repo.Save(), Times.Once);
 
     }

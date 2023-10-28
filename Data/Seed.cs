@@ -27,6 +27,7 @@ namespace AuthorVerseServer.Data
 
                     User admin = new User()
                     {
+                        Id = "admin",
                         UserName = "Admin",
                         Description = "Люблю жизнь, она моя, она нагнула меня, но я не отчаиваюсь, живу",
                         Name = "Юри",
@@ -170,9 +171,8 @@ namespace AuthorVerseServer.Data
                                 Title = book.Key + b.ToString(),
                                 Author = admin,
                                 Description = book.Value + b.ToString(),
-                                PublicationData = DateTime.Now,
-                                AgeRating = Enums.AgeRating.All,
-                                Permission = Enums.PublicationPermission.Approved,
+                                AgeRating = AgeRating.All,
+                                Permission = PublicationPermission.Approved,
                                 BookCover = files[num]
                             };
                             num++;

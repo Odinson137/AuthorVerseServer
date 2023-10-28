@@ -10,15 +10,14 @@ namespace AuthorVerseServer.Models
     {
         [Key]
         public int CommentId { get; set; }
-        public string CommentatorId { get; set; }
-        [ForeignKey("CommentatorId")]
+        public string CommentatorId { get; set; } = null!;
         public User Commentator { get; set; } = null!;
         public int BookId { get; set; }
+        public Book Book { get; set; } = null!;
         public string Text { get; set; } = null!;
         public int Likes { get; set; }
         public int DisLikes { get; set; }
-        public int Rating { get; set; }
-        public DateTime CommentCreatedDateTime { get; set; }
+        public DateTime CommentCreatedDateTime { get; } = DateTime.Now;
         public PublicationPermission Permission { get; set; }
     }
 }
