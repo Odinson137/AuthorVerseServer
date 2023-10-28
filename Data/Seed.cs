@@ -56,23 +56,24 @@ namespace AuthorVerseServer.Data
 
                     var genreNames = new List<string>
                     {
-                        "Фантастика",
-                        "Детектив",
-                        "Фэнтези",
-                        "Приключения",
-                        "Роман",
-                        "Триллер",
-                        "Ужасы",
-                        "Научная фантастика",
-                        "Исторический",
-                        "Боевик",
-                        "Мистика",
-                        "Комедия",
-                        "Драма",
-                        "Фильм-нуар",
-                        "Биография",
-                        "Фэнтези"
+                        "Science Fiction",
+                        "Detective",
+                        "Fantasy",
+                        "Adventure",
+                        "Romance",
+                        "Thriller",
+                        "Horror",
+                        "Science Fiction",
+                        "Historical",
+                        "Action",
+                        "Mystery",
+                        "Comedy",
+                        "Drama",
+                        "Film Noir",
+                        "Biography",
+                        "Fantasy"
                     };
+
                     var tagNames = new List<string>()
                     {
                         "Book",

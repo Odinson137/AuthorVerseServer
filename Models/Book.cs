@@ -3,11 +3,10 @@ using AuthorVerseServer.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
-    [Index(nameof(Title)), Index(nameof(PublicationData)), Index(nameof(AverageRating))]
+    [Index(nameof(Title)), Index(nameof(PublicationData))]
     public class Book
     {
         [Key]
@@ -24,10 +23,11 @@ namespace AuthorVerseServer.Models
         public ICollection<Character> Characters { get; set; } = new List<Character>();
         public ICollection<BookChapter> BookChapters { get; set; } = new List<BookChapter>();
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>();
-        public DateTime PublicationData { get; set; } // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги
-        public double AverageRating { get; set; }
+        public DateTime PublicationData { get; set; } = DateTime.Now; // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги
+        public ICollection<BookRating> Ratings { get; set; } = new List<BookRating>();
         public AgeRating AgeRating { get; set; }
         public string? BookCover { get; set; } 
+        public string? BookPanoramaImage { get; set; }
         public PublicationPermission Permission { get; set; }
     }
 }

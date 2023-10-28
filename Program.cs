@@ -35,6 +35,7 @@ services.AddTransient<CreateJWTtokenService>();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
+
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
 
 services.AddDbContext<DataContext>(options =>
@@ -42,6 +43,7 @@ services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
+//services.AddDbContext<DataContext>(options => options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
 
 var policyName = "AllowReactApp";
 services.AddCors(options =>

@@ -11,6 +11,7 @@ namespace AuthorVerseServer.DTO
         public string Description { get; set; } = null!;
         public UserDTO Author { get; set; } = null!;
         public ICollection<GenreDTO>? Genres { get; set; } = new List<GenreDTO>();
+        public ICollection<TagDTO>? Tags { get; set; } = new List<TagDTO>();
         public AgeRating AgeRating { get; set; }
         public string? BookCoverUrl { get; set; }
     }

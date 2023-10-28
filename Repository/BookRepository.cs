@@ -45,7 +45,8 @@ namespace AuthorVerseServer.Repository
         {
             var books = _context.Books
                 .AsNoTracking()
-                .OrderByDescending(book => book.AverageRating)
+                .Include(book => book.Ratings)
+                .OrderByDescending(book => book.Ratings.Max(x => x.Rating))
                 .Take(10)
                 .Select(book => new PopularBook()
                 {

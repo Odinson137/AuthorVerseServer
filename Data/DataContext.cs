@@ -42,6 +42,12 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(c => c.BookId)
                 .IsRequired(false);
 
+            modelBuilder.Entity<Book>()
+                .HasMany(b => b.Ratings)
+                .WithOne()
+                .HasForeignKey(b => b.BookId)
+                .IsRequired(false);
+
             modelBuilder.Entity<BookChapter>()
                 .HasMany(c => c.Notes)
                 .WithOne()
@@ -62,6 +68,7 @@ namespace AuthorVerseServer.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
+  
         }
     }
 }
