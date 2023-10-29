@@ -1,4 +1,4 @@
-﻿namespace AuthorVerseServer.Enums
+﻿namespace AuthorVerseServer.Data.Enums
 {
     public enum BookState
     {
@@ -7,7 +7,7 @@
         Abandoned,   // Брошено
         Finished,    // Прочитано
         Favorites,   // Любимые
-        Other        
+        Other
     }
 
 }

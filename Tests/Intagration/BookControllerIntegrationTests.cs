@@ -1,9 +1,12 @@
 ﻿using AuthorVerseServer.Data;
+using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
-using AuthorVerseServer.Enums;
+using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Net.Http.Json;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Integration
@@ -58,6 +61,35 @@ namespace AuthorVerseServer.Tests.Integration
 
             // Assert
             response.EnsureSuccessStatusCode();
+        }
+
+        [Fact]
+        public async Task GetMainPopularBooks_ReturnsOkResult()
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync("/api/Book/MainPopularBooks");
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            ICollection<MainPopularBook>? books = JsonConvert.DeserializeObject<ICollection<MainPopularBook>>(content);
+            Assert.True(books is not null, "Books are null");
+            
+            Assert.True(books.Count > 0, "Count of books is zero");
+
+            foreach (var book in books)
+            {
+                Assert.True(!string.IsNullOrEmpty(book.Title), "Title not have");
+                Assert.True(!string.IsNullOrEmpty(book.Description), "Description not have");
+                Assert.True(book.Genres.Count > 0, "Genre's count is zero");
+                Assert.True(book.Tags.Count > 0, "Tag's count is zero");
+                Assert.True(book.Endings > 0, "Must have not zero endings");
+                Assert.True(book.Choices >= 0, "Must have more zero choices");
+                Assert.True(book.PublicationData != DateTime.MinValue, "Error date");
+            }
         }
     }
 

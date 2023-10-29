@@ -1,9 +1,6 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.DTO;
-using AuthorVerseServer.Enums;
+﻿using AuthorVerseServer.DTO;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Integration

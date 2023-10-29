@@ -1,4 +1,4 @@
-﻿namespace AuthorVerseServer.Enums
+﻿namespace AuthorVerseServer.Data.Enums
 {
     public enum PublicationPermission
     {

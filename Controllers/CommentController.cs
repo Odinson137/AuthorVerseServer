@@ -20,7 +20,6 @@ namespace AuthorVerseServer.Controllers
         {
             _comment = comment;
             _userManager = userManager;
-
         }
 
         [HttpGet]

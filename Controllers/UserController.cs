@@ -5,8 +5,8 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
-using AuthorVerseServer.Enums;
 using Microsoft.AspNetCore.Identity;
+using AuthorVerseServer.Data.Enums;
 
 namespace AuthorVerseServer.Controllers
 {

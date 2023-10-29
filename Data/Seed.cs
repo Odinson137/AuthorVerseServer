@@ -1,4 +1,4 @@
-﻿using AuthorVerseServer.Enums;
+﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -185,8 +185,8 @@ namespace AuthorVerseServer.Data
 
                             for (int i = 0; i < 3; i++)
                             {
-                                var genre = genres[random.Next(0, 16)];
-                                Book.Genres.Add(genre);
+                                var tag = tags[random.Next(0, 9)];
+                                Book.Tags.Add(tag);
                             }
 
                             BookChapter chapter = new BookChapter()
@@ -214,6 +214,26 @@ namespace AuthorVerseServer.Data
                         },
                                 PublicationData = DateTime.Now
                             };
+
+                            BookChapter chapter3 = new BookChapter()
+                            {
+                                ChapterSections = new List<ChapterSection>()
+                        {
+                            new ChapterSection()
+                            {
+                                Number = 3,
+                                Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
+                            }
+                        },
+                                PublicationData = DateTime.Now
+                            };
+
+                            //SectionChoice section = new SectionChoice
+                            //{
+                            //    ChapterSection = chapter
+                            //}
+
+                            //chapter.
 
                             Book.BookChapters = new List<BookChapter>() { chapter, chapter2 };
 

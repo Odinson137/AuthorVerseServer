@@ -1,5 +1,4 @@
-﻿using AuthorVerseServer.Enums;
-using AuthorVerseServer.Models;
+﻿using AuthorVerseServer.Models;
 
 namespace AuthorVerseServer.DTO
 {

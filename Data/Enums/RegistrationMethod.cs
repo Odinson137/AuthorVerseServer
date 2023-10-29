@@ -1,9 +1,9 @@
-﻿namespace AuthorVerseServer.Enums
+﻿namespace AuthorVerseServer.Data.Enums
 {
     public enum RegistrationMethod
     {
+        Email,
         Google,
         Microsoft,
-        Email
     }
 }

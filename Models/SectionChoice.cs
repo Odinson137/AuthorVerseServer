@@ -7,7 +7,6 @@ namespace AuthorVerseServer.Models
     {
         [Key]
         public int SectionChoiceId { get; set; }
-
         public int ChapterSectionId { get; set; }
         [ForeignKey("ChapterSectionId")]
         public ChapterSection ChapterSection { get; set; } = null!;

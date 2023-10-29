@@ -40,7 +40,7 @@ namespace AuthorVerseServer.Controllers
         {
             await _genre.AddGenre(name);
             await _genre.Save();
-            return "Genre succecsully installed";
+            return Ok("Genre succecsully installed");
             
         }
     }

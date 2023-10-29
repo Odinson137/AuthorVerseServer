@@ -1,4 +1,4 @@
-﻿using AuthorVerseServer.Enums;
+﻿using AuthorVerseServer.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 

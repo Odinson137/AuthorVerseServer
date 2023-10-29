@@ -10,14 +10,12 @@ public interface IBook
     Task<int> GetCountBooks();
     Task<ICollection<PopularBook>> GetPopularBooks();
     Task<ICollection<PopularBook>> GetLastBooks();
-    Task<ICollection<BookDTO>> GetSecrtainBooksPage(int page);
+    Task<ICollection<BookDTO>> GetCertainBooksPage(int page);
+    Task<ICollection<MainPopularBook>> GetMainPopularBook();
     Task<BookDTO?> GetBookById(int bookId);
-    Task CreateBook(Book book);
+    Task AddBook(Book book);
     Task<Genre?> GetGenreById(int id);
-    //Task AddBookGenre(BookGenre bookGenre);
+    Task<Tag?> GetTagById(int id);
     Task Save();
-    //Task AddBookGenre(Book book, ICollection<int> genresId);
-    Task<IDbContextTransaction> BeginTransactionAsync();
-    //Task<ICollection<Genre>> GetSelectedGenres(ICollection<int> genresId);
 }
 

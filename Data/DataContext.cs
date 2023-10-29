@@ -18,8 +18,9 @@ namespace AuthorVerseServer.Data
         public DbSet<ChapterSection> ChapterSections { get; set; }
         public DbSet<UserSelectedBook> UserSelectedBooks { get; set; }
         public DbSet<SectionChoice> SectionChoices { get; set; }
-        public DbSet<Friendship> Friendships{ get; set; }
+        public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<Tag> Tags { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
         public DbSet<Character> Characters { get; set; }

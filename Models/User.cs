@@ -1,4 +1,4 @@
-﻿using AuthorVerseServer.Enums;
+﻿using AuthorVerseServer.Data.Enums;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,6 +15,6 @@ namespace AuthorVerseServer.Models
         public ICollection<Comment>? Comments { get; set; }
         public ICollection<Friendship>? Friendships { get; set; }
         public ICollection<User>? Friends { get; set; }
-        public RegistrationMethod Method { get; set; }
+        public RegistrationMethod Method { get; set; } = RegistrationMethod.Email;
     }
 }

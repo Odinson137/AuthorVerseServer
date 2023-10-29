@@ -1,6 +1,5 @@
 ﻿using AuthorVerseServer.Controllers;
 using AuthorVerseServer.DTO;
-using AuthorVerseServer.Enums;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Http.HttpResults;

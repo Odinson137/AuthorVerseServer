@@ -1,14 +1,8 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.DTO;
-using AuthorVerseServer.Enums;
+﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
-using AuthorVerseServer.Repository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -64,7 +58,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<List<BookDTO>>> GetSecrtainBooksPage(int page = 0)
         {
-            return Ok(await _book.GetSecrtainBooksPage(page));
+            return Ok(await _book.GetCertainBooksPage(page));
         }
 
         [HttpGet("{bookId}")]
@@ -93,6 +87,26 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("Invalid user Id");
             }
 
+            if (bookDTO.GenresId != null)
+            {
+                if (bookDTO.GenresId.Count == 0)
+                {
+                    return BadRequest("Genres are not select");
+                }
+            } else
+            {
+                return BadRequest("Genres are not select");
+            }
+
+            if (bookDTO.TagsId != null)
+            {
+                if (bookDTO.TagsId.Count == 0)
+                    return BadRequest("Tags are not select");
+            } else
+            {
+                return BadRequest("Tags are not select");
+            }
+
             User? user = await _userManager.FindByIdAsync(bookDTO.AuthorId);
 
             if (user == null)
@@ -110,21 +124,32 @@ namespace AuthorVerseServer.Controllers
                 BookCover = bookDTO.BookCoverUrl
             };
 
-            await _book.CreateBook(book);
+            await _book.AddBook(book);
 
-            if (bookDTO.GenresId != null)
+            foreach (var genreId in bookDTO.GenresId)
             {
-                foreach (var genreId in bookDTO.GenresId)
-                {
-                    var genre = await _book.GetGenreById(genreId);
+                var genre = await _book.GetGenreById(genreId);
 
-                    if (genre != null)
-                    {
-                        book.Genres.Add(genre);
-                    } else
-                    {
-                        return NotFound("Genre not found");
-                    }
+                if (genre != null)
+                {
+                    book.Genres.Add(genre);
+                } else
+                {
+                    return NotFound("Genre not found");
+                }
+            }
+
+            foreach (var tagId in bookDTO.TagsId)
+            {
+                var tag = await _book.GetTagById(tagId);
+
+                if (tag != null)
+                {
+                    book.Tags.Add(tag);
+                }
+                else
+                {
+                    return NotFound("Tag not found");
                 }
             }
 
@@ -137,5 +162,14 @@ namespace AuthorVerseServer.Controllers
 
             return Ok(book.BookId);
         }
+
+        [HttpGet("MainPopularBooks")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<ICollection<PopularBook>>> GetMainPopularBooks()
+        {
+            var books = await _book.GetMainPopularBook();
+            return Ok(books);
+        }
+
     }
 }
