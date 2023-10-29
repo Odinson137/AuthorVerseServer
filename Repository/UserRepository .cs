@@ -22,6 +22,7 @@ namespace AuthorVerseServer.Repository
             
         }
 
+<<<<<<< HEAD
         //public async Task<User?> GetUserByEmail(string email)
         //{
         //    return 
@@ -30,6 +31,31 @@ namespace AuthorVerseServer.Repository
         //{
         //    return await _userManager.FindByNameAsync(name);
         //}
+=======
+        public async Task<bool> PasswordValidation(string password)
+        {
+            var validators = _userManager.PasswordValidators;
+
+            foreach (var validator in validators)
+            {
+                var result = await validator.ValidateAsync(_userManager, null, password);
+                //В result указывается почему пароль не подходит
+
+                if (!result.Succeeded)
+                    return false;
+            }
+            return true;
+        }
+
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _userManager.FindByNameAsync(email);
+        }
+        public async Task<User?> GetUserByUsesrName(string name)
+        {
+            return await _userManager.FindByNameAsync(name);
+        }
+>>>>>>> add Token lifeteme and changed registration
 
         //public async Task<IdentityResult> CreateUser(User newUser, string password)
         //{

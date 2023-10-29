@@ -5,8 +5,8 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
-using Microsoft.AspNetCore.Identity;
-using AuthorVerseServer.Data.Enums;
+using AuthorVerseServer.Enums;
+using MimeKit;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -33,10 +33,46 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult> SendEmail([FromBody]UserRegistrationDTO user)
         {
-            string token = _jWTtokenService.GenerateJwtTokenEmail(user, _configuration);
+            var token = _jWTtokenService.GenerateJwtTokenEmail(user, _configuration);
             string result = await _mailService.SendEmail(token, user.Email);
             return Ok(new MessageDTO { message = result });
         }
+
+        [HttpGet("JWTHandler")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult> DecryptToken(string JWTToken)
+        {
+            var TokenInfo = new Dictionary<string, string>();
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(JWTToken);
+
+            var tokenExp = jwtSecurityToken.Claims.First(claim => claim.Type.Equals("exp")).Value;
+            var tokenDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(tokenExp)).UtcDateTime;
+
+            if (tokenDate >= DateTime.Now.ToUniversalTime())
+            {
+                var claims = jwtSecurityToken.Claims.ToList();
+
+                foreach (var claim in claims)
+                {
+                    TokenInfo.Add(claim.Type, claim.Value);
+                }
+
+                User newUser = new User()
+                {
+                    UserName = claims[0].Value,
+                    Email = claims[1].Value,
+                    Method = RegistrationMethod.Email
+                };
+                var result = await _user.CreateUser(newUser, claims[2].Value);
+
+                return Ok(result);
+            } 
+            else
+                return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
+        }
+
 
         [HttpGet]
         [ProducesResponseType(200)]
@@ -93,20 +129,26 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest(new MessageDTO { message = "Thisn name is alredy taken" });
             }
 
-            var newUser = new User()
+            var result = _user.PasswordValidation(registeredUser.Password);
+
+            if (result.Result == true)
             {
-                UserName = registeredUser.UserName,
-                Email = registeredUser.Email,
-                Method = RegistrationMethod.Email
-            };
+                var newUser = new UserRegistrationDTO()//Далее этот userDTO переходит в SendEmail()
+                {
+                    UserName = registeredUser.UserName,
+                    Email = registeredUser.Email,
+                    Password = registeredUser.Password,
+                };
 
             var result = await _userManager.CreateAsync(newUser, registeredUser.Password);
             //var result = await _user.CreateUser(newUser, );
+                SendEmail(newUser);
 
-            if (!result.Succeeded)
-                return BadRequest(new MessageDTO { message = "Password type is incorrect" });
+                return Ok(result);
+            }
+            else
+                return BadRequest(new MessageDTO { message = "Password type is not correct" });
 
-            return Ok();
         }
 
 
