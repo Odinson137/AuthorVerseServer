@@ -28,6 +28,7 @@ services.AddScoped<IBook, BookRepository>();
 services.AddScoped<ICharacter, CharacterRepository>();
 services.AddScoped<INote, NoteRepository>();
 services.AddScoped<IUser, UserRepository>();
+services.AddScoped<ITag, TagRepository>();
 services.AddTransient<MailService>();
 services.AddTransient<CreateJWTtokenService>();
 /*builder.Services.AddScoped<IFriendship, FriendshipRepository>();*/

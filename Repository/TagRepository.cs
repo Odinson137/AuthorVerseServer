@@ -6,31 +6,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
 {
-    public class GenreRepository : IGenre
+    public class TagRepository : ITag
     {
         private readonly DataContext _context;
-        public GenreRepository(DataContext context)
+        public TagRepository(DataContext context)
         {
             _context = context;
         }
-
-        public async Task<ICollection<GenreDTO>> GetGenreAsync()
+        public async Task AddTag(string name)
         {
-            var genres = _context.Genres.Select(genre => new GenreDTO
-            {
-                GenreId = genre.GenreId,
-                Name = genre.Name,
-            });
-
-            return await genres.ToListAsync();
-        }
-
-        public async Task AddGenre(string name)
-        {
-            await _context.Genres.AddAsync(new Genre()
+            await _context.Tags.AddAsync(new Tag()
             {
                 Name = name
             });
+        }
+
+        public async Task<ICollection<TagDTO>> GetTagAsync()
+        {
+            var tags = _context.Tags.Select(tag => new TagDTO
+            {
+                TagId = tag.TagId,
+                Name = tag.Name,
+            });
+
+            return await tags.ToListAsync();
         }
 
         public async Task Save()

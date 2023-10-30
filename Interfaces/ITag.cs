@@ -1,10 +1,11 @@
-﻿using AuthorVerseServer.Models;
+﻿using AuthorVerseServer.DTO;
+using AuthorVerseServer.Models;
 
 namespace AuthorVerseServer.Interfaces
 {
     public interface ITag
     {
-        Task<ICollection<Tag>> GetTagAsync();
+        Task<ICollection<TagDTO>> GetTagAsync();
         Task Save();
         Task AddTag(string name);
     }

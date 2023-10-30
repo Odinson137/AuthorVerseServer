@@ -1,10 +1,11 @@
-﻿using AuthorVerseServer.Models;
+﻿using AuthorVerseServer.DTO;
+using AuthorVerseServer.Models;
 
 namespace AuthorVerseServer.Interfaces
 {
     public interface IGenre
     {
-        Task<ICollection<Genre>> GetGenreAsync();
+        Task<ICollection<GenreDTO>> GetGenreAsync();
         Task Save();
         Task AddGenre(string name);
     }
