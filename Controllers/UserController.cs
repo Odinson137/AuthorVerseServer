@@ -5,8 +5,11 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
-using AuthorVerseServer.Enums;
 using MimeKit;
+using Microsoft.AspNetCore.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using AuthorVerseServer.Data.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -65,9 +68,12 @@ namespace AuthorVerseServer.Controllers
                     Email = claims[1].Value,
                     Method = RegistrationMethod.Email
                 };
-                var result = await _user.CreateUser(newUser, claims[2].Value);
+                var result = await _userManager.CreateAsync(newUser, claims[2].Value);
 
-                return Ok(result);
+                if(result.Succeeded)
+                    return Ok(result);
+                else
+                    return BadRequest(result);
             } 
             else
                 return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
@@ -122,16 +128,28 @@ namespace AuthorVerseServer.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
-            //var checkUser = await _user.GetUserByUserName(registeredUser.UserName);
             
             if (checkUser != null)
             {
                 return BadRequest(new MessageDTO { message = "Thisn name is alredy taken" });
             }
 
-            var result = _user.PasswordValidation(registeredUser.Password);
+            var validators = _userManager.PasswordValidators;
 
-            if (result.Result == true)
+            bool resultOfValidation = true;
+            foreach (var validator in validators)
+            {
+                var passCorrect = await validator.ValidateAsync(_userManager, null, registeredUser.Password);
+                //В result указывается почему пароль не подходит
+
+                if (!passCorrect.Succeeded)
+                {
+                    resultOfValidation = false;
+                    break;
+                }
+            }
+
+            if (resultOfValidation == true)
             {
                 var newUser = new UserRegistrationDTO()//Далее этот userDTO переходит в SendEmail()
                 {
@@ -140,17 +158,13 @@ namespace AuthorVerseServer.Controllers
                     Password = registeredUser.Password,
                 };
 
-            var result = await _userManager.CreateAsync(newUser, registeredUser.Password);
-            //var result = await _user.CreateUser(newUser, );
                 SendEmail(newUser);
 
-                return Ok(result);
+                return Ok();
             }
             else
                 return BadRequest(new MessageDTO { message = "Password type is not correct" });
-
-        }
-
+         }
 
         [HttpPost("reg-google")]
         [AllowAnonymous]
