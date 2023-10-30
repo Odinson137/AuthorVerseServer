@@ -19,39 +19,7 @@ namespace AuthorVerseServer.Repository
         public UserRepository(DataContext context)
         {
             _context = context;
-            
         }
-
-        //public async Task<User?> GetUserByEmail(string email)
-        //{
-        //    return 
-        //}
-        //public async Task<User?> GetUserByUsesrName(string name)
-        //{
-        //    return await _userManager.FindByNameAsync(name);
-        //}
-
-        //public async Task<IdentityResult> CreateUser(User newUser, string password)
-        //{
-        //    return await _userManager.CreateAsync(newUser, password);
-        //}
-
-        //public async Task<bool> CheckUserPassword(User user, string password)
-        //{
-        //    return await _userManager.CheckPasswordAsync(user, password);
-        //}
-
-        //public async Task<User?> GetUserByUserName(string userName)
-        //{
-        //    User? user = await _userManager.FindByNameAsync(userName);
-        //    return user;
-        //}
-
-        //public async Task<bool> CreateForeignUser(User user)
-        //{
-        //    var result = await _userManager.CreateAsync(user);
-        //    return result.Succeeded;
-        //}
 
         public async Task CreateMicrosoftUser(MicrosoftUser microsoftUser)
         {

@@ -20,7 +20,7 @@ namespace AuthorVerseServer.Services
             message.From.Add(new MailboxAddress("AuthorVerse", "sanya.baginsky@gmail.com"));
             message.To.Add(new MailboxAddress("Dear user", mail));
             message.Subject = "Confirm your Email";
-            message.Body = new BodyBuilder() { HtmlBody = $"<a href = \"http://localhost:3000/AuthorVerse/EmailConfirm?token={jwtToken}\">Для подтверждения почту </a>" }.ToMessageBody();
+            message.Body = new BodyBuilder() { HtmlBody = $"<a href = \"http://localhost:3000/AuthorVerse/EmailConfirm?token={jwtToken}\">Для подтверждения почты перейдите по ссылке</a>" }.ToMessageBody();
 
             try
             {

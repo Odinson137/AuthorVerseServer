@@ -5,8 +5,11 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
+using MimeKit;
 using Microsoft.AspNetCore.Identity;
+using System.IdentityModel.Tokens.Jwt;
 using AuthorVerseServer.Data.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -33,10 +36,49 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult> SendEmail([FromBody]UserRegistrationDTO user)
         {
-            string token = _jWTtokenService.GenerateJwtTokenEmail(user, _configuration);
+            var token = _jWTtokenService.GenerateJwtTokenEmail(user, _configuration);
             string result = await _mailService.SendEmail(token, user.Email);
             return Ok(new MessageDTO { message = result });
         }
+
+        [HttpGet("JWTHandler")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult> DecryptToken(string JWTToken)
+        {
+            var TokenInfo = new Dictionary<string, string>();
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(JWTToken);
+
+            var tokenExp = jwtSecurityToken.Claims.First(claim => claim.Type.Equals("exp")).Value;
+            var tokenDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(tokenExp)).UtcDateTime;
+
+            if (tokenDate >= DateTime.Now.ToUniversalTime())
+            {
+                var claims = jwtSecurityToken.Claims.ToList();
+
+                foreach (var claim in claims)
+                {
+                    TokenInfo.Add(claim.Type, claim.Value);
+                }
+
+                User newUser = new User()
+                {
+                    UserName = claims[0].Value,
+                    Email = claims[1].Value,
+                    Method = RegistrationMethod.Email
+                };
+                var result = await _userManager.CreateAsync(newUser, claims[2].Value);
+
+                if(result.Succeeded)
+                    return Ok(result);
+                else
+                    return BadRequest(result);
+            } 
+            else
+                return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
+        }
+
 
         [HttpGet]
         [ProducesResponseType(200)]
@@ -86,29 +128,43 @@ namespace AuthorVerseServer.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
-            //var checkUser = await _user.GetUserByUserName(registeredUser.UserName);
             
             if (checkUser != null)
             {
                 return BadRequest(new MessageDTO { message = "Thisn name is alredy taken" });
             }
 
-            var newUser = new User()
+            var validators = _userManager.PasswordValidators;
+
+            bool resultOfValidation = true;
+            foreach (var validator in validators)
             {
-                UserName = registeredUser.UserName,
-                Email = registeredUser.Email,
-                Method = RegistrationMethod.Email
-            };
+                var passCorrect = await validator.ValidateAsync(_userManager, null, registeredUser.Password);
+                //В result указывается почему пароль не подходит
 
-            var result = await _userManager.CreateAsync(newUser, registeredUser.Password);
-            //var result = await _user.CreateUser(newUser, );
+                if (!passCorrect.Succeeded)
+                {
+                    resultOfValidation = false;
+                    break;
+                }
+            }
 
-            if (!result.Succeeded)
-                return BadRequest(new MessageDTO { message = "Password type is incorrect" });
+            if (resultOfValidation == true)
+            {
+                var newUser = new UserRegistrationDTO()//Далее этот userDTO переходит в SendEmail()
+                {
+                    UserName = registeredUser.UserName,
+                    Email = registeredUser.Email,
+                    Password = registeredUser.Password,
+                };
 
-            return Ok();
-        }
+                SendEmail(newUser);
 
+                return Ok();
+            }
+            else
+                return BadRequest(new MessageDTO { message = "Password type is not correct" });
+         }
 
         [HttpPost("reg-google")]
         [AllowAnonymous]
