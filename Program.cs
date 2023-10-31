@@ -36,6 +36,7 @@ services.AddTransient<CreateJWTtokenService>();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
+services.AddMemoryCache();
 
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
 
@@ -110,8 +111,6 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
-
-
 
 await Seed.SeedData(app);
 

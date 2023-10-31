@@ -51,6 +51,7 @@ namespace AuthorVerseServer.Tests.Integration
             {
                 AuthorId = "admin",
                 GenresId = new List<int> { 1, 2 },
+                TagsId = new List<int> { 1, 2 },
                 Title = "Берсерк",
                 Description = "Черный мечник идёт за тобой",
                 AgeRating = AgeRating.EighteenPlus,

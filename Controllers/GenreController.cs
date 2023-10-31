@@ -4,6 +4,7 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -12,11 +13,12 @@ namespace AuthorVerseServer.Controllers
     public class GenreController : ControllerBase
     {
         private readonly IGenre _genre;
+        private readonly IMemoryCache _cache;
 
-        public GenreController(IGenre genre) 
+        public GenreController(IGenre genre, IMemoryCache cache) 
         {
             _genre = genre;
-
+            _cache = cache;
         }
 
         [HttpGet]
@@ -24,7 +26,12 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<GenreDTO>>> GetGenre()
         {
-            var genres = await _genre.GetGenreAsync();
+            var genres = await _cache.GetOrCreateAsync("genres", async entry =>
+            {
+                var genresDb = await _genre.GetGenreAsync();
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return genresDb;
+            });
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -44,7 +51,6 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest(ModelState);
 
             return Ok("Genre succecsully installed");
-            
         }
     }
 }

@@ -41,8 +41,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateComment([FromBody] CreateCommentDTO commentDTO)
         {
-
-            return Ok(0);
+            return BadRequest("Don't have any code");
         }
 
     }

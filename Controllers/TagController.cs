@@ -5,6 +5,7 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -13,24 +14,30 @@ namespace AuthorVerseServer.Controllers
     public class TagController : ControllerBase
     {
         private readonly ITag _tag;
+        private readonly IMemoryCache _cache;
 
-        public TagController(ITag tag)
+        public TagController(ITag tag, IMemoryCache cache)
         {
             _tag = tag;
-
+            _cache = cache;
         }
 
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<TagDTO>>> GetTag()
+        public async Task<ActionResult<ICollection<GenreDTO>>> GetTag()
         {
-            var genres = await _tag.GetTagAsync();
+            var tags = await _cache.GetOrCreateAsync("tags", async entry =>
+            {
+                var tagsDb = await _tag.GetTagAsync();
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return tagsDb;
+            });
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(genres);
+            return Ok(tags);
         }
 
         [HttpPost("{name}")]

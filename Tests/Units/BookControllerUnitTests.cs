@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
+namespace AuthorVerseServer.Tests.Units;
+
 public class BookControllerUnitTests
 {
     [Fact]
