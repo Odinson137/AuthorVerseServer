@@ -4,7 +4,7 @@ namespace AuthorVerseServer.Services
 {
     public class DecodeGoogleTokenService
     {
-        static public GoogleJsonWebSignature.Payload VerifyGoogleIdToken(string idToken)
+        static public GoogleJsonWebSignature.Payload? VerifyGoogleIdToken(string idToken)
         {
             try
             {
@@ -19,7 +19,7 @@ namespace AuthorVerseServer.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Invalid Google ID token.", ex);
+                return null;
             }
         }
     }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace AuthorVerseServer.Tests.Integration
+namespace AuthorVerseServer.Tests.Integrations
 {
     public class TagControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {

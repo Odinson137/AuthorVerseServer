@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using System.Net.Http.Json;
 using Xunit;
 
-namespace AuthorVerseServer.Tests.Integration
+namespace AuthorVerseServer.Tests.Integrations
 {
     public class BooksControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
@@ -21,11 +21,6 @@ namespace AuthorVerseServer.Tests.Integration
             {
                 builder.UseSolutionRelativeContentRoot("C:\\Users\\buryy\\source\\repos\\AuthorVerseServer");
             }).CreateClient();
-            //var options = new DbContextOptionsBuilder<DataContext>()
-            //    .UseInMemoryDatabase(databaseName: "InMemoryDatabase")
-            //    .Options;
-
-            //_context = new DataContext(options);
         }
 
         [Fact]

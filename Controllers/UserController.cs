@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using AuthorVerseServer.Data.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Net.Mail;
+using System.ComponentModel;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -19,87 +23,85 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IUser _user;
         private readonly UserManager<User> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly MailService _mailService;
         private readonly CreateJWTtokenService _jWTtokenService;
+        private readonly GenerateRandomName _generateNameService;
 
-        public UserController(IUser user, IConfiguration configuration, UserManager<User> userManager, MailService mailService, CreateJWTtokenService jWTtokenService)
+        public UserController(
+            IUser user,
+            UserManager<User> userManager, MailService mailService, 
+            CreateJWTtokenService jWTtokenService, GenerateRandomName generateRandomName)
         {
             _user = user;
-            _configuration = configuration;
             _mailService = mailService;
             _jWTtokenService = jWTtokenService;
             _userManager = userManager;
+            _generateNameService = generateRandomName;
         }
 
         [HttpPost("Gmail")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult> SendEmail([FromBody]UserRegistrationDTO user)
+        public async Task<ActionResult> SendEmail([FromBody] UserRegistrationDTO user)
         {
-            var token = _jWTtokenService.GenerateJwtTokenEmail(user, _configuration);
-            string result = await _mailService.SendEmail(token, user.Email);
+            string result = await Send(user);
             return Ok(new MessageDTO { message = result });
         }
 
-        [HttpGet("JWTHandler")]
-        [ProducesResponseType(200)]
-        public async Task<ActionResult> DecryptToken(string JWTToken)
+        private async Task<string> Send(UserRegistrationDTO user)
         {
-            var TokenInfo = new Dictionary<string, string>();
+            var token = _jWTtokenService.GenerateJwtTokenEmail(user);
+            string result = await _mailService.SendEmail(token, user.Email);
+            return result;
+        }
 
+        [HttpPost("EmailConfirm")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(MessageDTO))]
+        public async Task<ActionResult<bool>> DecryptToken([FromQuery] string token)
+        {
             var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(JWTToken);
+            var jwtSecurityToken = handler.ReadJwtToken(token);
 
-            var tokenExp = jwtSecurityToken.Claims.First(claim => claim.Type.Equals("exp")).Value;
-            var tokenDate = DateTimeOffset.FromUnixTimeSeconds(long.Parse(tokenExp)).UtcDateTime;
-
-            if (tokenDate >= DateTime.Now.ToUniversalTime())
+            var tokenExp = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("exp"))?.Value;
+            if (tokenExp == null || !long.TryParse(tokenExp, out long expUnixTime))
             {
-                var claims = jwtSecurityToken.Claims.ToList();
+                return BadRequest(new MessageDTO { message = "Invalid token" });
+            }
 
-                foreach (var claim in claims)
-                {
-                    TokenInfo.Add(claim.Type, claim.Value);
-                }
-
-                User newUser = new User()
-                {
-                    UserName = claims[0].Value,
-                    Email = claims[1].Value,
-                    Method = RegistrationMethod.Email
-                };
-                var result = await _userManager.CreateAsync(newUser, claims[2].Value);
-
-                if(result.Succeeded)
-                    return Ok(result);
-                else
-                    return BadRequest(result);
-            } 
-            else
+            var tokenDate = DateTimeOffset.FromUnixTimeSeconds(expUnixTime).UtcDateTime;
+            if (tokenDate < DateTime.Now.ToUniversalTime())
+            {
                 return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
+            }
+
+            var claims = jwtSecurityToken.Claims.ToDictionary(c => c.Type, c => c.Value);
+
+            User newUser = new User()
+            {
+                UserName = claims["unique_name"],
+                Email = claims["email"],
+                Method = RegistrationMethod.Email,
+                EmailConfirmed = true,
+            };
+
+            var result = await _userManager.CreateAsync(newUser, claims["given_name"]);
+
+            if (result.Succeeded)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(new MessageDTO { message = string.Join(", ", result.Errors) });
+            }
         }
 
-
-        [HttpGet]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<User>>> GetUser()
-        {
-            var users = await _user.GetUserAsync();
-
-            if (!ModelState.IsValid)
-                return BadRequest(new MessageDTO { message = "No users found" });
-
-            return Ok(users);
-        }
 
         [HttpPost("Login")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserVerify>> Login(UserLoginDTO authUser)
+        public async Task<ActionResult<UserVerify>> Login([FromBody] UserLoginDTO authUser)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             User? user = await _userManager.FindByNameAsync(authUser.UserName);
 
             if (user != null)
@@ -107,7 +109,7 @@ namespace AuthorVerseServer.Controllers
                 var passwordCheck = await _userManager.CheckPasswordAsync(user, authUser.Password);
                 if (passwordCheck)
                 {
-                    var Token = _jWTtokenService.GenerateJwtToken(user, _configuration);
+                    var Token = _jWTtokenService.GenerateJwtToken(user);
                     return Ok(new UserVerify()
                     {
                         Id = user.Id,
@@ -122,48 +124,19 @@ namespace AuthorVerseServer.Controllers
 
         [HttpPost("Registration")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<string>> Registration(UserRegistrationDTO registeredUser)
+        [ProducesResponseType(400, Type = typeof(MessageDTO))]
+        public async Task<ActionResult<MessageDTO>> Registration(UserRegistrationDTO registeredUser)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
             
             if (checkUser != null)
             {
-                return BadRequest(new MessageDTO { message = "Thisn name is alredy taken" });
+                return BadRequest(new MessageDTO { message = "This name is already taken" });
             }
 
-            var validators = _userManager.PasswordValidators;
+            string result = await Send(registeredUser);
 
-            bool resultOfValidation = true;
-            foreach (var validator in validators)
-            {
-                var passCorrect = await validator.ValidateAsync(_userManager, null, registeredUser.Password);
-                //В result указывается почему пароль не подходит
-
-                if (!passCorrect.Succeeded)
-                {
-                    resultOfValidation = false;
-                    break;
-                }
-            }
-
-            if (resultOfValidation == true)
-            {
-                var newUser = new UserRegistrationDTO()//Далее этот userDTO переходит в SendEmail()
-                {
-                    UserName = registeredUser.UserName,
-                    Email = registeredUser.Email,
-                    Password = registeredUser.Password,
-                };
-
-                SendEmail(newUser);
-
-                return Ok();
-            }
-            else
-                return BadRequest(new MessageDTO { message = "Password type is not correct" });
+            return Ok(new MessageDTO { message = result });
          }
 
         [HttpPost("reg-google")]
@@ -173,6 +146,7 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<UserGoogleVerify>> RegWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
+            if (userInfo == null) return BadRequest(new MessageDTO { message = "Error token" });
 
             User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user != null)
@@ -182,7 +156,7 @@ namespace AuthorVerseServer.Controllers
 
             User createUser = new User()
             {
-                UserName = GenerateRandomName.GenerateRandomUsername(),
+                UserName = _generateNameService.GenerateRandomUsername(),
                 Name = userInfo.GivenName,
                 LastName = userInfo.FamilyName,
                 Email = userInfo.Email,
@@ -193,7 +167,6 @@ namespace AuthorVerseServer.Controllers
 
             var result = await _userManager.CreateAsync(createUser);
 
-            //bool result = await _user.CreateForeignUser(createUser);
             if (!result.Succeeded)
             {
                 return BadRequest(new MessageDTO { message = "Failed to create user" });
@@ -203,7 +176,7 @@ namespace AuthorVerseServer.Controllers
             {
                 Id = createUser.Id,
                 UserName = createUser.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(createUser, _configuration),
+                Token = _jWTtokenService.GenerateJwtToken(createUser),
                 IconUrl = userInfo.Picture
             };
 
@@ -213,10 +186,11 @@ namespace AuthorVerseServer.Controllers
         [HttpPost("signin-google")]
         [AllowAnonymous]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(MessageDTO))]
         public async Task<ActionResult<UserGoogleVerify>> SignInWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
+            if (userInfo == null) return BadRequest(new MessageDTO { message = "Error token" });
 
             User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user == null)
@@ -228,7 +202,7 @@ namespace AuthorVerseServer.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user, _configuration),
+                Token = _jWTtokenService.GenerateJwtToken(user),
                 IconUrl = userInfo.Picture
             };
 
@@ -239,7 +213,7 @@ namespace AuthorVerseServer.Controllers
         [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserMicrosoftVerify>> SignInWithMicrosoft([FromBody] UserProfile userInfo)
+        public async Task<ActionResult<UserVerify>> SignInWithMicrosoft([FromBody] UserProfile userInfo)
         {
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser == null)
@@ -249,11 +223,11 @@ namespace AuthorVerseServer.Controllers
 
             User user = microsoftUser.User;
 
-            UserMicrosoftVerify userGoogle = new UserMicrosoftVerify()
+            UserVerify userGoogle = new UserVerify()
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user, _configuration),
+                Token = _jWTtokenService.GenerateJwtToken(user),
             };
 
             return Ok(userGoogle);
@@ -264,7 +238,7 @@ namespace AuthorVerseServer.Controllers
         [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserMicrosoftVerify>> RegWithMicrosoft([FromBody] UserProfile userInfo)
+        public async Task<ActionResult<UserVerify>> RegWithMicrosoft([FromBody] UserProfile userInfo)
         {
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser != null)
@@ -274,7 +248,7 @@ namespace AuthorVerseServer.Controllers
 
             User user = new User()
             {
-                UserName = GenerateRandomName.GenerateRandomUsername(),
+                UserName = _generateNameService.GenerateRandomUsername(),
                 Name = userInfo.GivenName,
                 LastName = userInfo.Surname,
             };
@@ -293,11 +267,11 @@ namespace AuthorVerseServer.Controllers
 
             await _user.Save();
 
-            UserMicrosoftVerify userMicrosoft = new UserMicrosoftVerify()
+            UserVerify userMicrosoft = new UserVerify()
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user, _configuration),
+                Token = _jWTtokenService.GenerateJwtToken(user),
             };
 
             return Ok(userMicrosoft);

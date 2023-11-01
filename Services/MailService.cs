@@ -7,13 +7,14 @@ namespace AuthorVerseServer.Services
 {
     public class MailService
     {
-        private readonly ILogger<MailService> _logger;
-        public MailService(ILogger<MailService> logger)
-        {
-            _logger = logger;
-        }
+        public MailService() {}
+        //private readonly ILogger<MailService> _logger;
+        //public MailService(ILogger<MailService> logger)
+        //{
+        //    _logger = logger;
+        //}
 
-        public async Task<string> SendEmail(string jwtToken, string mail)
+        public virtual async Task<string> SendEmail(string jwtToken, string mail)
         {
             MimeMessage message = new MimeMessage();
 
@@ -35,7 +36,7 @@ namespace AuthorVerseServer.Services
             }
             catch (MailKit.Net.Smtp.SmtpCommandException ex)
             {
-                return "Inputed mail do not exist";
+                return "Inputted mail do not exist";
             }
             catch
             {

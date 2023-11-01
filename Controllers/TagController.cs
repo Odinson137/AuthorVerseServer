@@ -48,6 +48,8 @@ namespace AuthorVerseServer.Controllers
             await _tag.AddTag(name);
             await _tag.Save();
 
+            _cache.Remove("tags");
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

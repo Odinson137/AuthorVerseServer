@@ -2,10 +2,10 @@
 
 namespace AuthorVerseServer.Services
 {
-    static public class GenerateRandomName
+    public class GenerateRandomName
     {
         private static string allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        public static string GenerateRandomUsername()
+        public string GenerateRandomUsername()
         {
             const string prefix = "User";
 

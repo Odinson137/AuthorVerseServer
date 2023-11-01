@@ -47,6 +47,8 @@ namespace AuthorVerseServer.Controllers
             await _genre.AddGenre(name);
             await _genre.Save();
 
+            _cache.Remove("genres");
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

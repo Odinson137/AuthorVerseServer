@@ -29,9 +29,11 @@ services.AddScoped<ICharacter, CharacterRepository>();
 services.AddScoped<INote, NoteRepository>();
 services.AddScoped<IUser, UserRepository>();
 services.AddScoped<ITag, TagRepository>();
+
 services.AddTransient<MailService>();
-services.AddTransient<CreateJWTtokenService>();
-/*builder.Services.AddScoped<IFriendship, FriendshipRepository>();*/
+services.AddTransient<GenerateRandomName>();
+services.AddSingleton<CreateJWTtokenService>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();

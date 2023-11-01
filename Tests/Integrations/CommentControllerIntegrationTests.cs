@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Xunit;
 
-namespace AuthorVerseServer.Tests.Integration
+namespace AuthorVerseServer.Tests.Integrations
 {
     public class CommentControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {

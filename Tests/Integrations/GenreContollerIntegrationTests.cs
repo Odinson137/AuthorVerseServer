@@ -8,7 +8,7 @@ using Moq;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace AuthorVerseServer.Tests.Integration
+namespace AuthorVerseServer.Tests.Integrations
 {
     public class GenreContollerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
