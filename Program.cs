@@ -4,9 +4,6 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Repository;
 using Microsoft.AspNetCore.Identity;
 using AuthorVerseServer.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,6 +34,21 @@ services.AddSingleton<CreateJWTtokenService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
+
+//string redisConnection = builder.Configuration.GetConnectionString("Redis");
+
+//services.AddStackExchangeRedisCache(redisOptions =>
+//{
+//    string connection = redisConnection;
+//    redisOptions.Configuration = connection;
+//});
+
+
+//services.AddSingleton<IDatabase>(provider =>
+//{
+//    var connectionMultiplexer = ConnectionMultiplexer.Connect(redisConnection);
+//    return connectionMultiplexer.GetDatabase();
+//});
 
 services.AddMemoryCache();
 
@@ -89,7 +101,7 @@ services.AddIdentity<User, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
-builder.Services.AddAuthentication(options =>
+services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -107,7 +119,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(options =>
+services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });

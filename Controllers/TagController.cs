@@ -1,11 +1,12 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -25,7 +26,7 @@ namespace AuthorVerseServer.Controllers
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<GenreDTO>>> GetTag()
+        public async Task<ActionResult<ICollection<TagDTO>>> GetTag()
         {
             var tags = await _cache.GetOrCreateAsync("tags", async entry =>
             {
@@ -33,9 +34,6 @@ namespace AuthorVerseServer.Controllers
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
                 return tagsDb;
             });
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
             return Ok(tags);
         }

@@ -47,8 +47,6 @@ namespace AuthorVerseServer.Services
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.Password),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
@@ -56,7 +54,7 @@ namespace AuthorVerseServer.Services
                 _configuration["Jwt:Issuer"],
                 _configuration["Jwt:Issuer"],
                 claims,
-                expires: DateTime.Now.AddMinutes(10),
+                expires: DateTime.Now.AddMinutes(14),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

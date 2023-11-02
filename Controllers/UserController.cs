@@ -1,19 +1,13 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
-using MimeKit;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using AuthorVerseServer.Data.Enums;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Net.Mail;
-using System.ComponentModel;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -26,13 +20,14 @@ namespace AuthorVerseServer.Controllers
         private readonly MailService _mailService;
         private readonly CreateJWTtokenService _jWTtokenService;
         private readonly GenerateRandomName _generateNameService;
-
+        private readonly IMemoryCache _cache;
         public UserController(
-            IUser user,
+            IUser user, IMemoryCache cache,
             UserManager<User> userManager, MailService mailService, 
             CreateJWTtokenService jWTtokenService, GenerateRandomName generateRandomName)
         {
             _user = user;
+            _cache = cache;
             _mailService = mailService;
             _jWTtokenService = jWTtokenService;
             _userManager = userManager;
@@ -49,6 +44,8 @@ namespace AuthorVerseServer.Controllers
 
         private async Task<string> Send(UserRegistrationDTO user)
         {
+            _cache.Set($"user:{user.UserName}", user, TimeSpan.FromMinutes(15));
+
             var token = _jWTtokenService.GenerateJwtTokenEmail(user);
             string result = await _mailService.SendEmail(token, user.Email);
             return result;
@@ -74,17 +71,24 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
             }
 
-            var claims = jwtSecurityToken.Claims.ToDictionary(c => c.Type, c => c.Value);
+            var userName = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("unique_name"))?.Value;
+
+            var user = _cache.Get<UserRegistrationDTO>($"user:{userName}");
+
+            if (user == null)
+            {
+                return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
+            }
 
             User newUser = new User()
             {
-                UserName = claims["unique_name"],
-                Email = claims["email"],
+                UserName = userName,
+                Email = user.Email,
                 Method = RegistrationMethod.Email,
                 EmailConfirmed = true,
             };
 
-            var result = await _userManager.CreateAsync(newUser, claims["given_name"]);
+            var result = await _userManager.CreateAsync(newUser, user.Password);
 
             if (result.Succeeded)
             {
@@ -128,10 +132,18 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<MessageDTO>> Registration(UserRegistrationDTO registeredUser)
         {
             User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
-            
-            if (checkUser != null)
+            var userCache = _cache.Get($"user:{registeredUser.UserName}");
+
+            if (checkUser != null || userCache != null)
             {
                 return BadRequest(new MessageDTO { message = "This name is already taken" });
+            }
+
+            User? checkEmail = await _userManager.FindByEmailAsync(registeredUser.Email);
+
+            if (checkEmail != null)
+            {
+                return BadRequest(new MessageDTO { message = "This email is already taken" });
             }
 
             string result = await Send(registeredUser);

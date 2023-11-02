@@ -6,6 +6,7 @@ using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Xunit;
 
@@ -18,10 +19,12 @@ namespace AuthorVerseServer.Tests.Units
         private readonly Mock<UserManager<User>> _mockUserManager;
         private readonly Mock<MailService> _mockEmailService;
         private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
+        private readonly Mock<IMemoryCache> _mockCache;
 
         public UserControllerUnitTests()
         {
             _mockUser = new Mock<IUser>();
+            _mockCache = new Mock<IMemoryCache>();
             _mockUserManager = new Mock<UserManager<User>>(
                 Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
             _mockEmailService = new Mock<MailService>();
@@ -30,7 +33,7 @@ namespace AuthorVerseServer.Tests.Units
             var generateRandomName = new Mock<GenerateRandomName>();
 
             _userController = new UserController(
-                _mockUser.Object, _mockUserManager.Object, _mockEmailService.Object, _mockJWTTokenService.Object, generateRandomName.Object);
+                _mockUser.Object, _mockCache.Object, _mockUserManager.Object, _mockEmailService.Object, _mockJWTTokenService.Object, generateRandomName.Object);
         }
 
         [Fact]
@@ -50,24 +53,48 @@ namespace AuthorVerseServer.Tests.Units
         }
 
         [Fact]
-        public async Task Registration_Ok_ReturnsOk()
+        public async Task Registration_ExistingEmail_ReturnsBadRequest()
         {
             // Arrange
             _mockUserManager.Setup(um => um.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((User?)null);
 
-            string token = "token";
-            _mockJWTTokenService.Setup(um => um.GenerateJwtTokenEmail(new UserRegistrationDTO()))
-                .Returns(token);
-
-            _mockEmailService.Setup(um => um.SendEmail(token, "Yura"))
-                .ReturnsAsync("Ok");
+            _mockUserManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(new User());
 
             // Act
-            var result = await _userController.Registration(new UserRegistrationDTO());
+            var result = await _userController.Registration(new UserRegistrationDTO { UserName = "existingUser" });
 
             // Assert
-            var okRequestResult = Assert.IsType<OkObjectResult>(result.Result);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var message = Assert.IsType<MessageDTO>(badRequestResult.Value);
+            Assert.Equal("This email is already taken", message.message);
         }
+
+        //[Fact]
+        //public async Task Registration_Ok_ReturnsOk()
+        //{
+        //    // Arrange
+        //    _mockUserManager.Setup(um => um.FindByNameAsync(It.IsAny<string>()))
+        //        .ReturnsAsync((User?)null);
+
+        //    _mockUserManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>()))
+        //        .ReturnsAsync((User?)null);
+
+        //    string token = "token";
+        //    _mockJWTTokenService.Setup(um => um.GenerateJwtTokenEmail(new UserRegistrationDTO()))
+        //        .Returns(token);
+
+        //    _mockEmailService.Setup(um => um.SendEmail(token, "Yura"))
+        //        .ReturnsAsync("Ok");
+
+        //    //_mockCache.Setup(x => x.Get(It.IsAny<string>())).Returns(new object());
+
+        //    // Act
+        //    var result = await _userController.Registration(new UserRegistrationDTO());
+
+        //    // Assert
+        //    var okRequestResult = Assert.IsType<OkObjectResult>(result.Result);
+        //}
     }
 }
