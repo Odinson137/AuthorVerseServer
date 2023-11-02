@@ -10,7 +10,8 @@ public interface IBook
     Task<int> GetCountBooks();
     Task<ICollection<PopularBook>> GetPopularBooks();
     Task<ICollection<PopularBook>> GetLastBooks();
-    Task<ICollection<BookDTO>> GetCertainBooksPage(int page);
+    Task<ICollection<BookDTO>> GetCertainBooksPage(int tag, int genre, int page);
+    Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId);
     Task<ICollection<MainPopularBook>> GetMainPopularBook();
     Task<BookDTO?> GetBookById(int bookId);
     Task AddBook(Book book);

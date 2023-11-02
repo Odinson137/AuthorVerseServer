@@ -282,4 +282,52 @@ public class BookControllerUnitTests
         mockBookRepository.Verify(repo => repo.Save(), Times.Once);
     }
 
+    [Fact]
+    public async Task GetCertainBooksPage_WithBooksCount_ShouldReturnOkRequest()
+    {
+        // Arrange
+        var mockBookRepository = new Mock<IBook>();
+        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+
+        int tag = 0, genre = 0, page = 0;
+
+        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page)).ReturnsAsync(new List<BookDTO>());
+
+        // Act
+        var result = await controller.GetCertainBooksPage(tag, genre, page);
+
+        // Assert
+        var objectResult = Assert.IsType<ActionResult<BookPageDTO>>(result);
+        Assert.IsType<OkObjectResult>(result.Result);
+
+        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page), Times.Once);
+        mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetCertainBooksPage_WithOutBooksCount_ShouldReturnOkRequest()
+    {
+        // Arrange
+        var mockBookRepository = new Mock<IBook>();
+        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+
+        int tag = 0, genre = 0, page = 1;
+
+        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page)).ReturnsAsync(new List<BookDTO>());
+        mockBookRepository.Setup(um => um.GetBooksCountByTagsAndGenres(tag, genre)).ReturnsAsync(1);
+
+        // Act
+        var result = await controller.GetCertainBooksPage(tag, genre, page);
+
+        // Assert
+        var objectResult = Assert.IsType<ActionResult<BookPageDTO>>(result);
+        Assert.IsType<OkObjectResult>(result.Result);
+
+        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page), Times.Once);
+        mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre), Times.Never);
+    }
 }

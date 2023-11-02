@@ -64,7 +64,6 @@ namespace AuthorVerseServer.Data
                         "Romance",
                         "Thriller",
                         "Horror",
-                        "Science Fiction",
                         "Historical",
                         "Action",
                         "Mystery",

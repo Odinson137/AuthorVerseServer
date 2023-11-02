@@ -75,7 +75,22 @@ namespace AuthorVerseServer.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-  
+            modelBuilder.Entity<Book>()
+                .HasIndex(g => g.BookId);
+            modelBuilder.Entity<Book>()
+                .HasIndex(g => g.Title);
+            modelBuilder.Entity<Book>()
+                .HasIndex(g => g.PublicationData);
+            modelBuilder.Entity<Book>()
+                .HasIndex(g => g.Permission);
+            modelBuilder.Entity<Book>()
+                .HasIndex(g => g.AuthorId);
+
+            modelBuilder.Entity<Genre>()
+                .HasIndex(g => g.GenreId);
+
+            modelBuilder.Entity<Tag>()
+                .HasIndex(g => g.TagId);
         }
     }
 }

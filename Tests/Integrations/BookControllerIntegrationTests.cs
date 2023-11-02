@@ -1,12 +1,8 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.Data.Enums;
+﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
-using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using System.Net.Http.Json;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Integrations
@@ -87,6 +83,132 @@ namespace AuthorVerseServer.Tests.Integrations
                 Assert.True(book.PublicationData != DateTime.MinValue, "Error date");
             }
         }
-    }
 
+        [Fact]
+        public async Task GetPageBooksByGenreAndTags_SendRequest_ReturnsOkResult()
+        {
+            // Arrange
+            int tagId = 0;
+            int genreid = 0;
+            int page = 0;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreid}&page={page}");
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
+
+        [Theory]
+        [InlineData(0, 0, 0)]
+        [InlineData(1, 1, 1)]
+        public async Task GetPageBooksByGenreAndTags_GetObject_ReturnsOkResult(int tagId, int genreId, int page)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var booksPage = JsonConvert.DeserializeObject<BookPageDTO>(content);
+
+            Assert.NotNull(booksPage);
+            Assert.NotEmpty(booksPage.Books);
+        }
+
+        [Fact]
+        public async Task GetPageBooksByGenreAndTags_BadTagId_ReturnsZeroBooksCount()
+        {
+            // Arrange
+            int tagId = 60;
+            int genreId = 0, page = 0;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var booksPage = JsonConvert.DeserializeObject<BookPageDTO>(content);
+
+            Assert.NotNull(booksPage);
+            Assert.Empty(booksPage.Books);
+        }
+
+        [Fact]
+        public async Task GetPageBooksByGenreAndTags_GetCount_ReturnsOkResult()
+        {
+            // Arrange
+            int tagId = 0;
+            int genreId = 0;
+            int page = 0;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var booksPage = JsonConvert.DeserializeObject<BookPageDTO>(content);
+
+            Assert.NotNull(booksPage);
+            Assert.NotEmpty(booksPage.Books);
+            Assert.True(booksPage.BooksCount > 0, "BooksCount is zero");
+        }
+
+        [Fact]
+        public async Task GetPageBooksByGenreAndTags_GetNullGenreTag_ReturnsOkResult()
+        {
+            // Arrange
+            int tagId = 0;
+            int genreId = 0;
+            int page = 1;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var booksPage = JsonConvert.DeserializeObject<BookPageDTO>(content);
+
+            Assert.NotNull(booksPage);
+            Assert.NotEmpty(booksPage.Books);
+
+            foreach (var book in booksPage.Books)
+            {
+                Assert.True(!string.IsNullOrEmpty(book.Title), "Title not have");
+                Assert.True(book.Genres.Count > 0, "Genre's count is zero");
+                Assert.True(book.Tags.Count > 0, "Tag's count is zero");
+                Assert.DoesNotContain(tagId, book.Tags.Select(tag => tag.TagId));
+                Assert.DoesNotContain(genreId, book.Genres.Select(genre => genre.GenreId));
+            }
+        }
+
+        [Fact]
+        public async Task GetPageBooksByGenreAndTags_Ok_ReturnsOkResult()
+        {
+            // Arrange
+            int tagId = 1;
+            int genreId = 4;
+            int page = 1;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var booksPage = JsonConvert.DeserializeObject<BookPageDTO>(content);
+
+            Assert.NotNull(booksPage);
+            Assert.NotEmpty(booksPage.Books);
+
+            foreach (var book in booksPage.Books)
+            {
+                Assert.True(!string.IsNullOrEmpty(book.Title), "Title not have");
+                Assert.True(book.Genres.Count > 0, "Genre's count is zero");
+                Assert.True(book.Tags.Count > 0, "Tag's count is zero");
+                Assert.Contains(tagId, book.Tags.Select(tag => tag.TagId));
+                Assert.Contains(genreId, book.Genres.Select(genre => genre.GenreId));
+            }
+        }
+    }
 }

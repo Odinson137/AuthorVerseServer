@@ -6,7 +6,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
-    [Index(nameof(Title)), Index(nameof(PublicationData))]
     public class Book
     {
         [Key]

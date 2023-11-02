@@ -54,11 +54,19 @@ namespace AuthorVerseServer.Controllers
             return Ok(await _book.GetLastBooks());
         }
 
-        [HttpGet("Page/{page?}")]
+        [HttpGet("SearchBy")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<List<BookDTO>>> GetSecrtainBooksPage(int page = 0)
+        public async Task<ActionResult<BookPageDTO>> GetCertainBooksPage(int tagId = 0, int genreId = 0, int page = 0)
         {
-            return Ok(await _book.GetCertainBooksPage(page));
+            var books = await _book.GetCertainBooksPage(tagId, genreId, page);
+
+            int count = page == 0 ? await _book.GetBooksCountByTagsAndGenres(tagId, genreId) : 0;
+            
+            return Ok(new BookPageDTO
+            {
+                Books = books,
+                BooksCount = count
+            });
         }
 
         [HttpGet("{bookId}")]

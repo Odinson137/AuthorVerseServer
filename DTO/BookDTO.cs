@@ -4,6 +4,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.DTO
 {
+    public class BookPageDTO
+    {
+        public ICollection<BookDTO> Books { get; set; } = new List<BookDTO>();
+        public int BooksCount { get; set; }
+    }
+
     public class BookDTO
     {
         public int BookId { get; set; }

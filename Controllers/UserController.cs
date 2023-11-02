@@ -54,10 +54,10 @@ namespace AuthorVerseServer.Controllers
             return result;
         }
 
-        [HttpPost("EmailConfirm")]
+        [HttpPost("EmailConfirm/{token}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(MessageDTO))]
-        public async Task<ActionResult<bool>> DecryptToken([FromQuery] string token)
+        public async Task<ActionResult<bool>> DecryptToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadJwtToken(token);

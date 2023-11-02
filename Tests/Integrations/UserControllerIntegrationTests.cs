@@ -98,7 +98,7 @@ namespace AuthorVerseServer.Tests.Integrations
             var token = _createToken.GenerateJwtTokenEmail(userDTO);
 
             // Act
-            var response = await client.PostAsync($"/api/User/EmailConfirm?token={token}", new StringContent(""));
+            var response = await client.PostAsync($"/api/User/EmailConfirm/{token}", new StringContent(""));
 
             // Assert
             response.EnsureSuccessStatusCode();

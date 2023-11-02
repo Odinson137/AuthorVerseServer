@@ -57,37 +57,68 @@ namespace AuthorVerseServer.Repository
             return await books.ToListAsync();
         }
 
-        public async Task<ICollection<BookDTO>> GetCertainBooksPage(int page)
+        public async Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId)
         {
-            var books = _context.Books
-            .AsNoTracking()
-            .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved)
-            .Skip(page * 5)
-            .Take(5)
-            .Select(book => new BookDTO()
-            {
-                BookId = book.BookId,
-                Title = book.Title,
-                Author = new UserDTO()
-                {
-                    Id = book.AuthorId,
-                    UserName = book.Author.UserName ?? "No name",
-                },
-                Genres = book.Genres.Select(genre => new GenreDTO()
-                {
-                    GenreId = genre.GenreId,
-                    Name = genre.Name
-                }).ToList(),
-                Tags = book.Tags.Select(tag => new TagDTO()
-                {
-                    TagId = tag.TagId,
-                    Name = tag.Name
-                }).ToList(),
-                AgeRating = book.AgeRating,
-                BookCoverUrl = book.BookCover
-            });
+            var query = _context.Books
+                .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
 
-            return await books.ToListAsync();
+            if (tagId != 0)
+            {
+                query = query.Where(book => book.Tags.Any(tag => tag.TagId == tagId));
+            }
+
+            if (genreId != 0)
+            {
+                query = query.Where(book => book.Genres.Any(genre => genre.GenreId == genreId));
+            }
+
+
+            return await query.CountAsync();
+        }
+
+        public async Task<ICollection<BookDTO>> GetCertainBooksPage(int tagId, int genreId, int page)
+        {
+            var query = _context.Books
+                .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
+
+            if (tagId != 0)
+            {
+                query = query.Where(book => book.Tags.Any(tag => tag.TagId == tagId));
+            }
+
+            if (genreId != 0)
+            {
+                query = query.Where(book => book.Genres.Any(genre => genre.GenreId == genreId));
+            }
+
+            var booksDTO = query
+                .OrderByDescending(book => book.BookId)
+                .Skip(page * 5)
+                .Take(5)
+                .Select(book => new BookDTO
+                {
+                    BookId = book.BookId,
+                    Title = book.Title,
+                    Author = new UserDTO
+                    {
+                        Id = book.AuthorId,
+                        UserName = book.Author.UserName,
+                    },
+                    Genres = book.Genres.Select(genre => new GenreDTO
+                    {
+                        GenreId = genre.GenreId,
+                        Name = genre.Name
+                    }).ToList(),
+                    Tags = book.Tags.Select(tag => new TagDTO
+                    {
+                        TagId = tag.TagId,
+                        Name = tag.Name
+                    }).ToList(),
+                    AgeRating = book.AgeRating,
+                    BookCoverUrl = book.BookCover
+                });
+
+            return await booksDTO.ToListAsync();
         }
 
         public async Task<BookDTO?> GetBookById(int bookId)
