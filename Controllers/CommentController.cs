@@ -41,7 +41,16 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateComment([FromBody] CreateCommentDTO commentDTO)
         {
-            return BadRequest("Don't have any code");
+            Comment newComment = new Comment()
+            {
+                CommentatorId = commentDTO.UserId,
+                Commentator = await _comment.FindCommentatorById(commentDTO.UserId),
+                BookId = commentDTO.BookId,
+                Book = await _comment.FindBookById(commentDTO.BookId),
+                Text = commentDTO.Text,
+            };
+            var result = _comment.AddComment(newComment);
+            return Ok(result);
         }
 
     }

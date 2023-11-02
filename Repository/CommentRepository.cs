@@ -17,6 +17,14 @@ namespace AuthorVerseServer.Repository
         {
             throw new NotImplementedException();
         }
+        public async Task<User> FindCommentatorById(string id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+        }
+        public async Task<Book> FindBookById(int id)
+        {
+            return await _context.Books.FirstOrDefaultAsync(x => x.BookId == id);
+        }
 
         public Task<Book> CheckUserComment()
         {
@@ -43,9 +51,9 @@ namespace AuthorVerseServer.Repository
             return await _context.Comments.OrderBy(c => c.CommentId).ToListAsync();
         }
 
-        Task IComment.AddComment()
+        public async Task AddComment(Comment newComment)
         {
-            throw new NotImplementedException();
+            await _context.Comments.AddAsync(newComment);
         }
     }
 }
