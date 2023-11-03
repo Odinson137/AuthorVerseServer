@@ -12,7 +12,7 @@ namespace AuthorVerseServer.Tests.Integrations
         {
             _client = factory.WithWebHostBuilder(builder =>
             {
-                builder.UseSolutionRelativeContentRoot("C:\\Users\\buryy\\source\\repos\\AuthorVerseServer");
+                builder.UseSolutionRelativeContentRoot("C:\\Users\\sasha\\source\\repos\\AuthorVerseServerRep2");
             }).CreateClient();
         }
 
@@ -23,7 +23,7 @@ namespace AuthorVerseServer.Tests.Integrations
             var bookDTO = new CreateCommentDTO
             {
                 UserId = "admin",
-                BookId = 0,
+                BookId = 1,
                 Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
             };
 

@@ -1,6 +1,8 @@
 ﻿using AuthorVerseServer.Data;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
@@ -17,9 +19,11 @@ namespace AuthorVerseServer.Repository
         {
             throw new NotImplementedException();
         }
-        public async Task<User> FindCommentatorById(string id)
+        public async Task<string> FindCommentatorById(string id)
         {
-            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return user.UserName;
+
         }
         public async Task<Book> FindBookById(int id)
         {
@@ -55,6 +59,19 @@ namespace AuthorVerseServer.Repository
         {
             await _context.Comments.AddAsync(newComment);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteComment(int commentId, string userID)
+        {
+            Comment commentToRemove = await _context.Comments.FirstOrDefaultAsync(x => x.CommentId == commentId);
+            if (commentToRemove.Commentator.UserName == userID || userID == "admin")
+            {
+                _context.Comments.Remove(commentToRemove);
+                await _context.SaveChangesAsync();
+            }
+            else
+                return false;
+            return true;
         }
     }
 }

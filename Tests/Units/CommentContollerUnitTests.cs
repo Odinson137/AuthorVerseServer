@@ -157,7 +157,7 @@ namespace AuthorVerseServer.Tests.Units
             // Act
             var result = await controller.CreateComment(commentDTO);
             // Assert
-            Assert.IsType<OkObjectResult>(result.Result);
+            Assert.IsType<OkResult>(result.Result);
         }
     }
 }
