@@ -7,6 +7,6 @@ namespace AuthorVerseServer.Models
         [Key]
         public int TagId { get; set; }
         public string Name { get; set; } = null!;
-        public ICollection<Book>? Books { get; set; }
+        public ICollection<Book> Books { get; set; } = new List<Book>();
     }
 }

@@ -22,8 +22,10 @@ namespace AuthorVerseServer.Data
                     await context.Database.EnsureCreatedAsync();
                 }
 
-                if (!context.Roles.Any())
+                if (!context.Books.Any())
                 {
+                    //await context.Database.EnsureDeletedAsync();
+                    //await context.Database.EnsureCreatedAsync();
 
                     User admin = new User()
                     {
@@ -44,7 +46,7 @@ namespace AuthorVerseServer.Data
 
                     //await context.Users.AddAsync(admin);
 
-                    string folderPath = @"./wwwroot/api/images/";
+                    string folderPath = @"./wwwroot/Api/Images/";
 
                     string[] fileNames = Directory.GetFiles(folderPath);
                     List<string> files = new List<string>(10);
@@ -64,6 +66,7 @@ namespace AuthorVerseServer.Data
                         "Romance",
                         "Thriller",
                         "Horror",
+                        "Science Fiction",
                         "Historical",
                         "Action",
                         "Mystery",

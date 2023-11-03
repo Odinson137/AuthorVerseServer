@@ -44,11 +44,12 @@ namespace AuthorVerseServer.Controllers
         {
             Comment newComment = new Comment()
             {
-                CommentatorDTO = new UserDTO { Id = commentDTO.UserId, UserName = await _comment.FindCommentatorById(commentDTO.UserId)},
+                Commentator = await _userManager.FindByIdAsync(commentDTO.UserId),
                 BookId = commentDTO.BookId,
                 Book = await _comment.FindBookById(commentDTO.BookId),
                 Text = commentDTO.Text,
             };
+
             await _comment.AddComment(newComment);
             return Ok();
         }

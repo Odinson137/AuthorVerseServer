@@ -3,6 +3,7 @@ using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace AuthorVerseServer.Data
 {
@@ -38,6 +39,43 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<Friendship>().HasNoKey();
 
             modelBuilder.Entity<Book>()
+                .HasMany(b => b.Genres)
+                .WithMany(g => g.Books)
+                .UsingEntity<BookGenre>(
+                    j => j
+                        .HasOne(bg => bg.Genre)
+                        .WithMany()
+                        .HasForeignKey(bg => bg.GenreId),
+                    j => j
+                        .HasOne(bg => bg.Book)
+                        .WithMany()
+                        .HasForeignKey(bg => bg.BookId),
+                    j =>
+                    {
+                        j.HasKey(t => new { t.BookId, t.GenreId });
+                        j.ToTable("BookGenre"); 
+                    });
+
+            modelBuilder.Entity<Book>()
+                .HasMany(b => b.Tags)
+                .WithMany(g => g.Books)
+                .UsingEntity<BookTag>(
+                    j => j
+                        .HasOne(bg => bg.Tag)
+                        .WithMany()
+                        .HasForeignKey(bg => bg.TagId),
+                    j => j
+                        .HasOne(bg => bg.Book)
+                        .WithMany()
+                        .HasForeignKey(bg => bg.BookId),
+                    j =>
+                    {
+                        j.HasKey(t => new { t.BookId, t.TagId });
+                        j.ToTable("BookTag");
+                    });
+
+
+            modelBuilder.Entity<Book>()
                 .HasMany(c => c.Comments)
                 .WithOne(c => c.Book)
                 .HasForeignKey(c => c.BookId)
@@ -61,6 +99,7 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(c => c.BookChapterid)
                 .IsRequired(false);
 
+            
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserSelectedBooks)
                 .WithOne(u => u.User)
@@ -74,6 +113,16 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(b => b.BookId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Book>()
+                .HasMany(b => b.Characters)
+                .WithOne(b => b.Book)
+                .HasForeignKey(b => b.BookId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
 
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.BookId);
@@ -91,6 +140,88 @@ namespace AuthorVerseServer.Data
 
             modelBuilder.Entity<Tag>()
                 .HasIndex(g => g.TagId);
+
+            modelBuilder.Entity<BookChapter>()
+                .HasIndex(g => g.BookChapterId);
+            modelBuilder.Entity<BookChapter>()
+                .HasIndex(g => g.BookId);
+            modelBuilder.Entity<BookChapter>()
+                .HasIndex(g => g.PublicationData);
+
+            modelBuilder.Entity<BookRating>()
+                .HasIndex(g => g.BookRatingId);
+            modelBuilder.Entity<BookRating>()
+                .HasIndex(g => g.BookId);
+            modelBuilder.Entity<BookRating>()
+                .HasIndex(g => g.Rating);
+
+            modelBuilder.Entity<BookTag>()
+                .HasIndex(g => g.BookId);
+            modelBuilder.Entity<BookTag>()
+                .HasIndex(g => g.TagId);
+
+            modelBuilder.Entity<BookGenre>()
+                .HasIndex(g => g.BookId);
+            modelBuilder.Entity<BookGenre>()
+                .HasIndex(g => g.GenreId);
+
+            modelBuilder.Entity<ChapterSection>()
+                .HasIndex(g => g.SectionId);
+            modelBuilder.Entity<ChapterSection>()
+                .HasIndex(g => g.BookChapterId);
+            modelBuilder.Entity<ChapterSection>()
+                .HasIndex(g => g.Number);
+
+            modelBuilder.Entity<Character>()
+                .HasIndex(g => g.CharacterId);
+            modelBuilder.Entity<Character>()
+                .HasIndex(g => g.BookId);
+            modelBuilder.Entity<Character>()
+                .HasIndex(g => g.BookChapterId);
+
+            modelBuilder.Entity<Comment>()
+                .HasIndex(g => g.CommentId);
+            modelBuilder.Entity<Comment>()
+                .HasIndex(g => g.CommentatorId);
+            modelBuilder.Entity<Comment>()
+                .HasIndex(g => g.BookId);
+            modelBuilder.Entity<Comment>()
+                .HasIndex(g => g.Permission);
+
+            modelBuilder.Entity<Friendship>()
+                .HasIndex(g => g.User1Id);
+            modelBuilder.Entity<Friendship>()
+                .HasIndex(g => g.User2Id);
+            modelBuilder.Entity<Friendship>()
+                .HasIndex(g => g.Status);
+
+            modelBuilder.Entity<MicrosoftUser>()
+                .HasIndex(g => g.Id);
+            modelBuilder.Entity<MicrosoftUser>()
+                .HasIndex(g => g.AzureName);
+
+            modelBuilder.Entity<Note>()
+                .HasIndex(g => g.NoteId);
+            modelBuilder.Entity<Note>()
+                .HasIndex(g => g.UserId);
+            modelBuilder.Entity<Note>()
+                .HasIndex(g => g.BookChapterid);
+            modelBuilder.Entity<Note>()
+                .HasIndex(g => g.NoteCreatedDateTime);
+            modelBuilder.Entity<Note>()
+                .HasIndex(g => g.Permission);
+
+            modelBuilder.Entity<SectionChoice>()
+                .HasIndex(g => g.SectionChoiceId);
+            modelBuilder.Entity<SectionChoice>()
+                .HasIndex(g => g.ChapterSectionId);
+
+            modelBuilder.Entity<UserSelectedBook>()
+                .HasIndex(g => g.UserBookId);
+            modelBuilder.Entity<UserSelectedBook>()
+                .HasIndex(g => g.UserId);
+            modelBuilder.Entity<UserSelectedBook>()
+                .HasIndex(g => g.BookId);
         }
     }
 }

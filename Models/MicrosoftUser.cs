@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
-    [Index("AzureName")]
     public class MicrosoftUser
     {
         public int Id { get; set; }

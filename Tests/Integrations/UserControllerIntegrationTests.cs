@@ -1,19 +1,11 @@
 ﻿using AuthorVerseServer.DTO;
-using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
+using System.IO;
 using System.Net;
 using Xunit;
-using static AuthorVerseServer.Tests.Integrations.GenreContollerIntegrationTests;
 
 namespace AuthorVerseServer.Tests.Integrations
 {
@@ -22,7 +14,9 @@ namespace AuthorVerseServer.Tests.Integrations
         WebApplicationFactory<Program> _factory;
         private CreateJWTtokenService _createToken;
 
-        string path = "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer";
+
+        string path;
+
         public UserControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
             _factory = factory;
@@ -34,7 +28,31 @@ namespace AuthorVerseServer.Tests.Integrations
                 })
                 .Build();
 
+            var location = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //Для выделения пути к каталогу, воспользуйтесь `System.IO.Path`:
+            path = GetBinFolderPath(location);
+
+
             _createToken = new CreateJWTtokenService(fakeConfiguration);
+        }
+
+        static string GetBinFolderPath(string fullPath)
+        {
+            string binFolderName = "bin";
+            string directorySeparator = Path.DirectorySeparatorChar.ToString();
+
+            // Получаем индекс последнего вхождения папки "bin" в полный путь
+            int index = fullPath.LastIndexOf(directorySeparator + binFolderName, StringComparison.OrdinalIgnoreCase);
+
+            // Если папка "bin" найдена в пути, обрезаем путь до этой папки
+            if (index >= 0)
+            {
+                // Добавляем 1, чтобы включить разделитель директории в обрезанном пути
+                return fullPath.Substring(0, index + 1);
+            }
+
+            // Если папка "bin" не найдена, возвращаем пустую строку или обрабатываем ошибку, как требуется
+            return string.Empty;
         }
 
         [Fact]
@@ -164,46 +182,4 @@ namespace AuthorVerseServer.Tests.Integrations
             Assert.IsType<UserVerify>(userVerify);
         }
     }
-
-    public class FakeCache : IMemoryCache
-    {
-        private readonly Dictionary<string, object> _cache = new Dictionary<string, object>();
-
-        public void Set(string key, object value)
-        {
-            _cache[key] = value;
-        }
-
-        public UserRegistrationDTO Get(string key)
-        {
-            if (_cache.TryGetValue(key, out var value) && value is UserRegistrationDTO result)
-            {
-                return result;
-            }
-
-            return default(UserRegistrationDTO);
-        }
-
-        public ICacheEntry CreateEntry(object key)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Remove(object key)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryGetValue(object key, out object? value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-
 }

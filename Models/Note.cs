@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
-    [Index("BookChapterid")]
     public class Note
     {
         [Key]
