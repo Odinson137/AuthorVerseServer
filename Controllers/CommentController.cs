@@ -50,7 +50,7 @@ namespace AuthorVerseServer.Controllers
                 Text = commentDTO.Text,
             };
             var result = _comment.AddComment(newComment);
-            return Ok(result);
+            return Ok();
         }
 
     }

@@ -48,12 +48,13 @@ namespace AuthorVerseServer.Repository
 
         public async Task<ICollection<Comment>> GetCommentAsync()
         {
-            return await _context.Comments.OrderBy(c => c.CommentId).ToListAsync();
+            return await _context.Comments.Take(_context.Comments.Count()).ToListAsync();
         }
 
         public async Task AddComment(Comment newComment)
         {
             await _context.Comments.AddAsync(newComment);
+            await _context.SaveChangesAsync();
         }
     }
 }
