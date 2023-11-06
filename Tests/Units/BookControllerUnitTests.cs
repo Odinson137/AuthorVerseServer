@@ -5,6 +5,7 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Xunit;
 
@@ -17,9 +18,10 @@ public class BookControllerUnitTests
     {
         // Arrange
         var mockBookRepository = new Mock<IBook>();
+        var mockMemoryCache = new Mock<IMemoryCache>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -43,9 +45,11 @@ public class BookControllerUnitTests
     {
         // Arrange
         var mockBookRepository = new Mock<IBook>();
+        var mockMemoryCache = new Mock<IMemoryCache>();
+
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -70,8 +74,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -96,8 +101,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -122,8 +128,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -148,8 +155,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -175,8 +183,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -206,8 +215,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -241,8 +251,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
         var bookDTO = new CreateBookDTO
         {
             AuthorId = "admin",
@@ -288,8 +299,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         int tag = 0, genre = 0, page = 0;
 
@@ -312,8 +324,9 @@ public class BookControllerUnitTests
         // Arrange
         var mockBookRepository = new Mock<IBook>();
         var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
 
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object);
+        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object);
 
         int tag = 0, genre = 0, page = 1;
 

@@ -1,8 +1,10 @@
 ﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using Azure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -12,46 +14,40 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IBook _book;
         private readonly UserManager<User> _userManager;
+        private readonly IMemoryCache _cache;
 
-        public BookController(IBook book, UserManager<User> userManager)
+        public BookController(IBook book, UserManager<User> userManager, IMemoryCache cache)
         {
             _book = book;
             _userManager = userManager;
-        }
-
-        [HttpGet]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<Book>>> GetBooks()
-        {
-            var books = await _book.GetBooksAsync();
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            return Ok(books);
-        }
-
-        [HttpGet("Count")]
-        [ProducesResponseType(200)]
-        public async Task<ActionResult<int>> GetCountBooks()
-        {
-            int bookCount = await _book.GetCountBooks();
-            return Ok(bookCount);
+            _cache = cache;
         }
 
         [HttpGet("Popular")]
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetPopularBooks()
         {
-            return Ok(await _book.GetPopularBooks());
+            var books = await _cache.GetOrCreateAsync("popularMainBooks", async entry =>
+            {
+                var bookDb = await _book.GetPopularBooks();
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return bookDb;
+            });
+            return Ok(books);
         }
 
         [HttpGet("Last")]
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks()
         {
-            return Ok(await _book.GetLastBooks());
+            var books = await _cache.GetOrCreateAsync("lastMainBooks", async entry =>
+            {
+                var bookDb = await _book.GetLastBooks();
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return bookDb;
+            });
+
+            return Ok(books);
         }
 
         [HttpGet("SearchBy")]
@@ -175,7 +171,12 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetMainPopularBooks()
         {
-            var books = await _book.GetMainPopularBook();
+            var books = await _cache.GetOrCreateAsync("mainPopularBooks", async entry =>
+            {
+                var bookDb = await _book.GetMainPopularBook();
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return bookDb;
+            });
             return Ok(books);
         }
 
