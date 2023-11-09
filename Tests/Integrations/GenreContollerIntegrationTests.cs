@@ -13,21 +13,21 @@ namespace AuthorVerseServer.Tests.Integrations
     public class GenreContollerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         WebApplicationFactory<Program> _factory;
-        string path = "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer";
         public GenreContollerIntegrationTests(WebApplicationFactory<Program> factory)
         {
-            _factory = factory;
+            var currentDirectory = Environment.CurrentDirectory;
+            string path = Path.Combine(currentDirectory, "../../../");
+            _factory = factory.WithWebHostBuilder(builder =>
+            {
+                builder.UseSolutionRelativeContentRoot(path);
+            });
         }
 
         [Fact]
         public async Task GetGenres_ReturnsOkResult()
         {
-            HttpClient client = _factory.WithWebHostBuilder(builder =>
-             {
-                 builder.UseSolutionRelativeContentRoot(path);
-             }).CreateClient();
-
             // Arrange
+            HttpClient client = _factory.CreateClient();
 
             // Act
             var response = await client.GetAsync("/api/Genre");
@@ -54,7 +54,6 @@ namespace AuthorVerseServer.Tests.Integrations
 
             HttpClient client = _factory.WithWebHostBuilder(builder =>
             {
-                builder.UseSolutionRelativeContentRoot(path);
                 builder.ConfigureServices(services =>
                 {
                     services.AddSingleton<IGenre>(fakeGenreService);

@@ -8,6 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AuthorVerseServer.Services;
+using AuthorVerseServer.Interfaces.ServiceInterfaces;
+using Microsoft.OpenApi.Models;
+using AuthorVerseServer.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -27,13 +30,18 @@ services.AddScoped<INote, NoteRepository>();
 services.AddScoped<IUser, UserRepository>();
 services.AddScoped<ITag, TagRepository>();
 
+services.AddScoped<ILoadImage, LoadImageService>();
 services.AddTransient<MailService>();
 services.AddTransient<GenerateRandomName>();
 services.AddSingleton<CreateJWTtokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+services.AddSwaggerGen(s =>
+{
+    s.SwaggerDoc("v1", new OpenApiInfo { Title = "Author Verse", Version = "v1" });
+    s.OperationFilter<SwaggerAuthorizedMiddleware>();
+});
 
 //string redisConnection = builder.Configuration.GetConnectionString("Redis");
 

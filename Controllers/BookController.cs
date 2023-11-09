@@ -1,10 +1,14 @@
 ﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
 using Azure;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -15,12 +19,14 @@ namespace AuthorVerseServer.Controllers
         private readonly IBook _book;
         private readonly UserManager<User> _userManager;
         private readonly IMemoryCache _cache;
+        private readonly ILoadImage _loadImage;
 
-        public BookController(IBook book, UserManager<User> userManager, IMemoryCache cache)
+        public BookController(IBook book, UserManager<User> userManager, IMemoryCache cache, ILoadImage loadImage)
         {
             _book = book;
             _userManager = userManager;
             _cache = cache;
+            _loadImage = loadImage;
         }
 
         [HttpGet("Popular")]
@@ -67,7 +73,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("{bookId}")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<BookDTO>> GetBook(int bookId)
         {
             var book = await _book.GetBookById(bookId);
@@ -80,36 +86,21 @@ namespace AuthorVerseServer.Controllers
             return book;
         }
 
+        [Authorize]
         [HttpPost("Create")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateBook([FromBody] CreateBookDTO bookDTO)
         {
-            if (string.IsNullOrEmpty(bookDTO.AuthorId))
-            {
-                return BadRequest("Invalid user Id");
-            }
-
-            if (bookDTO.GenresId != null)
-            {
-                if (bookDTO.GenresId.Count == 0)
-                {
-                    return BadRequest("Genres are not select");
-                }
-            } else
+            if (bookDTO.GenresId.Count == 0)
             {
                 return BadRequest("Genres are not select");
             }
-
-            if (bookDTO.TagsId != null)
-            {
-                if (bookDTO.TagsId.Count == 0)
-                    return BadRequest("Tags are not select");
-            } else
-            {
+   
+            if (bookDTO.TagsId.Count == 0)
                 return BadRequest("Tags are not select");
-            }
 
             User? user = await _userManager.FindByIdAsync(bookDTO.AuthorId);
 
@@ -125,8 +116,21 @@ namespace AuthorVerseServer.Controllers
                 Title = bookDTO.Title,
                 Description = bookDTO.Description,
                 AgeRating = bookDTO.AgeRating,
-                BookCover = bookDTO.BookCoverUrl
             };
+
+            if (bookDTO.BookCoverImage != null)
+            {
+                string nameFile = _loadImage.GetUniqueName(bookDTO.BookCoverImage);
+                await _loadImage.CreateImageAsync(bookDTO.BookCoverImage, nameFile, "Images");
+                book.BookCover = nameFile;
+            }
+
+            if (bookDTO.BookPanoramImage != null)
+            {
+                string nameFile = _loadImage.GetUniqueName(bookDTO.BookPanoramImage);
+                await _loadImage.CreateImageAsync(bookDTO.BookPanoramImage, nameFile, "Images");
+                book.BookPanoramaImage = nameFile;
+            }
 
             await _book.AddBook(book);
 
@@ -177,8 +181,18 @@ namespace AuthorVerseServer.Controllers
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
                 return bookDb;
             });
+
             return Ok(books);
         }
 
+        [Authorize]
+        [HttpPut("Confirm")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> ConfirmBook(int bookId)
+        {
+            return Ok(1);
+        }
     }
 }

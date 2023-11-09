@@ -1,5 +1,6 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Models;
+using Microsoft.Extensions.FileProviders;
 using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.DTO
@@ -24,15 +25,23 @@ namespace AuthorVerseServer.DTO
 
     public class CreateBookDTO
     {
-        public int BookId { get; set; }
+        [Required(ErrorMessage = "Title is required")]
+        [MaxLength(200)]
         public string Title { get; set; } = null!;
+        [Required(ErrorMessage = "Description is required")]
+        [MinLength(50, ErrorMessage = "Description length is lower than 50 letter")]
+        [MaxLength(1000, ErrorMessage = "Description length more than 1000 characters")]
         public string Description { get; set; } = null!;
+        [Required(ErrorMessage = "Author Id is required")]
         public string AuthorId { get; set; } = null!;
+        [Required(ErrorMessage = "Genre is required")]
         public ICollection<int> GenresId { get; set; } = null!;
+        [Required(ErrorMessage = "Tag is required")]
         public ICollection<int> TagsId { get; set; } = null!;
+        [Required(ErrorMessage = "Age rating is required")]
         public AgeRating AgeRating { get; set; }
-        public string? BookCoverUrl { get; set; }
-        public string? BookPanoramUrl { get; set; }
+        public IFormFile? BookCoverImage { get; set; }
+        public IFormFile? BookPanoramImage { get; set; }
     }
 
     public class PopularBook

@@ -1,8 +1,12 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
+using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Integrations
@@ -10,28 +14,43 @@ namespace AuthorVerseServer.Tests.Integrations
     public class BooksControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
+        private readonly CreateJWTtokenService _token;
 
         public BooksControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
-            _client = factory.WithWebHostBuilder(builder =>
+            var currentDirectory = Environment.CurrentDirectory;
+            string path = Path.Combine(currentDirectory, "../../../");
+            factory = factory.WithWebHostBuilder(builder =>
             {
-                builder.UseSolutionRelativeContentRoot("C:\\Users\\buryy\\source\\repos\\AuthorVerseServer");
-            }).CreateClient();
+                builder.UseSolutionRelativeContentRoot(path);
+            });
+
+            _client = factory.CreateClient();
+
+            var configuration = factory.Services.GetRequiredService<IConfiguration>();
+
+            _token = new CreateJWTtokenService(configuration);
         }
 
         [Fact]
-        public async Task GetCountBooks_ReturnsCorrectCount()
+        public async Task CreateBook_CheckModelStateWork_ReturnsBadRequest()
         {
+            // Arrange
+            var bookDTO = new CreateBookDTO
+            {
+                AuthorId = string.Empty,
+                GenresId = new List<int> { 1, 2 },
+                TagsId = new List<int> { 1, 2 },
+                Title = "Берсерк",
+                Description = "«Берсерк» - это японская манга, созданная Кентаро Миурой. Сюжет рассказывает о Гатсе, мстительном воине, путешествующем в мрачном мире средневековой Европы, сражаясь с демонами и чудовищами. Волнующий и темный рассказ о выживании, предательстве и потере человечности, \"Берсерк\" славится своим уникальным стилем и глубокими темами, привлекая миллионы читателей по всему миру.",
+                AgeRating = AgeRating.EighteenPlus,
+            };
+
             // Act
-            var response = await _client.GetAsync("/api/Book/Count");
+            var response = await _client.PostAsJsonAsync("/api/Book/Create", bookDTO);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.True(int.TryParse(content, out int bookCount));
-
-            Assert.True(bookCount >= 0);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -44,17 +63,23 @@ namespace AuthorVerseServer.Tests.Integrations
                 GenresId = new List<int> { 1, 2 },
                 TagsId = new List<int> { 1, 2 },
                 Title = "Берсерк",
-                Description = "Черный мечник идёт за тобой",
+                Description = "«Берсерк» - это японская манга, созданная Кентаро Миурой. Сюжет рассказывает о Гатсе, мстительном воине, путешествующем в мрачном мире средневековой Европы, сражаясь с демонами и чудовищами. Волнующий и темный рассказ о выживании, предательстве и потере человечности, \"Берсерк\" славится своим уникальным стилем и глубокими темами, привлекая миллионы читателей по всему миру.",
                 AgeRating = AgeRating.EighteenPlus,
             };
 
+            string jwtToken = _token.GenerateJwtToken("admin");
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+            var requestContent = new StringContent(JsonConvert.SerializeObject(bookDTO), Encoding.UTF8, "application/json");
+
             // Act
-            var response = await _client.PostAsJsonAsync("/api/Book/Create", bookDTO);
+            var response = await _client.PostAsync("/api/Book/Create", requestContent);
 
             // Assert
             response.EnsureSuccessStatusCode();
         }
 
+        
         [Fact]
         public async Task GetMainPopularBooks_ReturnsOkResult()
         {

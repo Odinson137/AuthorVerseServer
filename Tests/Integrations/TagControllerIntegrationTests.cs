@@ -10,20 +10,20 @@ namespace AuthorVerseServer.Tests.Integrations
     public class TagControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         WebApplicationFactory<Program> _factory;
-        string path = "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer";
         public TagControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
-            _factory = factory;
+            var currentDirectory = Environment.CurrentDirectory;
+            string path = Path.Combine(currentDirectory, "../../../");
+            _factory = factory.WithWebHostBuilder(builder =>
+            {
+                builder.UseSolutionRelativeContentRoot(path);
+            });
         }
 
         [Fact]
         public async Task GetGenres_ReturnsOkResult()
         {
-            HttpClient client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.UseSolutionRelativeContentRoot(path);
-            }).CreateClient();
-
+            HttpClient client = _factory.CreateClient();
             // Arrange
 
             // Act
@@ -51,7 +51,6 @@ namespace AuthorVerseServer.Tests.Integrations
 
             HttpClient client = _factory.WithWebHostBuilder(builder =>
             {
-                builder.UseSolutionRelativeContentRoot(path);
                 builder.ConfigureServices(services =>
                 {
                     services.AddSingleton<ITag>(fakeTagService);

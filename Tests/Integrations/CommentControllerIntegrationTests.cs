@@ -10,10 +10,14 @@ namespace AuthorVerseServer.Tests.Integrations
         private readonly HttpClient _client;
         public CommentControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
-            _client = factory.WithWebHostBuilder(builder =>
+            var currentDirectory = Environment.CurrentDirectory;
+            string path = Path.Combine(currentDirectory, "../../../");
+            factory = factory.WithWebHostBuilder(builder =>
             {
-                builder.UseSolutionRelativeContentRoot("C:\\Users\\sasha\\source\\repos\\AuthorVerseServerRep2");
-            }).CreateClient();
+                builder.UseSolutionRelativeContentRoot(path);
+            });
+
+            _client = factory.CreateClient();
         }
 
         [Fact]

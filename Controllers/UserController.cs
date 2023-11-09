@@ -113,7 +113,7 @@ namespace AuthorVerseServer.Controllers
                 var passwordCheck = await _userManager.CheckPasswordAsync(user, authUser.Password);
                 if (passwordCheck)
                 {
-                    var Token = _jWTtokenService.GenerateJwtToken(user);
+                    var Token = _jWTtokenService.GenerateJwtToken(user.Id);
                     return Ok(new UserVerify()
                     {
                         Id = user.Id,
@@ -188,7 +188,7 @@ namespace AuthorVerseServer.Controllers
             {
                 Id = createUser.Id,
                 UserName = createUser.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(createUser),
+                Token = _jWTtokenService.GenerateJwtToken(createUser.Id),
                 IconUrl = userInfo.Picture
             };
 
@@ -214,7 +214,7 @@ namespace AuthorVerseServer.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user),
+                Token = _jWTtokenService.GenerateJwtToken(user.Id),
                 IconUrl = userInfo.Picture
             };
 
@@ -239,7 +239,7 @@ namespace AuthorVerseServer.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user),
+                Token = _jWTtokenService.GenerateJwtToken(user.Id),
             };
 
             return Ok(userGoogle);
@@ -283,7 +283,7 @@ namespace AuthorVerseServer.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user),
+                Token = _jWTtokenService.GenerateJwtToken(user.Id),
             };
 
             return Ok(userMicrosoft);
