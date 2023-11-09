@@ -4,6 +4,7 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace AuthorVerseServer.Repository
 {
@@ -20,9 +21,9 @@ namespace AuthorVerseServer.Repository
             return user.UserName;
 
         }
-        public Task<Comment> CheckUserComment(Book book, User user)
+        public async Task<Comment> CheckUserComment(Book book, User user)
         {
-            throw new NotImplementedException();
+            return await _context.Comments.Where(x => x.BookId == book.BookId && x.CommentatorId == user.Id).FirstOrDefaultAsync();
         }
 
         public async Task<Book> GetBook(int bookId)

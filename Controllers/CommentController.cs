@@ -42,15 +42,24 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateComment([FromBody] CreateCommentDTO commentDTO)
         {
-            var Book = await _comment.GetBook(commentDTO.BookId);
-            if (Book == null)
+            User? user = await _userManager.FindByIdAsync(commentDTO.UserId);
+            if(user == null)
+                return NotFound("User not found");
+
+            Book? book = await _comment.GetBook(commentDTO.BookId);
+            if (book == null)
                 return NotFound("Book not found");
 
-            Comment newComment = new Comment()
+            if (_comment.CheckUserComment(book, user) != null)
+                return BadRequest("This user alredy made a comment");
+
+
+
+                Comment newComment = new Comment()
             {
-                Commentator = await _userManager.FindByIdAsync(commentDTO.UserId),
+                Commentator = user,
                 BookId = commentDTO.BookId,
-                Book = Book,
+                Book = book,
                 Text = commentDTO.Text,
             };
 
