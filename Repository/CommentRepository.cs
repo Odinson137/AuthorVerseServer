@@ -4,6 +4,7 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace AuthorVerseServer.Repository
 {
@@ -14,40 +15,20 @@ namespace AuthorVerseServer.Repository
         {
             _context = context;
         }
-
-        public Task<Book> AddComment()
-        {
-            throw new NotImplementedException();
-        }
         public async Task<string> FindCommentatorById(string id)
         {
             User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
             return user.UserName;
 
         }
-        public async Task<Book> FindBookById(int id)
+        public async Task<Comment> CheckUserComment(Book book, User user)
         {
-            return await _context.Books.FirstOrDefaultAsync(x => x.BookId == id);
+            return await _context.Comments.Where(x => x.BookId == book.BookId && x.CommentatorId == user.Id).FirstOrDefaultAsync();
         }
 
-        public Task<Book> CheckUserComment()
+        public async Task<Book> GetBook(int bookId)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<Comment> CheckUserComment(Book book, User user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Book> GetBook()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Book> GetBook(int bookId)
-        {
-            throw new NotImplementedException();
+            return await _context.Books.FirstOrDefaultAsync(x => x.BookId == bookId);
         }
 
         public async Task<ICollection<Comment>> GetCommentAsync()

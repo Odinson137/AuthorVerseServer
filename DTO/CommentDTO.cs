@@ -1,4 +1,6 @@
 ﻿using AuthorVerseServer.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.DTO
 {
@@ -12,8 +14,11 @@ namespace AuthorVerseServer.DTO
 
     public class CreateCommentDTO
     {
+        [Required]
         public string UserId { get; set; }
         public int BookId { get; set; }
+        [Required]
+        [MaxLength(400, ErrorMessage = "Messege's to big")]
         public string Text { get; set; }
     }
 }

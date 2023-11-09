@@ -13,51 +13,6 @@ namespace AuthorVerseServer.Tests.Units
     public class CommentContollerUnitTests
     {
         [Fact]
-        public async Task CreateComment_InvalidCommentText_ShouldReturnBadRequest()
-        {
-            // Arrange
-            var mockCommentRepository = new Mock<IComment>();
-            var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
-
-            var commentDTO = new CreateCommentDTO
-            {
-                UserId = "Netu tacogo",
-                BookId = 0,
-                Text = string.Empty,
-            };
-
-            // Act
-            var result = await controller.CreateComment(commentDTO);
-            // Assert
-            Assert.IsType<BadRequestResult>(result.Result);
-        }
-
-
-        [Fact]
-        public async Task CreateComment_InvalidUserId_ShouldReturn()
-        {
-            // Arrange
-            var mockCommentRepository = new Mock<IComment>();
-            var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
-
-            var commentDTO = new CreateCommentDTO
-            {
-                UserId = string.Empty,
-                BookId = 0,
-                Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
-            };
-
-            // Act
-            var result = await controller.CreateComment(commentDTO);
-            // Assert
-            Assert.IsType<BadRequestResult>(result.Result);
-        }
-
-        [Fact]
         public async Task CreateComment_UserNotFound_ShouldReturnNotFound()
         {
             // Arrange
@@ -79,7 +34,7 @@ namespace AuthorVerseServer.Tests.Units
             // Act
             var result = await controller.CreateComment(commentDTO);
             // Assert
-            Assert.IsType<NotFoundResult>(result.Result);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
         [Fact]
@@ -105,7 +60,7 @@ namespace AuthorVerseServer.Tests.Units
             // Act
             var result = await controller.CreateComment(commentDTO);
             // Assert
-            Assert.IsType<NotFoundResult>(result.Result);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
         [Fact]
@@ -131,7 +86,7 @@ namespace AuthorVerseServer.Tests.Units
             // Act
             var result = await controller.CreateComment(commentDTO);
             // Assert
-            Assert.IsType<NotFoundResult>(result.Result);
+            Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
         [Fact]
