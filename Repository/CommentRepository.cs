@@ -14,40 +14,20 @@ namespace AuthorVerseServer.Repository
         {
             _context = context;
         }
-
-        public Task<Book> AddComment()
-        {
-            throw new NotImplementedException();
-        }
         public async Task<string> FindCommentatorById(string id)
         {
             User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
             return user.UserName;
 
         }
-        public async Task<Book> FindBookById(int id)
-        {
-            return await _context.Books.FirstOrDefaultAsync(x => x.BookId == id);
-        }
-
-        public Task<Book> CheckUserComment()
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<Comment> CheckUserComment(Book book, User user)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Book> GetBook()
+        public async Task<Book> GetBook(int bookId)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<Book> GetBook(int bookId)
-        {
-            throw new NotImplementedException();
+            return await _context.Books.FirstOrDefaultAsync(x => x.BookId == bookId);
         }
 
         public async Task<ICollection<Comment>> GetCommentAsync()

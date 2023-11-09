@@ -42,11 +42,15 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateComment([FromBody] CreateCommentDTO commentDTO)
         {
+            var Book = await _comment.GetBook(commentDTO.BookId);
+            if (Book == null)
+                return NotFound("Book not found");
+
             Comment newComment = new Comment()
             {
                 Commentator = await _userManager.FindByIdAsync(commentDTO.UserId),
                 BookId = commentDTO.BookId,
-                Book = await _comment.FindBookById(commentDTO.BookId),
+                Book = Book,
                 Text = commentDTO.Text,
             };
 
