@@ -26,7 +26,6 @@ namespace AuthorVerseServer.Models
         public ICollection<BookRating> Ratings { get; set; } = new List<BookRating>();
         public AgeRating AgeRating { get; set; }
         public string? BookCover { get; set; } 
-        public string? BookPanoramaImage { get; set; }
         public PublicationPermission Permission { get; set; }
     }
 }

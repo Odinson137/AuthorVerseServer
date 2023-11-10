@@ -199,7 +199,6 @@ namespace AuthorVerseServer.Repository
                             .Where(x => x.SectionChoices != null && x.SectionChoices.Count >= 2))
                             .Count(),
                     BookCoverUrl = book.BookCover,
-                    BookPanoramUrl = book.BookPanoramaImage,
                     PublicationData = book.PublicationData,
                 })
                 .Take(5);

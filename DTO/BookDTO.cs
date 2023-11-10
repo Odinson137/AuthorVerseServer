@@ -41,7 +41,6 @@ namespace AuthorVerseServer.DTO
         [Required(ErrorMessage = "Age rating is required")]
         public AgeRating AgeRating { get; set; }
         public IFormFile? BookCoverImage { get; set; }
-        public IFormFile? BookPanoramImage { get; set; }
     }
 
     public class PopularBook
@@ -63,7 +62,6 @@ namespace AuthorVerseServer.DTO
         public int Endings { get; set; }
         public int Choices { get; set; }
         public string? BookCoverUrl { get; set; }
-        public string? BookPanoramUrl { get; set; }
         public DateTime PublicationData { get; set; }
     }
 }

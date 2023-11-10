@@ -125,13 +125,6 @@ namespace AuthorVerseServer.Controllers
                 book.BookCover = nameFile;
             }
 
-            if (bookDTO.BookPanoramImage != null)
-            {
-                string nameFile = _loadImage.GetUniqueName(bookDTO.BookPanoramImage);
-                await _loadImage.CreateImageAsync(bookDTO.BookPanoramImage, nameFile, "Images");
-                book.BookPanoramaImage = nameFile;
-            }
-
             await _book.AddBook(book);
 
             foreach (var genreId in bookDTO.GenresId)
@@ -173,7 +166,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("MainPopularBooks")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<PopularBook>>> GetMainPopularBooks()
+        public async Task<ActionResult<MainPopularBook>> GetMainPopularBooks()
         {
             var books = await _cache.GetOrCreateAsync("mainPopularBooks", async entry =>
             {
