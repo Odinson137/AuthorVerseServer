@@ -58,8 +58,12 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("SearchBy")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<BookPageDTO>> GetCertainBooksPage(int tagId = 0, int genreId = 0, int page = 0)
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<BookPageDTO>> GetCertainBooksPage(int tagId = 0, int genreId = 0, int page = 1)
         {
+            if (--page < 0)
+                return BadRequest("Page is smaller than zero");
+
             var books = await _book.GetCertainBooksPage(tagId, genreId, page);
 
             int count = page == 0 ? await _book.GetBooksCountByTagsAndGenres(tagId, genreId) : 0;
@@ -166,7 +170,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("MainPopularBooks")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<MainPopularBook>> GetMainPopularBooks()
+        public async Task<ActionResult<ICollection<MainPopularBook>>> GetMainPopularBooks()
         {
             var books = await _cache.GetOrCreateAsync("mainPopularBooks", async entry =>
             {

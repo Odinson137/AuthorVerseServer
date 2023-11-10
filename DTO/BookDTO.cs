@@ -19,8 +19,10 @@ namespace AuthorVerseServer.DTO
         public UserDTO Author { get; set; } = null!;
         public ICollection<GenreDTO> Genres { get; set; } = new List<GenreDTO>();
         public ICollection<TagDTO> Tags { get; set; } = new List<TagDTO>();
-        public AgeRating AgeRating { get; set; }
+        public double Rating { get; set; }
+        public int CountRating { get; set; }
         public string? BookCoverUrl { get; set; }
+        public DateOnly PublicationData { get; set; }
     }
 
     public class CreateBookDTO
@@ -54,8 +56,7 @@ namespace AuthorVerseServer.DTO
         public int BookId { get; set; }
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public string AuthorId { get; set; } = null!;
-        public string AuthorUserName { get; set; } = null!;
+        public UserDTO Author { get; set; } = null!;
         public ICollection<GenreDTO> Genres { get; set; } = null!;
         public ICollection<TagDTO> Tags { get; set; } = null!;
         public double Rating { get; set; }

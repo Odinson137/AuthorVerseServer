@@ -114,9 +114,11 @@ namespace AuthorVerseServer.Repository
                         TagId = tag.TagId,
                         Name = tag.Name
                     }).ToList(),
-                    AgeRating = book.AgeRating,
+                    Rating = book.Ratings.Any() ? book.Ratings.Average(x => x.Rating) : 0,
+                    CountRating = book.Ratings.Where(r => r.BookId == book.BookId).Count(),
+                    PublicationData = DateOnly.FromDateTime(book.PublicationData),
                     BookCoverUrl = book.BookCover
-                });
+                });;
 
             return await booksDTO.ToListAsync();
         }
@@ -135,7 +137,10 @@ namespace AuthorVerseServer.Repository
                     Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
                     Genres = book.Genres.Select(genre => new GenreDTO() { GenreId = genre.GenreId, Name = genre.Name }).ToList(),
                     Tags = book.Genres.Select(tag => new TagDTO() { TagId = tag.GenreId, Name = tag.Name }).ToList(),
-                    AgeRating = book.AgeRating
+                    Rating = book.Ratings.Any() ? book.Ratings.Average(x => x.Rating) : 0,
+                    CountRating = book.Ratings.Where(r => r.BookId == book.BookId).Count(),
+                    PublicationData = DateOnly.FromDateTime(book.PublicationData),
+                    BookCoverUrl = book.BookCover
                 }).FirstOrDefaultAsync();
 
             return book;
@@ -177,8 +182,7 @@ namespace AuthorVerseServer.Repository
                     BookId = book.BookId,
                     Title = book.Title,
                     Description = book.Description,
-                    AuthorId = book.AuthorId,
-                    AuthorUserName = book.Author.UserName,
+                    Author = new UserDTO { Id = book.AuthorId, UserName = book.Author.UserName },
                     Genres = book.Genres.Select(genre => new GenreDTO
                     {
                         GenreId = genre.GenreId,
