@@ -2,11 +2,15 @@
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using System.Collections.ObjectModel;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -23,19 +27,16 @@ namespace AuthorVerseServer.Controllers
             _userManager = userManager;
         }
 
+
         [HttpGet]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<Comment>>> GetComment()
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<Collection<CommentDTO>>> GetBookComment(int bookId)
         {
-            var comments = await _comment.GetCommentAsync();
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            return Ok(comments);
+            return BadRequest();
         }
 
+        [Authorize]
         [HttpPost("Create")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -50,12 +51,10 @@ namespace AuthorVerseServer.Controllers
             if (book == null)
                 return NotFound("Book not found");
 
-            if (_comment.CheckUserComment(book, user) != null)
+            if (await _comment.CheckUserComment(book, user) != null)
                 return BadRequest("This user alredy made a comment");
 
-
-
-                Comment newComment = new Comment()
+            Comment newComment = new Comment()
             {
                 Commentator = user,
                 BookId = commentDTO.BookId,
@@ -64,20 +63,58 @@ namespace AuthorVerseServer.Controllers
             };
 
             await _comment.AddComment(newComment);
+            await _comment.Save();
             return Ok();
         }
 
+        [Authorize]
         [HttpPost("Delete")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> DeleteComment(int commentId, string userId)
+        public async Task<ActionResult<string>> DeleteComment(int commentId)
         {
-            bool result = await _comment.DeleteComment(commentId, userId);
-            if (result == true)
-                return Ok();
-            else
-                return BadRequest(new MessageDTO { message = "Коммаентарий не был удалён" });
+            ClaimsPrincipal user = this.User;
+            string? userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            return BadRequest(new MessageDTO { message = "Коммаентарий не был удалён" });
+            //bool result = await _comment.DeleteComment(commentId, userId); // обновить DeleteComment
+            //if (result == true)
+            //    return Ok();
+            //else
+            //    return BadRequest(new MessageDTO { message = "Коммаентарий не был удалён" });
+        }
+
+        [Authorize]
+        [HttpPost("ChangeCommentText")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<string>> ChangeComment(int commentId, string bookText)
+        {
+            return BadRequest();
+        }
+
+        [Authorize]
+        [HttpPost("UpRating")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<string>> ChangeUpRating(int commentId)
+        {
+            return BadRequest();
+        }
+
+        [Authorize]
+        [HttpPost("DownRating")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<string>> ChangeDownRating(int commentId)
+        {
+            return BadRequest();
         }
     }
 }

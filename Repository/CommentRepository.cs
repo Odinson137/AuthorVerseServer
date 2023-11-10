@@ -15,44 +15,43 @@ namespace AuthorVerseServer.Repository
         {
             _context = context;
         }
-        public async Task<string> FindCommentatorById(string id)
-        {
-            User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
-            return user.UserName;
 
-        }
-        public async Task<Comment> CheckUserComment(Book book, User user)
+        public async Task<Comment?> CheckUserComment(Book book, User user)
         {
-            return await _context.Comments.Where(x => x.BookId == book.BookId && x.CommentatorId == user.Id).FirstOrDefaultAsync();
+            return await _context.Comments.Where(x => x.Book == book && x.Commentator == user).FirstOrDefaultAsync();
         }
 
-        public async Task<Book> GetBook(int bookId)
+        public async Task<Book?> GetBook(int bookId)
         {
             return await _context.Books.FirstOrDefaultAsync(x => x.BookId == bookId);
-        }
-
-        public async Task<ICollection<Comment>> GetCommentAsync()
-        {
-            return await _context.Comments.Take(_context.Comments.Count()).ToListAsync();
         }
 
         public async Task AddComment(Comment newComment)
         {
             await _context.Comments.AddAsync(newComment);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> DeleteComment(int commentId, string userID)
+        public async Task<bool> DeleteComment(int commentId)
         {
-            Comment commentToRemove = await _context.Comments.FirstOrDefaultAsync(x => x.CommentId == commentId);
-            if (commentToRemove.Commentator.UserName == userID || userID == "admin")
-            {
-                _context.Comments.Remove(commentToRemove);
-                await _context.SaveChangesAsync();
-            }
-            else
-                return false;
+            //Comment? commentToRemove = await _context.Comments.FirstOrDefaultAsync(x => x.CommentId == commentId);
+            //if (commentToRemove.Commentator.UserName == userID || userID == "admin")
+            //{
+            //_context.Comments.Remove(commentToRemove);
+            //    await _context.SaveChangesAsync();
+            //}
+            //else
+            //    return false;
             return true;
+        }
+
+        public async Task<Comment?> GetCommentAsync(int bookId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> Save()
+        {
+            return await _context.SaveChangesAsync();
         }
     }
 }

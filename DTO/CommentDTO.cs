@@ -9,16 +9,17 @@ namespace AuthorVerseServer.DTO
         public int CommentId { get; set; }
         public UserDTO Commentator { get; set; } = null!;
         public string Text { get; set; } = null!;
-        public DateTime CommentCreatedDateTime { get; set; }
+        public DateOnly CommentCreatedDateTime { get; set; }
     }
 
     public class CreateCommentDTO
     {
         [Required]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = null!;
         public int BookId { get; set; }
         [Required]
-        [MaxLength(400, ErrorMessage = "Messege's to big")]
-        public string Text { get; set; }
+        [MaxLength(400, ErrorMessage = "Messege's too big")]
+        [MinLength(50, ErrorMessage = "Messege's too short")]
+        public string Text { get; set; } = null!;
     }
 }
