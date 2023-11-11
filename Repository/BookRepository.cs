@@ -2,6 +2,7 @@
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
@@ -44,9 +45,8 @@ namespace AuthorVerseServer.Repository
         {
             var books = _context.Books
                 .AsNoTracking()
-                .Include(book => book.Ratings)
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved)
-                .OrderByDescending(book => book.Ratings.Max(x => x.Rating))
+                .OrderByDescending(book => book.Rating)
                 .Take(10)
                 .Select(book => new PopularBook()
                 {
@@ -57,7 +57,7 @@ namespace AuthorVerseServer.Repository
             return await books.ToListAsync();
         }
 
-        public async Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId)
+        private IQueryable<Book> GetQueryBooksByTagsGenresTitle(int tagId, int genreId, string searchText)
         {
             var query = _context.Books
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
@@ -72,24 +72,23 @@ namespace AuthorVerseServer.Repository
                 query = query.Where(book => book.Genres.Any(genre => genre.GenreId == genreId));
             }
 
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                query = query.Where(book => book.NormalizedTitle.Contains(searchText));
+            }
 
+            return query;
+        }
+
+        public async Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId, string searchText)
+        {
+            var query = GetQueryBooksByTagsGenresTitle(tagId, genreId, searchText);
             return await query.CountAsync();
         }
 
-        public async Task<ICollection<BookDTO>> GetCertainBooksPage(int tagId, int genreId, int page)
+        public async Task<ICollection<BookDTO>> GetCertainBooksPage(int tagId, int genreId, int page, string searchText)
         {
-            var query = _context.Books
-                .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
-
-            if (tagId != 0)
-            {
-                query = query.Where(book => book.Tags.Any(tag => tag.TagId == tagId));
-            }
-
-            if (genreId != 0)
-            {
-                query = query.Where(book => book.Genres.Any(genre => genre.GenreId == genreId));
-            }
+            var query = GetQueryBooksByTagsGenresTitle(tagId, genreId, searchText);
 
             var booksDTO = query
                 .OrderByDescending(book => book.BookId)
@@ -114,8 +113,8 @@ namespace AuthorVerseServer.Repository
                         TagId = tag.TagId,
                         Name = tag.Name
                     }).ToList(),
-                    Rating = book.Ratings.Any() ? book.Ratings.Average(x => x.Rating) : 0,
-                    CountRating = book.Ratings.Where(r => r.BookId == book.BookId).Count(),
+                    Rating = book.Rating,
+                    CountRating = book.CountRating,
                     PublicationData = DateOnly.FromDateTime(book.PublicationData),
                     BookCoverUrl = book.BookCover
                 });;
@@ -137,8 +136,8 @@ namespace AuthorVerseServer.Repository
                     Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
                     Genres = book.Genres.Select(genre => new GenreDTO() { GenreId = genre.GenreId, Name = genre.Name }).ToList(),
                     Tags = book.Genres.Select(tag => new TagDTO() { TagId = tag.GenreId, Name = tag.Name }).ToList(),
-                    Rating = book.Ratings.Any() ? book.Ratings.Average(x => x.Rating) : 0,
-                    CountRating = book.Ratings.Where(r => r.BookId == book.BookId).Count(),
+                    Rating = book.Rating,
+                    CountRating = book.CountRating,
                     PublicationData = DateOnly.FromDateTime(book.PublicationData),
                     BookCoverUrl = book.BookCover
                 }).FirstOrDefaultAsync();
@@ -150,11 +149,6 @@ namespace AuthorVerseServer.Repository
         {
             await _context.Books.AddAsync(book);
         }
-
-        //public async Task<IDbContextTransaction> BeginTransactionAsync()
-        //{
-        //    return await _context.Database.BeginTransactionAsync();
-        //}
 
         public async Task Save()
         {
@@ -176,7 +170,7 @@ namespace AuthorVerseServer.Repository
             var books = _context.Books
                 .AsNoTracking()
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved)
-                .OrderByDescending(book => book.Ratings.Max(x => x.Rating))
+                .OrderByDescending(book => book.Rating)
                 .Select(book => new MainPopularBook()
                 {
                     BookId = book.BookId,
@@ -193,7 +187,7 @@ namespace AuthorVerseServer.Repository
                         TagId = tag.TagId,
                         Name = tag.Name,
                     }).ToList(),
-                    Rating = book.Ratings.Any() ? book.Ratings.Average(x => x.Rating) : 0,
+                    Rating = book.Comments.Any() ? book.Comments.Average(x => x.ReaderRating) : 0,
                     Endings = book.BookChapters
                             .SelectMany(x => x.ChapterSections
                             .Where(x => x.NextSectionId == 0))

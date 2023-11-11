@@ -13,6 +13,6 @@ namespace AuthorVerseServer.Models
         public Book Book { get; set; } = null!;
         public ICollection<Note>? Notes { get; set; }
         public ICollection<ChapterSection> ChapterSections { get; set; } = new List<ChapterSection>();
-        public DateTime PublicationData { get; set; }
+        public DateTime PublicationData { get; set; } = DateTime.Now;
     }
 }

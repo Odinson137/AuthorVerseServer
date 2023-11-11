@@ -87,12 +87,6 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(c => c.CommentatorId)
                 .IsRequired(false);
 
-            modelBuilder.Entity<Book>()
-                .HasMany(b => b.Ratings)
-                .WithOne()
-                .HasForeignKey(b => b.BookId)
-                .IsRequired(false);
-
             modelBuilder.Entity<BookChapter>()
                 .HasMany(c => c.Notes)
                 .WithOne()
@@ -147,13 +141,6 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.BookId);
             modelBuilder.Entity<BookChapter>()
                 .HasIndex(g => g.PublicationData);
-
-            modelBuilder.Entity<BookRating>()
-                .HasIndex(g => g.BookRatingId);
-            modelBuilder.Entity<BookRating>()
-                .HasIndex(g => g.BookId);
-            modelBuilder.Entity<BookRating>()
-                .HasIndex(g => g.Rating);
 
             modelBuilder.Entity<BookTag>()
                 .HasIndex(g => g.BookId);

@@ -12,6 +12,7 @@ namespace AuthorVerseServer.Models
         public int BookId { get; set; }
         [MaxLength(200)]
         public string Title { get; set; } = null!;
+        public string NormalizedTitle { get; set; } = null!;
         [MaxLength(1000)]
         public string Description { get; set; } = null!;
         public string AuthorId { get; set; } = null!;
@@ -23,9 +24,11 @@ namespace AuthorVerseServer.Models
         public ICollection<BookChapter> BookChapters { get; set; } = new List<BookChapter>();
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>(); // наверное нужно убрать
         public DateTime PublicationData { get; } = DateTime.Now; // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги
-        public ICollection<BookRating> Ratings { get; set; } = new List<BookRating>();
         public AgeRating AgeRating { get; set; }
-        public string? BookCover { get; set; } 
+        public string? BookCover { get; set; }
+        [Range(1, 5)]
+        public double Rating { get; set; }
+        public int CountRating { get; set; }
         public PublicationPermission Permission { get; set; }
     }
 }

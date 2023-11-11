@@ -58,5 +58,10 @@ namespace AuthorVerseServer.Repository
         {
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<int> GetCommentByBookAsync(int bookId)
+        {
+            return await _context.Comments.Where(c => c.BookId == bookId).CountAsync();
+        }
     }
 }

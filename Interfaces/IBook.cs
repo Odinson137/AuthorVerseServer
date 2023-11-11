@@ -2,6 +2,7 @@
 
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Models;
+using MailKit.Search;
 using Microsoft.EntityFrameworkCore.Storage;
 
 public interface IBook
@@ -10,8 +11,8 @@ public interface IBook
     Task<int> GetCountBooks();
     Task<ICollection<PopularBook>> GetPopularBooks();
     Task<ICollection<PopularBook>> GetLastBooks();
-    Task<ICollection<BookDTO>> GetCertainBooksPage(int tag, int genre, int page);
-    Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId);
+    Task<ICollection<BookDTO>> GetCertainBooksPage(int tag, int genre, int page, string searchText);
+    Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId, string searchText);
     Task<ICollection<MainPopularBook>> GetMainPopularBook();
     Task<BookDTO?> GetBookById(int bookId);
     Task AddBook(Book book);

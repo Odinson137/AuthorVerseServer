@@ -72,14 +72,15 @@ namespace AuthorVerseServer.Controllers
         [HttpGet("SearchBy")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<BookPageDTO>> GetCertainBooksPage(int tagId = 0, int genreId = 0, int page = 1)
+        public async Task<ActionResult<BookPageDTO>> GetCertainBooksPage(
+            int tagId = 0, int genreId = 0, int page = 1, string searchText = "")
         {
             if (--page < 0)
                 return BadRequest("Page is smaller than zero");
 
-            var books = await _book.GetCertainBooksPage(tagId, genreId, page);
+            var books = await _book.GetCertainBooksPage(tagId, genreId, page, searchText);
 
-            int count = page == 0 ? await _book.GetBooksCountByTagsAndGenres(tagId, genreId) : 0;
+            int count = page == 0 ? await _book.GetBooksCountByTagsAndGenres(tagId, genreId, searchText) : 0;
             
             return Ok(new BookPageDTO
             {

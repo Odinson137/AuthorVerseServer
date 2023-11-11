@@ -1,6 +1,7 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Services;
+using MailKit.Search;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
@@ -180,8 +181,9 @@ namespace AuthorVerseServer.Tests.Integrations
             Assert.True(booksPage.BooksCount > 0, "BooksCount is zero");
         }
 
+
         [Fact]
-        public async Task GetPageBooksByGenreAndTags_GetNullGenreTag_ReturnsOkResult()
+        public async Task GetPageBooksByGenreAndTags_GetTrueInfromation_ReturnsOkResult()
         {
             // Arrange
             int tagId = 0;
@@ -203,6 +205,29 @@ namespace AuthorVerseServer.Tests.Integrations
                 Assert.True(!string.IsNullOrEmpty(book.Title), "Title not have");
                 Assert.True(book.Genres.Count > 0, "Genre's count is zero");
                 Assert.True(book.Tags.Count > 0, "Tag's count is zero");
+            }
+        }
+
+        [Fact]
+        public async Task GetPageBooksByGenreAndTags_GetNullGenreTag_ReturnsOkResult()
+        {
+            // Arrange
+            int tagId = 0;
+            int genreId = 0;
+            int page = 1;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var booksPage = JsonConvert.DeserializeObject<BookPageDTO>(content);
+
+            Assert.NotNull(booksPage);
+            Assert.NotEmpty(booksPage.Books);
+
+            foreach (var book in booksPage.Books)
+            {
                 Assert.DoesNotContain(tagId, book.Tags.Select(tag => tag.TagId));
                 Assert.DoesNotContain(genreId, book.Genres.Select(genre => genre.GenreId));
             }
@@ -228,11 +253,33 @@ namespace AuthorVerseServer.Tests.Integrations
 
             foreach (var book in booksPage.Books)
             {
-                Assert.True(!string.IsNullOrEmpty(book.Title), "Title not have");
-                Assert.True(book.Genres.Count > 0, "Genre's count is zero");
-                Assert.True(book.Tags.Count > 0, "Tag's count is zero");
                 Assert.Contains(tagId, book.Tags.Select(tag => tag.TagId));
                 Assert.Contains(genreId, book.Genres.Select(genre => genre.GenreId));
+            }
+        }
+
+        [Fact]
+        public async Task GetPageBooksByGenreAndTagsAndTitle_Ok_ReturnsOkResult()
+        {
+            // Arrange
+            int tagId = 0;
+            int genreId = 0;
+            int page = 1;
+            string searchText = "19";
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}&searchText={searchText}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var booksPage = JsonConvert.DeserializeObject<BookPageDTO>(content);
+
+            Assert.NotNull(booksPage);
+            Assert.NotEmpty(booksPage.Books);
+
+            foreach (var book in booksPage.Books)
+            {
+                Assert.Contains(searchText, book.Title);
             }
         }
     }

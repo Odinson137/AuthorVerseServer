@@ -4,6 +4,7 @@ using AuthorVerseServer.Models;
 
 public interface IComment
 {
+    Task<int> GetCommentByBookAsync(int bookId);
     Task<Comment?> GetCommentAsync(int commentId);
     Task<Comment?> GetUserCommentAsync(string commentatorId, int commentId);
     Task<Book?> GetBook(int bookId);

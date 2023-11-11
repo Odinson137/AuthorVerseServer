@@ -34,9 +34,10 @@ namespace AuthorVerseServer.Controllers
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<Collection<CommentDTO>>> GetBookComment(int bookId)
+        public async Task<ActionResult<int>> GetBookComment(int bookId)
         {
-            return BadRequest();
+            int commentsCount = await _comment.GetCommentByBookAsync(bookId);
+            return Ok(commentsCount);
         }
 
         [Authorize]

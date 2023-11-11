@@ -329,8 +329,9 @@ public class BookControllerUnitTests
         var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         int tag = 0, genre = 0, page = 0;
+        string searchText = "";
 
-        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page)).ReturnsAsync(new List<BookDTO>());
+        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page, string.Empty)).ReturnsAsync(new List<BookDTO>());
 
         // Act
         var result = await controller.GetCertainBooksPage(tag, genre, page);
@@ -339,8 +340,8 @@ public class BookControllerUnitTests
         var objectResult = Assert.IsType<ActionResult<BookPageDTO>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
 
-        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page), Times.Once);
-        mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre), Times.Once);
+        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page, string.Empty), Times.Once);
+        mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre, searchText), Times.Once);
     }
 
     [Fact]
@@ -355,9 +356,10 @@ public class BookControllerUnitTests
         var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         int tag = 0, genre = 0, page = 1;
+        string searchText = "";
 
-        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page)).ReturnsAsync(new List<BookDTO>());
-        mockBookRepository.Setup(um => um.GetBooksCountByTagsAndGenres(tag, genre)).ReturnsAsync(1);
+        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page, string.Empty)).ReturnsAsync(new List<BookDTO>());
+        mockBookRepository.Setup(um => um.GetBooksCountByTagsAndGenres(tag, genre, searchText)).ReturnsAsync(1);
 
         // Act
         var result = await controller.GetCertainBooksPage(tag, genre, page);
@@ -366,8 +368,8 @@ public class BookControllerUnitTests
         var objectResult = Assert.IsType<ActionResult<BookPageDTO>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
 
-        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page), Times.Once);
-        mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre), Times.Never);
+        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page, string.Empty), Times.Once);
+        mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre, searchText), Times.Never);
     }
 
     public IFormFile CreateMockFormFile(string fileName, long length)
