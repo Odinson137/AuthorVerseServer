@@ -2,6 +2,7 @@
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -20,11 +21,13 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IComment _comment;
         private readonly UserManager<User> _userManager;
+        private readonly CreateJWTtokenService _jWTtokenService;
 
-        public CommentController(IComment comment, UserManager<User> userManager)
+        public CommentController(IComment comment, UserManager<User> userManager, CreateJWTtokenService jWTtokenService = null)
         {
             _comment = comment;
             _userManager = userManager;
+            _jWTtokenService = jWTtokenService;
         }
 
 
@@ -74,12 +77,11 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<string>> DeleteComment(int commentId)
         {
-            ClaimsPrincipal user = this.User;
-            string? userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
 
-            return BadRequest(new MessageDTO { message = "Коммаентарий не был удалён" });
+            return BadRequest();
             //bool result = await _comment.DeleteComment(commentId, userId); // обновить DeleteComment
             //if (result == true)
             //    return Ok();

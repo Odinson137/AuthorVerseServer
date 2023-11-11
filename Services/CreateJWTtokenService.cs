@@ -58,5 +58,11 @@ namespace AuthorVerseServer.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public virtual string? GetIdFromToken(ClaimsPrincipal user)
+        {
+            string? userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            return userId;
+        }
     }
 }
