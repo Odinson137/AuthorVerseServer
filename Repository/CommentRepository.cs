@@ -31,17 +31,13 @@ namespace AuthorVerseServer.Repository
             await _context.Comments.AddAsync(newComment);
         }
 
-        public async Task<bool> DeleteComment(int commentId)
+        public async Task DeleteComment(Comment commentToRemove)
         {
-            Comment? commentToRemove = await _context.Comments.FirstOrDefaultAsync(x => x.CommentId == commentId);
-            //if (commentToRemove.Commentator.UserName == userID || userID == "admin")
-            //{
-            //_context.Comments.Remove(commentToRemove);
-            //    await _context.SaveChangesAsync();
-            //}
-            //else
-            //    return false;
-            return true;
+            _context.Comments.Remove(commentToRemove);
+        }
+        public async Task FindCommentRating(Comment commentToRemove)
+        {
+            _context.Comments.Remove(commentToRemove);
         }
 
         public async Task<Comment?> GetCommentAsync(int commentId)

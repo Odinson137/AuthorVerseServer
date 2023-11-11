@@ -24,8 +24,8 @@ namespace AuthorVerseServer.Data
 
                 if (!context.Books.Any())
                 {
-                    //await context.Database.EnsureDeletedAsync();
-                    //await context.Database.EnsureCreatedAsync();
+                    await context.Database.EnsureDeletedAsync();
+                    await context.Database.EnsureCreatedAsync();
 
                     User admin = new User()
                     {

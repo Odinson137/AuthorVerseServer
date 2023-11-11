@@ -16,9 +16,8 @@ namespace AuthorVerseServer.Models
         [MaxLength(400)]
         [MinLength(50)]
         public string Text { get; set; } = null!;
-        public int Likes { get; set; } = 0;
-        public int DisLikes { get; set; } = 0;
         public DateTime CommentCreatedDateTime { get; } = DateTime.Now;
+        public ICollection<CommentRating> commentRatings { get; set; } = new List<CommentRating>();
         public PublicationPermission Permission { get; set; } = PublicationPermission.PendingApproval;
     }
 }

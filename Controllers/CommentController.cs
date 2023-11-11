@@ -23,7 +23,7 @@ namespace AuthorVerseServer.Controllers
         private readonly UserManager<User> _userManager;
         private readonly CreateJWTtokenService _jWTtokenService;
 
-        public CommentController(IComment comment, UserManager<User> userManager, CreateJWTtokenService jWTtokenService = null)
+        public CommentController(IComment comment, UserManager<User> userManager, CreateJWTtokenService jWTtokenService)
         {
             _comment = comment;
             _userManager = userManager;
@@ -81,12 +81,15 @@ namespace AuthorVerseServer.Controllers
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
 
-            return BadRequest();
-            //bool result = await _comment.DeleteComment(commentId, userId); // обновить DeleteComment
-            //if (result == true)
-            //    return Ok();
-            //else
-            //    return BadRequest(new MessageDTO { message = "Коммаентарий не был удалён" });
+            Comment? comment = await _comment.GetCommentAsync(commentId);
+            if (comment == null)
+                return NotFound("Comment not found");
+
+            await _comment.DeleteComment(comment);
+            if (await _comment.Save() == 0)
+                return BadRequest("Problem with saving");
+
+            return Ok();
         }
 
         [Authorize]
@@ -96,12 +99,11 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<string>> ChangeComment(int commentId, string bookText)
         {
-            ClaimsPrincipal user = this.User;
-            string? userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
 
-            Comment comment = await _comment.GetUserCommentAsync(userId, commentId);
+            Comment comment = await _comment.GetCommentAsync(commentId);
             if (comment != null)
                 comment.Text = bookText;
             else
@@ -117,7 +119,20 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<string>> ChangeUpRating(int commentId)
         {
-            return BadRequest();
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            Comment? comment = await _comment.GetCommentAsync(commentId);
+            if (comment != null)
+                comment.commentRatings.Add(new CommentRating { CommentId = commentId, Likes = 1, UserCommentedId = userId });
+            else
+                return NotFound("Comment from this user to this book not found");
+
+            if (await _comment.Save() == 0)
+                return BadRequest("Problem with saving");
+
+            return Ok();
         }
 
         [Authorize]
