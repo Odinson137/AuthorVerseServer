@@ -29,6 +29,13 @@ namespace AuthorVerseServer.Controllers
             _loadImage = loadImage;
         }
 
+        [HttpGet("Count")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<int>> GetBooksCount()
+        {
+            return await _book.GetCountBooks();
+        }
+
         [HttpGet("Popular")]
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetPopularBooks()
