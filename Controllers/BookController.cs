@@ -33,7 +33,13 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<int>> GetBooksCount()
         {
-            return await _book.GetCountBooks();
+            var books = await _cache.GetOrCreateAsync("booksCount", async entry =>
+            {
+                var bookDb = await _book.GetCountBooks();
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                return bookDb;
+            });
+            return Ok(books);
         }
 
         [HttpGet("Popular")]
