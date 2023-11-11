@@ -10,7 +10,7 @@ public interface IComment
     Task<Book?> GetBook(int bookId);
     Task<Comment?> CheckUserComment(Book book, User user);
     Task AddComment(Comment newComment);
-    Task<bool> DeleteComment(int commentId);
+    Task DeleteComment(Comment commentToRemove);
     Task<int> Save();
 }
 

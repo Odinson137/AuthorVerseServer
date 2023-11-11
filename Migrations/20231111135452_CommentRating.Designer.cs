@@ -4,6 +4,7 @@ using AuthorVerseServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231111135452_CommentRating")]
+    partial class CommentRating
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,26 +43,16 @@ namespace AuthorVerseServer.Migrations
                     b.Property<string>("BookCover")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CountRating")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("NormalizedTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Permission")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PublicationData")
                         .HasColumnType("datetime2");
-
-                    b.Property<double>("Rating")
-                        .HasColumnType("float");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -124,6 +117,31 @@ namespace AuthorVerseServer.Migrations
                     b.HasIndex("GenreId");
 
                     b.ToTable("BookGenre", (string)null);
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.BookRating", b =>
+                {
+                    b.Property<int>("BookRatingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookRatingId"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("BookRatingId");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("BookRatingId");
+
+                    b.HasIndex("Rating");
+
+                    b.ToTable("BookRating");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookTag", b =>
@@ -225,16 +243,10 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("Permission")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReaderRating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Permission")
-                        .HasColumnType("int");
-
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.HasKey("CommentId");
 
@@ -719,6 +731,13 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Genre");
                 });
 
+            modelBuilder.Entity("AuthorVerseServer.Models.BookRating", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.Book", null)
+                        .WithMany("Ratings")
+                        .HasForeignKey("BookId");
+                });
+
             modelBuilder.Entity("AuthorVerseServer.Models.BookTag", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.Book", "Book")
@@ -904,6 +923,8 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Characters");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("Ratings");
 
                     b.Navigation("UserSelectedBooks");
                 });

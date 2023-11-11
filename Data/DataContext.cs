@@ -115,6 +115,13 @@ namespace AuthorVerseServer.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Comment>()
+                .HasMany(b => b.commentRatings)
+                .WithOne()
+                .HasForeignKey(b => b.CommentId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
 
 

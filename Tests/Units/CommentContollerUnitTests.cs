@@ -20,9 +20,10 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             var commentDTO = new CreateCommentDTO
             {
@@ -45,9 +46,10 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             var commentDTO = new CreateCommentDTO
             {
@@ -71,9 +73,10 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             var commentDTO = new CreateCommentDTO
             {
@@ -97,9 +100,10 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             var commentDTO = new CreateCommentDTO
             {
@@ -124,25 +128,25 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
             mockCommentRepository.Setup(com => com.Save());
 
             var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
-            mockClaimsPrincipal.Setup(cl => cl.FindFirst(It.IsAny<string>())).Returns(claim);
 
             // Act
             var result = await controller.DeleteComment(1);
             // Assert
-            Assert.IsType<OkResult>(result.Result);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
         [Fact]
-        public async Task DeleteComment_CommentNotDelete_ShouldReturnBadRequest()
+        public async Task DeleteComment_CommentNotDeleted_ShouldReturnBadRequest()
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
@@ -156,7 +160,7 @@ namespace AuthorVerseServer.Tests.Units
             //var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
             mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
 
-            mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<int>()));
+            mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<Comment>()));
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
 
@@ -180,7 +184,7 @@ namespace AuthorVerseServer.Tests.Units
 
             mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-            mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<int>()));
+            mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<Comment>()));
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
@@ -195,15 +199,12 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var mockTokenService = new Mock<CreateJWTtokenService>();
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
-
-            var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
-            mockClaimsPrincipal.Setup(cl => cl.FindFirst(It.IsAny<string>())).Returns(claim);
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
@@ -218,15 +219,12 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var mockTokenService = new Mock<CreateJWTtokenService>();
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-
-            var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
-            mockClaimsPrincipal.Setup(cl => cl.FindFirst(It.IsAny<string>())).Returns(claim);
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
 
@@ -241,15 +239,12 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var mockTokenService = new Mock<CreateJWTtokenService>();
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-
-            var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
-            mockClaimsPrincipal.Setup(cl => cl.FindFirst(It.IsAny<string>())).Returns(claim);
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
@@ -264,12 +259,13 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
@@ -284,12 +280,13 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
 
@@ -304,12 +301,13 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
@@ -325,12 +323,13 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
@@ -345,12 +344,13 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
 
@@ -365,12 +365,13 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
+            mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
             mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
