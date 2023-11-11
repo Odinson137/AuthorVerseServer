@@ -149,7 +149,7 @@ namespace AuthorVerseServer.Tests.Units
             var mockTokenService = new Mock<CreateJWTtokenService>();
             var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
 
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
+            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
 
             mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
 
