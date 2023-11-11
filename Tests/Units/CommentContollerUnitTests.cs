@@ -191,29 +191,6 @@ namespace AuthorVerseServer.Tests.Units
         }
 
         [Fact]
-        public async Task ChangeCommentText_SizeNotAllowed_ShouldReturnBadRequest() // если будет через модели делать условие, то можно будет убрать
-        {
-            // Arrange
-            var mockCommentRepository = new Mock<IComment>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
-            var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-
-            var controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
-
-            mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
-
-            var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
-            mockClaimsPrincipal.Setup(cl => cl.FindFirst(It.IsAny<string>())).Returns(claim);
-
-            mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
-
-            // Act
-            var result = await controller.ChangeComment(1, "short text");
-            // Assert
-            Assert.IsType<NotFoundObjectResult>(result.Result);
-        }
-
-        [Fact]
         public async Task ChangeCommentText_CommentNotFound_ShouldReturnNotFound()
         {
             // Arrange

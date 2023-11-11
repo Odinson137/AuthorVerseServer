@@ -96,7 +96,18 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<string>> ChangeComment(int commentId, string bookText)
         {
-            return BadRequest();
+            ClaimsPrincipal user = this.User;
+            string? userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            Comment comment = await _comment.GetUserCommentAsync(userId, commentId);
+            if (comment != null)
+                comment.Text = bookText;
+            else
+                return NotFound("Comment from this user to this book not found");
+
+            return Ok();
         }
 
         [Authorize]

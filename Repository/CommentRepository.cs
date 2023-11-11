@@ -33,7 +33,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task<bool> DeleteComment(int commentId)
         {
-            //Comment? commentToRemove = await _context.Comments.FirstOrDefaultAsync(x => x.CommentId == commentId);
+            Comment? commentToRemove = await _context.Comments.FirstOrDefaultAsync(x => x.CommentId == commentId);
             //if (commentToRemove.Commentator.UserName == userID || userID == "admin")
             //{
             //_context.Comments.Remove(commentToRemove);
@@ -44,9 +44,14 @@ namespace AuthorVerseServer.Repository
             return true;
         }
 
-        public async Task<Comment?> GetCommentAsync(int bookId)
+        public async Task<Comment?> GetCommentAsync(int commentId)
         {
-            throw new NotImplementedException();
+            return await _context.Comments.FirstOrDefaultAsync(x=> x.CommentId == commentId);
+        }
+
+        public async Task<Comment?> GetUserCommentAsync(string commentatorId, int bookId)
+        {
+            return await _context.Comments.FirstOrDefaultAsync(x => x.BookId == bookId && x.CommentatorId == commentatorId);
         }
 
         public async Task<int> Save()
