@@ -14,6 +14,7 @@ namespace AuthorVerseServer.Models
         public int BookId { get; set; }
         public Book Book { get; set; } = null!;
         [MaxLength(400)]
+        [MinLength(50)]
         public string Text { get; set; } = null!;
         public int Likes { get; set; } = 0;
         public int DisLikes { get; set; } = 0;
