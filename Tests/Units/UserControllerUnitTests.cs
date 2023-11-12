@@ -71,30 +71,6 @@ namespace AuthorVerseServer.Tests.Units
             Assert.Equal("This email is already taken", message.message);
         }
 
-        //[Fact]
-        //public async Task Registration_Ok_ReturnsOk()
-        //{
-        //    // Arrange
-        //    _mockUserManager.Setup(um => um.FindByNameAsync(It.IsAny<string>()))
-        //        .ReturnsAsync((User?)null);
-
-        //    _mockUserManager.Setup(um => um.FindByEmailAsync(It.IsAny<string>()))
-        //        .ReturnsAsync((User?)null);
-
-        //    string token = "token";
-        //    _mockJWTTokenService.Setup(um => um.GenerateJwtTokenEmail(new UserRegistrationDTO()))
-        //        .Returns(token);
-
-        //    _mockEmailService.Setup(um => um.SendEmail(token, "Yura"))
-        //        .ReturnsAsync("Ok");
-
-        //    //_mockCache.Setup(x => x.Get(It.IsAny<string>())).Returns(new object());
-
-        //    // Act
-        //    var result = await _userController.Registration(new UserRegistrationDTO());
-
-        //    // Assert
-        //    var okRequestResult = Assert.IsType<OkObjectResult>(result.Result);
-        //}
+      
     }
 }

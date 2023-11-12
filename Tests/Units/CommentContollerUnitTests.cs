@@ -27,12 +27,11 @@ namespace AuthorVerseServer.Tests.Units
 
             var commentDTO = new CreateCommentDTO
             {
-                UserId = "Netu tacogo",
                 BookId = 0,
                 Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
             };
 
-            mockUserManager.Setup(um => um.FindByIdAsync(commentDTO.UserId)).ReturnsAsync((User?)null);
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
             mockCommentRepository.Setup(com => com.CheckUserComment(new Book(), new User())).ReturnsAsync(new Comment());
 
             // Act
@@ -53,12 +52,11 @@ namespace AuthorVerseServer.Tests.Units
 
             var commentDTO = new CreateCommentDTO
             {
-                UserId = "admin",
                 BookId = -5,
                 Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
             };
 
-            mockUserManager.Setup(um => um.FindByIdAsync(commentDTO.UserId)).ReturnsAsync(new User());
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
             mockCommentRepository.Setup(com => com.GetBook(-5)).ReturnsAsync((Book?)null);
             //mockCommentRepository.Setup(com => com.CheckUserComment(new Book(), new User())).ReturnsAsync(new Comment());
 
@@ -80,12 +78,11 @@ namespace AuthorVerseServer.Tests.Units
 
             var commentDTO = new CreateCommentDTO
             {
-                UserId = "admin",
                 BookId = 0,
                 Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
             };
 
-            mockUserManager.Setup(um => um.FindByIdAsync(commentDTO.UserId)).ReturnsAsync(new User());
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
             mockCommentRepository.Setup(com => com.GetBook(0)).ReturnsAsync(new Book());
             mockCommentRepository.Setup(com => com.CheckUserComment(It.IsAny<Book>(), It.IsAny<User>())).ReturnsAsync(new Comment());
 
@@ -107,12 +104,11 @@ namespace AuthorVerseServer.Tests.Units
 
             var commentDTO = new CreateCommentDTO
             {
-                UserId = "admin",
                 BookId = 0,
                 Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
             };
 
-            mockUserManager.Setup(um => um.FindByIdAsync(commentDTO.UserId)).ReturnsAsync(new User());
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
             mockCommentRepository.Setup(com => com.GetBook(0)).ReturnsAsync(new Book());
             mockCommentRepository.Setup(com => com.CheckUserComment(new Book(), new User())).ReturnsAsync((Comment?)null);
 

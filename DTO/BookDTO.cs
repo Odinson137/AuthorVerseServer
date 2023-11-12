@@ -94,4 +94,12 @@ namespace AuthorVerseServer.DTO
         public string? BookCoverUrl { get; set; }
         public DateTime PublicationData { get; set; }
     }
+
+    public class UpdateAccountBook
+    {
+        public int BookId { get; set; }
+        public string BookTitle { get; set; } = null!;
+        public int ChapterIndex { get; set; }
+        public string ChapterTitle { get; set; }
+    }
 }

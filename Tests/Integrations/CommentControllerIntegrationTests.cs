@@ -37,7 +37,6 @@ namespace AuthorVerseServer.Tests.Integrations
             // Arrange
             var bookDTO = new CreateCommentDTO
             {
-                UserId = "admin",
                 BookId = 0,
                 Text = "Слишком коротко",
             };
@@ -49,9 +48,6 @@ namespace AuthorVerseServer.Tests.Integrations
 
             // Act
             var response = await _client.PostAsync("/api/Comment/Create", requestContent);
-
-            // Act
-            //var response = await _client.PostAsJsonAsync("/api/Comment/Create", bookDTO);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -65,13 +61,18 @@ namespace AuthorVerseServer.Tests.Integrations
 
             var bookDTO = new CreateCommentDTO
             {
-                UserId = "admin",
                 BookId = random.Next(1, 1000),
                 Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием, длинна которого должна быть ",
             };
 
             // Act
-            var response = await _client.PostAsJsonAsync("/api/Comment/Create", bookDTO);
+            string jwtToken = _token.GenerateJwtToken("admin");
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+            var requestContent = new StringContent(JsonConvert.SerializeObject(bookDTO), Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await _client.PostAsync("/api/Comment/Create", requestContent);
 
             // Assert
             response.EnsureSuccessStatusCode();

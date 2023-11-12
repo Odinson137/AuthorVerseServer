@@ -6,6 +6,11 @@ namespace AuthorVerseServer.Repository
 {
     public class AccountRepository : IAccount
     {
+        public Task<ICollection<UpdateAccountBook>> CheckUserUpdates(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<UserProfileDTO> GetUserAsync(string userId)
         {
             throw new NotImplementedException();

@@ -32,7 +32,7 @@ namespace AuthorVerseServer.Services
                 _configuration["Jwt:Issuer"],
                 _configuration["Jwt:Issuer"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(120),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -61,7 +61,7 @@ namespace AuthorVerseServer.Services
 
         public virtual string? GetIdFromToken(ClaimsPrincipal user)
         {
-            string? userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            string? userId = user.Identities.First().Claims.First().Value;
             return userId;
         }
     }

@@ -3,7 +3,6 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace AuthorVerseServer.Data
 {

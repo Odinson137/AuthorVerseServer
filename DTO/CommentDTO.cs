@@ -27,8 +27,6 @@ namespace AuthorVerseServer.DTO
 
     public class CreateCommentDTO
     {
-        [Required]
-        public string UserId { get; set; } = null!;
         public int BookId { get; set; }
         [Required]
         [MaxLength(400, ErrorMessage = "Messege's too big")]

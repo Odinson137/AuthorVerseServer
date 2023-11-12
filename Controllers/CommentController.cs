@@ -47,7 +47,11 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateComment([FromBody] CreateCommentDTO commentDTO)
         {
-            User? user = await _userManager.FindByIdAsync(commentDTO.UserId);
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            User? user = await _userManager.FindByIdAsync(userId);
             if(user == null)
                 return NotFound("User not found");
 
