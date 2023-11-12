@@ -228,9 +228,6 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("ReaderRating")
                         .HasColumnType("int");
 
-                    b.Property<int>("Permission")
-                        .HasColumnType("int");
-
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -266,8 +263,9 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("Likes")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserCommentedId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserCommentedId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CommentRatingId");
 
@@ -777,7 +775,7 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.CommentRating", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.Comment", null)
-                        .WithMany("commentRatings")
+                        .WithMany("CommentRatings")
                         .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
@@ -922,7 +920,7 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.Comment", b =>
                 {
-                    b.Navigation("commentRatings");
+                    b.Navigation("CommentRatings");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>

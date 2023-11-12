@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231029163843_ClearTable")]
-    partial class ClearTable
+    [Migration("20231112082635_CreateTables")]
+    partial class CreateTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,19 +43,26 @@ namespace AuthorVerseServer.Migrations
                     b.Property<string>("BookCover")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BookPanoramaImage")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CountRating")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("NormalizedTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Permission")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PublicationData")
                         .HasColumnType("datetime2");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -65,6 +72,10 @@ namespace AuthorVerseServer.Migrations
                     b.HasKey("BookId");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("Permission");
 
                     b.HasIndex("PublicationData");
 
@@ -92,32 +103,47 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasKey("BookChapterId");
 
+                    b.HasIndex("BookChapterId");
+
                     b.HasIndex("BookId");
+
+                    b.HasIndex("PublicationData");
 
                     b.ToTable("BookChapters");
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.BookRating", b =>
+            modelBuilder.Entity("AuthorVerseServer.Models.BookGenre", b =>
                 {
-                    b.Property<int>("BookRatingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookRatingId"));
-
                     b.Property<int>("BookId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Rating")
+                    b.Property<int>("GenreId")
                         .HasColumnType("int");
 
-                    b.HasKey("BookRatingId");
+                    b.HasKey("BookId", "GenreId");
 
                     b.HasIndex("BookId");
 
-                    b.HasIndex("Rating");
+                    b.HasIndex("GenreId");
 
-                    b.ToTable("BookRating");
+                    b.ToTable("BookGenre", (string)null);
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.BookTag", b =>
+                {
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BookId", "TagId");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("BookTag", (string)null);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
@@ -146,6 +172,10 @@ namespace AuthorVerseServer.Migrations
                     b.HasKey("SectionId");
 
                     b.HasIndex("BookChapterId");
+
+                    b.HasIndex("Number");
+
+                    b.HasIndex("SectionId");
 
                     b.ToTable("ChapterSections");
                 });
@@ -176,6 +206,8 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("BookId");
 
+                    b.HasIndex("CharacterId");
+
                     b.ToTable("Characters");
                 });
 
@@ -193,26 +225,56 @@ namespace AuthorVerseServer.Migrations
                     b.Property<string>("CommentatorId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("Permission")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReaderRating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("CommentatorId");
+
+                    b.HasIndex("Permission");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.CommentRating", b =>
+                {
+                    b.Property<int>("CommentRatingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentRatingId"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("DisLikes")
                         .HasColumnType("int");
 
                     b.Property<int>("Likes")
                         .HasColumnType("int");
 
-                    b.Property<int>("Permission")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
+                    b.Property<string>("UserCommentedId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CommentId");
+                    b.HasKey("CommentRatingId");
 
-                    b.HasIndex("BookId");
+                    b.HasIndex("CommentId");
 
-                    b.HasIndex("CommentatorId");
-
-                    b.ToTable("Comments");
+                    b.ToTable("CommentRating");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
@@ -227,6 +289,8 @@ namespace AuthorVerseServer.Migrations
                     b.Property<string>("User2Id")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("Status");
 
                     b.HasIndex("User1Id");
 
@@ -248,6 +312,8 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("GenreId");
+
+                    b.HasIndex("GenreId");
 
                     b.ToTable("Genres");
                 });
@@ -271,6 +337,8 @@ namespace AuthorVerseServer.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AzureName");
+
+                    b.HasIndex("Id");
 
                     b.HasIndex("UserId");
 
@@ -300,11 +368,19 @@ namespace AuthorVerseServer.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("NoteId");
 
                     b.HasIndex("BookChapterid");
+
+                    b.HasIndex("NoteCreatedDateTime");
+
+                    b.HasIndex("NoteId");
+
+                    b.HasIndex("Permission");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notes");
                 });
@@ -330,6 +406,8 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("ChapterSectionId");
 
+                    b.HasIndex("SectionChoiceId");
+
                     b.ToTable("SectionChoices");
                 });
 
@@ -346,6 +424,8 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TagId");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("Tags");
                 });
@@ -459,39 +539,11 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("BookId");
 
+                    b.HasIndex("UserBookId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("UserSelectedBooks");
-                });
-
-            modelBuilder.Entity("BookGenre", b =>
-                {
-                    b.Property<int>("BooksBookId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("GenresGenreId")
-                        .HasColumnType("int");
-
-                    b.HasKey("BooksBookId", "GenresGenreId");
-
-                    b.HasIndex("GenresGenreId");
-
-                    b.ToTable("BookGenre");
-                });
-
-            modelBuilder.Entity("BookTag", b =>
-                {
-                    b.Property<int>("BooksBookId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagsTagId")
-                        .HasColumnType("int");
-
-                    b.HasKey("BooksBookId", "TagsTagId");
-
-                    b.HasIndex("TagsTagId");
-
-                    b.ToTable("BookTag");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -649,11 +701,42 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Book");
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.BookRating", b =>
+            modelBuilder.Entity("AuthorVerseServer.Models.BookGenre", b =>
                 {
-                    b.HasOne("AuthorVerseServer.Models.Book", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("BookId");
+                    b.HasOne("AuthorVerseServer.Models.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AuthorVerseServer.Models.Genre", "Genre")
+                        .WithMany()
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Genre");
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.BookTag", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AuthorVerseServer.Models.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
@@ -672,8 +755,7 @@ namespace AuthorVerseServer.Migrations
                     b.HasOne("AuthorVerseServer.Models.Book", "Book")
                         .WithMany("Characters")
                         .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Book");
                 });
@@ -691,6 +773,14 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Commentator");
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.CommentRating", b =>
+                {
+                    b.HasOne("AuthorVerseServer.Models.Comment", null)
+                        .WithMany("CommentRatings")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
@@ -757,36 +847,6 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BookGenre", b =>
-                {
-                    b.HasOne("AuthorVerseServer.Models.Book", null)
-                        .WithMany()
-                        .HasForeignKey("BooksBookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AuthorVerseServer.Models.Genre", null)
-                        .WithMany()
-                        .HasForeignKey("GenresGenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("BookTag", b =>
-                {
-                    b.HasOne("AuthorVerseServer.Models.Book", null)
-                        .WithMany()
-                        .HasForeignKey("BooksBookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AuthorVerseServer.Models.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -846,8 +906,6 @@ namespace AuthorVerseServer.Migrations
 
                     b.Navigation("Comments");
 
-                    b.Navigation("Ratings");
-
                     b.Navigation("UserSelectedBooks");
                 });
 
@@ -861,6 +919,11 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>
                 {
                     b.Navigation("SectionChoices");
+                });
+
+            modelBuilder.Entity("AuthorVerseServer.Models.Comment", b =>
+                {
+                    b.Navigation("CommentRatings");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>

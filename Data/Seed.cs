@@ -13,18 +13,20 @@ namespace AuthorVerseServer.Data
             {
                 var context = serviceScope.ServiceProvider.GetService<DataContext>();
 
-                var pendingMigrations = context.Database.GetPendingMigrations();
+                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
                 if (pendingMigrations.Any())
                 {
                     await context.Database.EnsureDeletedAsync();
                     await context.Database.MigrateAsync();
-                    await context.Database.EnsureCreatedAsync();
+                    //await context.Database.EnsureCreatedAsync();
                 }
 
                 if (!context.Books.Any())
                 {
-                    await context.Database.EnsureDeletedAsync();
+                    //await context.Database.EnsureDeletedAsync();
                     await context.Database.EnsureCreatedAsync();
+
+                    context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
                     User admin = new User()
                     {

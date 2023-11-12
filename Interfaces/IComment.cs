@@ -4,9 +4,8 @@ using AuthorVerseServer.Models;
 
 public interface IComment
 {
-    Task<int> GetCommentByBookAsync(int bookId);
+    Task<ICollection<Comment>> GetCommentsByBookAsync(int bookId);
     Task<Comment?> GetCommentAsync(int commentId);
-    Task<Comment?> GetUserCommentAsync(string commentatorId, int commentId);
     Task<Book?> GetBook(int bookId);
     Task<Comment?> CheckUserComment(Book book, User user);
     Task AddComment(Comment newComment);

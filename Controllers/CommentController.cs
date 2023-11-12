@@ -34,10 +34,10 @@ namespace AuthorVerseServer.Controllers
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<int>> GetBookComment(int bookId)
+        public async Task<ActionResult<ICollection<Comment>>> GetBookComments(int bookId)
         {
-            int commentsCount = await _comment.GetCommentByBookAsync(bookId);
-            return Ok(commentsCount);
+            var comments = await _comment.GetCommentsByBookAsync(bookId);
+            return Ok(comments);
         }
 
         [Authorize]
@@ -126,7 +126,7 @@ namespace AuthorVerseServer.Controllers
 
             Comment? comment = await _comment.GetCommentAsync(commentId);
             if (comment != null)
-                comment.commentRatings.Add(new CommentRating { CommentId = commentId, Likes = 1, UserCommentedId = userId });
+                comment.CommentRatings.Add(new CommentRating { CommentId = commentId, Likes = 1, UserCommentedId = userId });
             else
                 return NotFound("Comment from this user to this book not found");
 

@@ -35,19 +35,10 @@ namespace AuthorVerseServer.Repository
         {
             _context.Comments.Remove(commentToRemove);
         }
-        public async Task FindCommentRating(Comment commentToRemove)
-        {
-            _context.Comments.Remove(commentToRemove);
-        }
 
         public async Task<Comment?> GetCommentAsync(int commentId)
         {
             return await _context.Comments.FirstOrDefaultAsync(x=> x.CommentId == commentId);
-        }
-
-        public async Task<Comment?> GetUserCommentAsync(string commentatorId, int bookId)
-        {
-            return await _context.Comments.FirstOrDefaultAsync(x => x.BookId == bookId && x.CommentatorId == commentatorId);
         }
 
         public async Task<int> Save()
@@ -55,9 +46,9 @@ namespace AuthorVerseServer.Repository
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<int> GetCommentByBookAsync(int bookId)
+        public async Task<ICollection<Comment>> GetCommentsByBookAsync(int bookId)
         {
-            return await _context.Comments.Where(c => c.BookId == bookId).CountAsync();
+            return await _context.Comments.AsNoTracking().Where(c => c.BookId == bookId).ToListAsync();
         }
     }
 }
