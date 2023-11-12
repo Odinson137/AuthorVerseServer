@@ -1,6 +1,7 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
 
 namespace AuthorVerseServer.Models
 {
@@ -12,9 +13,10 @@ namespace AuthorVerseServer.Models
         public string? Description { get; set; }
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>();
         public ICollection<Book> Books { get; set; } = new List<Book>();
-        public ICollection<Comment>? Comments { get; set; }
-        public ICollection<Friendship>? Friendships { get; set; }
-        public ICollection<User>? Friends { get; set; }
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Friendship> InitiatorFriendships { get; set; } = new List<Friendship>();
+        public ICollection<Friendship> TargetFriendships { get; set; } = new List<Friendship>();
+        //public ICollection<User> Friends { get; set; } = new List<User>();
         public RegistrationMethod Method { get; set; } = RegistrationMethod.Email;
     }
 }

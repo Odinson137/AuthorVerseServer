@@ -8,11 +8,11 @@ namespace AuthorVerseServer.Models
     {
         [Key]
         public int UserBookId { get; set; }
-        public string UserId { get; set; }
-        public User User { get; set; }
+        public string UserId { get; set; } = null!;
+        public User User { get; set; } = null!;
         public int BookId { get; set; }
-        public Book Book { get; set; }
-        public BookChapter LastBookChapter { get; set; }
+        public Book Book { get; set; } = null!;
+        public BookChapter LastBookChapter { get; set; } = null!;
         public BookState BookState { get; set; }
     }
 }

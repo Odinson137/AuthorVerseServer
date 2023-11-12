@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.Interfaces;
+﻿using AuthorVerseServer.Data.Enums;
+using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -31,12 +32,10 @@ namespace AuthorVerseServer.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Friendship>().Ignore(u => u.User1);
+            //modelBuilder.Entity<Friendship>().Ignore(u => u.User1);            modelBuilder.Entity<Friendship>()
+            modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
 
-            modelBuilder.Entity<User>().Ignore(u => u.Friendships);
             modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
-
-            modelBuilder.Entity<Friendship>().HasNoKey();
 
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.Genres)
@@ -55,6 +54,19 @@ namespace AuthorVerseServer.Data
                         j.HasKey(t => new { t.BookId, t.GenreId });
                         j.ToTable("BookGenre"); 
                     });
+
+
+            modelBuilder.Entity<Friendship>()
+                .HasOne(fs => fs.User1)
+                .WithMany(u => u.InitiatorFriendships)
+                .HasForeignKey(fs => fs.User1Id)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Friendship>()
+                .HasOne(fs => fs.User2)
+                .WithMany(u => u.TargetFriendships)
+                .HasForeignKey(fs => fs.User2Id)
+                .OnDelete(DeleteBehavior.NoAction);
+
 
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.Tags)

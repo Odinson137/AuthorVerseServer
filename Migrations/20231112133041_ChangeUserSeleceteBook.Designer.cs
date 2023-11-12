@@ -4,6 +4,7 @@ using AuthorVerseServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231112133041_ChangeUserSeleceteBook")]
+    partial class ChangeUserSeleceteBook
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,7 +81,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("Title");
 
-                    b.ToTable("Books", (string)null);
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookChapter", b =>
@@ -109,7 +112,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("PublicationData");
 
-                    b.ToTable("BookChapters", (string)null);
+                    b.ToTable("BookChapters");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookGenre", b =>
@@ -177,7 +180,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("ChapterSections", (string)null);
+                    b.ToTable("ChapterSections");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Character", b =>
@@ -208,7 +211,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.ToTable("Characters", (string)null);
+                    b.ToTable("Characters");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Comment", b =>
@@ -246,7 +249,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("Permission");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.CommentRating", b =>
@@ -274,7 +277,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.ToTable("CommentRating", (string)null);
+                    b.ToTable("CommentRating");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
@@ -296,7 +299,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("User2Id");
 
-                    b.ToTable("Friendships", (string)null);
+                    b.ToTable("Friendships");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Genre", b =>
@@ -315,7 +318,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("Genres", (string)null);
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.MicrosoftUser", b =>
@@ -342,7 +345,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("MicrosoftUsers", (string)null);
+                    b.ToTable("MicrosoftUsers");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Note", b =>
@@ -382,7 +385,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notes", (string)null);
+                    b.ToTable("Notes");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.SectionChoice", b =>
@@ -408,7 +411,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("SectionChoiceId");
 
-                    b.ToTable("SectionChoices", (string)null);
+                    b.ToTable("SectionChoices");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.Tag", b =>
@@ -427,7 +430,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
@@ -545,7 +548,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserSelectedBooks", (string)null);
+                    b.ToTable("UserSelectedBooks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
