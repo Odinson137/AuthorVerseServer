@@ -143,7 +143,20 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<string>> ChangeDownRating(int commentId)
         {
-            return BadRequest();
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            Comment? comment = await _comment.GetCommentAsync(commentId);
+            if (comment != null)
+                comment.CommentRatings.Add(new CommentRating { CommentId = commentId, DisLikes = 1, UserCommentedId = userId });
+            else
+                return NotFound("Comment from this user to this book not found");
+
+            if (await _comment.Save() == 0)
+                return BadRequest("Problem with saving");
+
+            return Ok();
         }
     }
 }
