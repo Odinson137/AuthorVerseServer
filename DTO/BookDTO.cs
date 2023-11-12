@@ -25,6 +25,35 @@ namespace AuthorVerseServer.DTO
         public DateOnly PublicationData { get; set; }
     }
 
+    public class UserBookDTO
+    {
+        public int BookId { get; set; }
+        public string Title { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string? BookCoverUrl { get; set; }
+        public DateOnly PublicationData { get; set; }
+        public int ReadersCount { get; set; }
+        public int Earnings { get; set; }
+    }
+
+    public class DetailBookDTO
+    {
+        public int BookId { get; set; }
+        public string Title { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public UserDTO Author { get; set; } = null!;
+        public ICollection<GenreDTO> Genres { get; set; } = new List<GenreDTO>();
+        public ICollection<TagDTO> Tags { get; set; } = new List<TagDTO>();
+        public ICollection<string> ImageUrls { get; set; } = new List<string>();
+        public double Rating { get; set; }
+        public int CountRating { get; set; }
+        public int Choices { get; set; }
+        public int ChapterCount { get; set; }
+        public string? BookCoverUrl { get; set; }
+        public DateOnly PublicationData { get; set; }
+        public AgeRating AgeRating { get; set; }
+    }
+
     public class CreateBookDTO
     {
         [Required(ErrorMessage = "Title is required")]

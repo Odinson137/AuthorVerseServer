@@ -91,6 +91,7 @@ namespace AuthorVerseServer.Repository
             var query = GetQueryBooksByTagsGenresTitle(tagId, genreId, searchText);
 
             var booksDTO = query
+                .AsNoTracking()
                 .OrderByDescending(book => book.BookId)
                 .Skip(page * 5)
                 .Take(5)
@@ -122,13 +123,13 @@ namespace AuthorVerseServer.Repository
             return await booksDTO.ToListAsync();
         }
 
-        public async Task<BookDTO?> GetBookById(int bookId)
+        public async Task<DetailBookDTO?> GetBookById(int bookId)
         {
             var book = await _context.Books
                 .AsNoTracking()
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved &&
                     book.BookId == bookId)
-                .Select(book => new BookDTO()
+                .Select(book => new DetailBookDTO()
                 {
                     BookId = book.BookId,
                     Title = book.Title,
@@ -136,9 +137,17 @@ namespace AuthorVerseServer.Repository
                     Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
                     Genres = book.Genres.Select(genre => new GenreDTO() { GenreId = genre.GenreId, Name = genre.Name }).ToList(),
                     Tags = book.Genres.Select(tag => new TagDTO() { TagId = tag.GenreId, Name = tag.Name }).ToList(),
+                    //ImageUrls = book.BookChapters
+                    //        .SelectMany(c => c.ChapterSections.Where(x => !string.IsNullOrEmpty(x.ImageUrl)).Select(x => x.ImageUrl))
+                    //        .ToList(),
                     Rating = book.Rating,
                     CountRating = book.CountRating,
+                    Choices = book.BookChapters
+                            .SelectMany(x => x.ChapterSections
+                            .Where(x => x.SectionChoices != null && x.SectionChoices.Count >= 2))
+                            .Count(),
                     PublicationData = DateOnly.FromDateTime(book.PublicationData),
+                    ChapterCount = book.BookChapters.Count(),
                     BookCoverUrl = book.BookCover
                 }).FirstOrDefaultAsync();
 

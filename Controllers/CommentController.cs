@@ -104,7 +104,7 @@ namespace AuthorVerseServer.Controllers
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
 
-            Comment comment = await _comment.GetCommentAsync(commentId);
+            Comment? comment = await _comment.GetCommentAsync(commentId);
             if (comment != null)
                 comment.Text = bookText;
             else

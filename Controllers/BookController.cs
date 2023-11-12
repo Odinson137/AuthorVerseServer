@@ -4,7 +4,6 @@ using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
 using Azure;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -92,7 +91,7 @@ namespace AuthorVerseServer.Controllers
         [HttpGet("{bookId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<BookDTO>> GetBook(int bookId)
+        public async Task<ActionResult<DetailBookDTO>> GetBook(int bookId)
         {
             var book = await _book.GetBookById(bookId);
 

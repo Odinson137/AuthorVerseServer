@@ -7,6 +7,7 @@ namespace AuthorVerseServer.Models
     {
         [Key]
         public int BookChapterId { get; set; }
+        public string? Title { get; set; }
         public string? Description { get; set; }
         public ICollection<int> Characters { get; set; } = new List<int>();
         public int BookId { get; set; }

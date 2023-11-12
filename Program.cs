@@ -22,7 +22,7 @@ services.AddScoped<IChapterSection, ChapterSectionRepository>();
 services.AddScoped<IComment, CommentRepository>();
 services.AddScoped<IBookChapter, BookChapterRepository>();
 services.AddScoped<IGenre, GenreRepository>();
-services.AddScoped<IUserSelectedBook, UserSelectedBookRepository>();
+services.AddScoped<IAccount, AccountRepository>();
 services.AddScoped<ISectionChoice, SectionChoiceRepository>();
 services.AddScoped<IBook, BookRepository>();
 services.AddScoped<ICharacter, CharacterRepository>();

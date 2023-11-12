@@ -29,6 +29,6 @@ namespace AuthorVerseServer.Models
         [Range(1, 5)]
         public double Rating { get; set; }
         public int CountRating { get; set; }
-        public PublicationPermission Permission { get; set; }
+        public PublicationPermission Permission { get; set; } = PublicationPermission.Approved;
     }
 }
