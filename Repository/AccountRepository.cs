@@ -27,12 +27,9 @@ namespace AuthorVerseServer.Repository
                 Description = data.Description,
                 LogoUrl = data.LogoUrl,
             }).FirstOrDefaultAsync();
-        public Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment)
-        {
-            throw new NotImplementedException();
         }
 
-        public Task<UserProfileDTO> GetUserAsync(string userId)
+        public Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment)
         {
             throw new NotImplementedException();
         }
