@@ -13,6 +13,12 @@ namespace AuthorVerseServer.DTO
         public DateOnly CommentCreatedDateTime { get; set; }
     }
 
+    public class CommentPageDTO
+    {
+        public int PagesCount { get; set; }
+        public List<CommentProfileDTO> comments = new List<CommentProfileDTO>();
+    }
+
     public class CommentProfileDTO
     {
         public int CommentId { get; set; }

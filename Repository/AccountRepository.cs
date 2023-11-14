@@ -11,6 +11,11 @@ namespace AuthorVerseServer.Repository
             throw new NotImplementedException();
         }
 
+        public Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<UserProfileDTO> GetUserAsync(string userId)
         {
             throw new NotImplementedException();

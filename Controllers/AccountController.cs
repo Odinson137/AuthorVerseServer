@@ -45,12 +45,12 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("UserComments")]
-        public async Task<ActionResult<ICollection<CommentProfileDTO>>> GetUserComments(
+        public async Task<ActionResult<CommentPageDTO>> GetUserComments(
             CommentType commentType = CommentType.All, int page = 1, string searchComment = "") // показывать на одной странице по 10 комментов
         {
             var a = Enum.IsDefined(typeof(CommentType), commentType);
             // userId from token
-            return Ok(new List<CommentProfileDTO>());
+            return Ok(new CommentPageDTO());
         }
 
         [HttpGet("Friends")]
@@ -68,10 +68,10 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("Updates")]
-        public async Task<ActionResult<ICollection<UserBookDTO>>> GetUserBooksUpdates()
+        public async Task<ActionResult<ICollection<UpdateAccountBook>>> GetUserBooksUpdates()
         {
             // userId from token
-            return Ok(new List<UserBookDTO>());
+            return Ok(new List<UpdateAccountBook>());
         }
     }
 }
