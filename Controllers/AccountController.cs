@@ -33,8 +33,16 @@ namespace AuthorVerseServer.Controllers
         [HttpGet("Profile")]
         public async Task<ActionResult<UserProfileDTO>> GetUserProfile()
         {
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            UserProfileDTO profile = await _account.GetUserAsync(userId);
+            if (profile == null)
+                return NotFound("User's not found");
+
             // userId from token
-            return Ok(new UserProfileDTO());
+            return Ok(profile);
         }
 
         [HttpGet("SelectedBooks")]
