@@ -2,6 +2,7 @@
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
@@ -21,12 +22,19 @@ namespace AuthorVerseServer.Repository
 
         public async Task<UserProfileDTO> GetUserAsync(string userId)
         {
-            return await _context.Users.Select(data => new UserProfileDTO
+            return await _context.Users.Where(data => data.Id == userId).Select(data => new UserProfileDTO
             {
                 UserName = data.UserName,
                 Description = data.Description,
                 LogoUrl = data.LogoUrl,
             }).FirstOrDefaultAsync();
+
+            /*return await _context.Users.Select(data => new UserProfileDTO
+            {
+                UserName = data.UserName,
+                Description = data.Description,
+                LogoUrl = data.LogoUrl,
+            }).FirstOrDefaultAsync();*/
         }
 
         public Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment)
@@ -49,9 +57,19 @@ namespace AuthorVerseServer.Repository
             throw new NotImplementedException();
         }
 
-        public Task<ICollection<UserSelectedBookDTO>> GetUserSelectedBooksAsync(string userId)
+        public async Task<ICollection<UserSelectedBookDTO>> GetUserSelectedBooksAsync(string userId)
         {
-            throw new NotImplementedException();
+            return await _context.UserSelectedBooks
+                .Where(data => data.UserId == userId)
+                .Select(data=> new UserSelectedBookDTO
+                {
+                    BookId = data.BookId,
+                    Title = data.Book.Title,
+                    ImageUrl = data.Book.BookCover,
+                    BookState = data.BookState,
+                    PublicationData = DateOnly.FromDateTime(data.Book.PublicationData.Date),
+/*                    LastReadingChapter = data.LastBookChapter.,
+*/                }).ToListAsync();
         }
     }
 }
