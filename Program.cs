@@ -11,6 +11,7 @@ using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.OpenApi.Models;
 using AuthorVerseServer.Filters;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -62,10 +63,9 @@ services.AddMemoryCache();
 
 var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
 
-services.AddDbContext<DataContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
 
 //services.AddDbContext<DataContext>(options => options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
 
@@ -134,7 +134,7 @@ services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-await Seed.SeedData(app);
+//await Seed.SeedData(app);
 
 var scope = app.Services.CreateScope();
 var scopedContext = scope.ServiceProvider.GetRequiredService<DataContext>();

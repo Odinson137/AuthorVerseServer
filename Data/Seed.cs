@@ -14,12 +14,12 @@ namespace AuthorVerseServer.Data
             {
                 var context = serviceScope.ServiceProvider.GetService<DataContext>();
 
-                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
-                {
-                    await context.Database.EnsureDeletedAsync();
-                    await context.Database.MigrateAsync();
-                }
+                //var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                //if (pendingMigrations.Any())
+                //{
+                //    await context.Database.EnsureDeletedAsync();
+                //    await context.Database.MigrateAsync();
+                //}
 
                 if (!context.Books.Any() || !context.Friendships.Any())
                 {
