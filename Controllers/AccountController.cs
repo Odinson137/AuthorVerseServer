@@ -52,10 +52,7 @@ namespace AuthorVerseServer.Controllers
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
 
-
-
-            // userId from token
-            return Ok(new List<UserSelectedBookDTO>());
+            return Ok(await _account.GetUserSelectedBooksAsync(userId));
         }
 
         [HttpGet("UserComments")]
