@@ -1,0 +1,33 @@
+
+version: '3.4'
+
+networks:
+  serverapp:
+
+services:
+  db:
+    container_name: db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+        - 1433:1433
+    environment:
+        - ACCEPT_EULA=Y
+        - MSSQL_SA_PASSWORD=PaASasssword@#Q@123456
+    networks:
+        - serverapp
+
+  server:
+    container_name: server
+    build:
+      context: .
+      target: final
+    ports:
+      - 7069:80
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=AuthorVerseDb
+      - DB_SA_PASSWORD=PaASasssword@#Q@123456
+    networks:
+      - serverapp

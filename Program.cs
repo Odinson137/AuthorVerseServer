@@ -60,8 +60,10 @@ services.AddSwaggerGen(s =>
 
 services.AddMemoryCache();
 
-var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
 
+//var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+
+var connectionString = $"Data Source=app-db;Initial Catalog=AuthorVerseDb;User ID=sa;Password=PaASasssword@#Q@123456";
 services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(connectionString);
