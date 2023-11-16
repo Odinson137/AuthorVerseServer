@@ -134,10 +134,14 @@ services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-await Seed.SeedData(app);
+using (var scope = app.Services.CreateScope())
+{
+    var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-var scope = app.Services.CreateScope();
-var scopedContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+    await Seed.SeedData(dataContext, roleManager, userManager);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -8,122 +8,115 @@ namespace AuthorVerseServer.Data
 {
     public class Seed
     {
-        public static async Task SeedData(IApplicationBuilder applicationBuilder)
+        public static async Task SeedData(DataContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
         {
-            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
             {
-                var context = serviceScope.ServiceProvider.GetService<DataContext>();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.MigrateAsync();
+            }
 
-                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
+            if (!context.Books.Any() || !context.Friendships.Any())
+            {
+                //await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
+
+                User admin = new User()
                 {
-                    await context.Database.EnsureDeletedAsync();
-                    await context.Database.MigrateAsync();
-                }
+                    Id = "admin",
+                    UserName = "Admin",
+                    Description = "Люблю жизнь, она моя, она нагнула меня, но я не отчаиваюсь, живу",
+                    Name = "Юри",
+                    LastName = "Brown",
+                    LogoUrl = "hashtag.png",
+                    Method = RegistrationMethod.Email,
+                    Email = "buryy132@gmail.com",
+                };
 
-                if (!context.Books.Any() || !context.Friendships.Any())
+                for (int i = 0; i < 5; i++)
                 {
-                    //await context.Database.EnsureDeletedAsync();
-                    await context.Database.EnsureCreatedAsync();
-
-                    User admin = new User()
+                    var friend = new User
                     {
-                        Id = "admin",
-                        UserName = "Admin",
-                        Description = "Люблю жизнь, она моя, она нагнула меня, но я не отчаиваюсь, живу",
-                        Name = "Юри",
+                        UserName = $"Friend-{i}",
+                        Description = "Живу ради админа",
+                        Name = "Friend",
                         LastName = "Brown",
                         LogoUrl = "hashtag.png",
                         Method = RegistrationMethod.Email,
-                        Email = "buryy132@gmail.com",
+                        Email = $"frined132{i}@gmail.com",
                     };
 
-                    for (int i = 0; i < 5; i++)
+                    Friendship friendship = new Friendship
                     {
-                        var friend = new User
-                        {
-                            UserName = $"Friend-{i}",
-                            Description = "Живу ради админа",
-                            Name = "Friend",
-                            LastName = "Brown",
-                            LogoUrl = "hashtag.png",
-                            Method = RegistrationMethod.Email,
-                            Email = $"frined132{i}@gmail.com",
-                        };
+                        User1 = admin,
+                        User2 = friend,
+                        Status = FriendshipStatus.Accepted,
+                    };
 
-                        Friendship friendship = new Friendship
-                        {
-                            User1 = admin,
-                            User2 = friend,
-                            Status = FriendshipStatus.Accepted,
-                        };
+                    admin.InitiatorFriendships.Add(friendship);
+                }
 
-                        admin.InitiatorFriendships.Add(friendship);
-                    }
-
-                    for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 2; i++)
+                {
+                    var friend = new User
                     {
-                        var friend = new User
-                        {
-                            UserName = $"Friend-request-{i}",
-                            Description = "Живу ради админа, чтоб быть у него в запросах",
-                            Name = "Friend",
-                            LastName = "Brown",
-                            LogoUrl = "hashtag.png",
-                            Method = RegistrationMethod.Email,
-                            Email = $"frined1321{i}@gmail.com",
-                        };
+                        UserName = $"Friend-request-{i}",
+                        Description = "Живу ради админа, чтоб быть у него в запросах",
+                        Name = "Friend",
+                        LastName = "Brown",
+                        LogoUrl = "hashtag.png",
+                        Method = RegistrationMethod.Email,
+                        Email = $"frined1321{i}@gmail.com",
+                    };
 
-                        Friendship friendship = new Friendship
-                        {
-                            User1 = admin,
-                            User2 = friend,
-                            Status = FriendshipStatus.Pending,
-                        };
-
-                        admin.InitiatorFriendships.Add(friendship);
-                    }
-
-                    for (int i = 0; i < 2; i++)
+                    Friendship friendship = new Friendship
                     {
-                        var friend = new User
-                        {
-                            UserName = $"Friend-banned-{i}",
-                            Description = "Живу ради админа, чтоб быть у него в бане",
-                            Name = "Friend",
-                            LastName = "Brown",
-                            LogoUrl = "hashtag.png",
-                            Method = RegistrationMethod.Email,
-                            Email = $"frined1322{i}@gmail.com",
-                        };
+                        User1 = admin,
+                        User2 = friend,
+                        Status = FriendshipStatus.Pending,
+                    };
 
-                        Friendship friendship = new Friendship
-                        {
-                            User1 = admin,
-                            User2 = friend,
-                            Status = FriendshipStatus.Blocked,
-                        };
+                    admin.InitiatorFriendships.Add(friendship);
+                }
 
-                        admin.InitiatorFriendships.Add(friendship);
-                    }
-
-                    var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                    var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-                    await userManager.CreateAsync(admin, "Password@123");
-
-                    string folderPath = @"./wwwroot/Api/Images/";
-
-                    string[] fileNames = Directory.GetFiles(folderPath);
-                    List<string> files = new List<string>(10);
-
-                    foreach (string fileName in fileNames)
+                for (int i = 0; i < 2; i++)
+                {
+                    var friend = new User
                     {
-                        string name = Path.GetFileName(fileName);
-                        files.Add(name);
-                    }
+                        UserName = $"Friend-banned-{i}",
+                        Description = "Живу ради админа, чтоб быть у него в бане",
+                        Name = "Friend",
+                        LastName = "Brown",
+                        LogoUrl = "hashtag.png",
+                        Method = RegistrationMethod.Email,
+                        Email = $"frined1322{i}@gmail.com",
+                    };
 
-                    var genreNames = new List<string>
+                    Friendship friendship = new Friendship
+                    {
+                        User1 = admin,
+                        User2 = friend,
+                        Status = FriendshipStatus.Blocked,
+                    };
+
+                    admin.InitiatorFriendships.Add(friendship);
+                }
+
+                await userManager.CreateAsync(admin, "Password@123");
+
+                string folderPath = @"./wwwroot/Api/Images/";
+
+                string[] fileNames = Directory.GetFiles(folderPath);
+                List<string> files = new List<string>(10);
+
+                foreach (string fileName in fileNames)
+                {
+                    string name = Path.GetFileName(fileName);
+                    files.Add(name);
+                }
+
+                var genreNames = new List<string>
                     {
                         "Science Fiction",
                         "Detective",
@@ -143,7 +136,7 @@ namespace AuthorVerseServer.Data
                         "Fantasy"
                     };
 
-                    var tagNames = new List<string>()
+                var tagNames = new List<string>()
                     {
                         "Book",
                         "AudioBook",
@@ -156,33 +149,33 @@ namespace AuthorVerseServer.Data
                         "Documental literature",
                     };
 
-                    var genres = new List<Genre>();
+                var genres = new List<Genre>();
 
-                    foreach (var genreName in genreNames)
-                    {
-                        var genre = new Genre { Name = genreName };
-                        genres.Add(genre);
-                        context.Add(genre);
-                    }
+                foreach (var genreName in genreNames)
+                {
+                    var genre = new Genre { Name = genreName };
+                    genres.Add(genre);
+                    context.Add(genre);
+                }
 
-                    var tags = new List<Tag>();
+                var tags = new List<Tag>();
 
-                    foreach (var tagName in tagNames)
-                    {
-                        var tag = new Tag { Name = tagName };
-                        tags.Add(tag);
-                        context.Add(tag);
-                    }
+                foreach (var tagName in tagNames)
+                {
+                    var tag = new Tag { Name = tagName };
+                    tags.Add(tag);
+                    context.Add(tag);
+                }
 
-                    if (!await roleManager.RoleExistsAsync("Admin"))
-                    {
-                        var role = new IdentityRole("Admin");
-                        await roleManager.CreateAsync(role);
-                    }
+                if (!await roleManager.RoleExistsAsync("Admin"))
+                {
+                    var role = new IdentityRole("Admin");
+                    await roleManager.CreateAsync(role);
+                }
 
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                await userManager.AddToRoleAsync(admin, "Admin");
 
-                    Dictionary<string, string> bookDescriptions = new Dictionary<string, string>
+                Dictionary<string, string> bookDescriptions = new Dictionary<string, string>
                     {
                         {"Красный и чёрный", "История о молодом и амбициозном Жюльене Сореле, который стремится взобраться на социальную лестницу Франции."},
                         {"Война и мир", "Величественная эпопея о Российской империи во времена войн против Наполеона."},
@@ -196,47 +189,47 @@ namespace AuthorVerseServer.Data
                         {"1984", "Дистопический роман о тоталитарном обществе, где правительство контролирует каждый аспект жизни граждан."}
                     };
 
-                    List<string> usersName = new List<string>()
+                List<string> usersName = new List<string>()
                     {
                         "", "Лев", "Маргарет", "Антуан", "Михаил", "Джоан", "Фёдор",
                         "Владимир", "Фрэнсис Скотт", "Джордж"
                     };
 
-                    List<string> usersLastName = new List<string>()
+                List<string> usersLastName = new List<string>()
                     {
                         "Стендаль", "Толстой", "Митчелл", "де Сент-Экзюпери", "Булгаков", "Роулинг", "Достоевский",
                         "Набоков", "Фицджеральд", "Оруэлл"
                     };
 
-                    Random random = new Random();
+                Random random = new Random();
 
-                    int numer = 0;
-                    foreach (var book in bookDescriptions)
+                int numer = 0;
+                foreach (var book in bookDescriptions)
+                {
+                    var Book = new Book()
                     {
-                        var Book = new Book()
-                        {
-                            Title = book.Key,
-                            NormalizedTitle = (book.Key).ToUpper(),
-                            Author = new User { UserName = $"CCharpProger_{numer}" },
-                            Description = book.Value,
-                            AgeRating = AgeRating.All,
-                            Permission = PublicationPermission.Approved,
-                            BookCover = files[numer++]
-                        };
+                        Title = book.Key,
+                        NormalizedTitle = (book.Key).ToUpper(),
+                        Author = new User { UserName = $"CCharpProger_{numer}" },
+                        Description = book.Value,
+                        AgeRating = AgeRating.All,
+                        Permission = PublicationPermission.Approved,
+                        BookCover = files[numer++]
+                    };
 
-                        for (int i = 0; i < 3; i++)
-                        {
-                            var genre = genres[random.Next(0, 16)];
-                            Book.Genres.Add(genre);
-                        }
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var genre = genres[random.Next(0, 16)];
+                        Book.Genres.Add(genre);
+                    }
 
-                        for (int i = 0; i < 3; i++)
-                        {
-                            var tag = tags[random.Next(0, 9)];
-                            Book.Tags.Add(tag);
-                        }
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var tag = tags[random.Next(0, 9)];
+                        Book.Tags.Add(tag);
+                    }
 
-                        var chapters = new List<BookChapter>() { new BookChapter()
+                    var chapters = new List<BookChapter>() { new BookChapter()
                         {
                             BookChapterNumber = 1,
                             ChapterSections = new List<ChapterSection>()
@@ -281,60 +274,188 @@ namespace AuthorVerseServer.Data
                                 }
                         } };
 
-                        var comments = new List<Comment>();
-                        for (int i = 0; i < random.Next(5, 30); i++)
+                    var comments = new List<Comment>();
+                    for (int i = 0; i < random.Next(5, 30); i++)
+                    {
+                        comments.Add(new Comment()
                         {
-                            comments.Add(new Comment()
-                            {
-                                Commentator = admin,
-                                Text = "Это мой первый тестовый коммент, так что не судите строго. Я правда стараюсь, Ярик, пожалуйста, не делай со мной то, что ты делал со мной в прошлый раз. Пожалуйста",
-                                ReaderRating = random.Next(1, 6)
-                            });
-                            comments.Add(new Comment()
-                            {
-                                Commentator = admin,
-                                Text = "Это мой второй тестовый коммент, так что не судите строго. Эта книга — настоящий литературный шедевр! Автор с легкостью создает живописные образы и увлекательные сюжеты, погружая читателя в удивительный мир воображения. От момента первого взгляда до последней строки она дарит непередаваемые эмоции и заставляет задуматься над глубокими философскими вопросами. Страстные персонажи, захватывающие сюжеты и неожиданные повороты — все это делает книгу невероятно увлекательной и запоминающейся. Прочитав ее, вы погружаетесь в уникальный мир приключений и открываете для себя неизведанные грани литературы",
-                                ReaderRating = random.Next(1, 6)
-                            });
-                            comments.Add(new Comment()
-                            {
-                                Commentator = admin,
-                                Text = "Это мой третий тестовый коммент, так что не судите строго. Увлекательная история, наполненная волнующими поворотами сюжета и захватывающими персонажами. Книга, которая поднимает важные вопросы о судьбе, предательстве и вечной борьбе добра со злом. Мастерски прописанные детали создают неповторимую атмосферу, погружая читателя в удивительный мир авторского воображения. Здесь найдется место как для приключений, так и для глубоких размышлений. Невозможно оторваться от страниц, пока герои ведут нас через запутанные лабиринты загадок и тайн. Великолепное произведение, которое оставит неизгладимый след в сердце каждого читателя",
-                                ReaderRating = random.Next(1, 6)
-                            });
-                        }
-
-                        Book.Comments = comments;
-
-                        Book.Rating = comments.Average(x => x.ReaderRating);
-                        Book.CountRating = comments.Count;
-
-                        Book.BookChapters = chapters;
-
-                        UserSelectedBook userSelectedBook = new UserSelectedBook()
+                            Commentator = admin,
+                            Text = "Это мой первый тестовый коммент, так что не судите строго. Я правда стараюсь, Ярик, пожалуйста, не делай со мной то, что ты делал со мной в прошлый раз. Пожалуйста",
+                            ReaderRating = random.Next(1, 6)
+                        });
+                        comments.Add(new Comment()
                         {
-                            Book = Book,
-                            User = admin,
-                            BookState = (BookState)random.Next(0, 5),
-                            LastBookChapterNumber = random.Next(1, 4),
-                        };
-
-                        admin.UserSelectedBooks.Add(userSelectedBook);
+                            Commentator = admin,
+                            Text = "Это мой второй тестовый коммент, так что не судите строго. Эта книга — настоящий литературный шедевр! Автор с легкостью создает живописные образы и увлекательные сюжеты, погружая читателя в удивительный мир воображения. От момента первого взгляда до последней строки она дарит непередаваемые эмоции и заставляет задуматься над глубокими философскими вопросами. Страстные персонажи, захватывающие сюжеты и неожиданные повороты — все это делает книгу невероятно увлекательной и запоминающейся. Прочитав ее, вы погружаетесь в уникальный мир приключений и открываете для себя неизведанные грани литературы",
+                            ReaderRating = random.Next(1, 6)
+                        });
+                        comments.Add(new Comment()
+                        {
+                            Commentator = admin,
+                            Text = "Это мой третий тестовый коммент, так что не судите строго. Увлекательная история, наполненная волнующими поворотами сюжета и захватывающими персонажами. Книга, которая поднимает важные вопросы о судьбе, предательстве и вечной борьбе добра со злом. Мастерски прописанные детали создают неповторимую атмосферу, погружая читателя в удивительный мир авторского воображения. Здесь найдется место как для приключений, так и для глубоких размышлений. Невозможно оторваться от страниц, пока герои ведут нас через запутанные лабиринты загадок и тайн. Великолепное произведение, которое оставит неизгладимый след в сердце каждого читателя",
+                            ReaderRating = random.Next(1, 6)
+                        });
                     }
 
-                    int numeric = 0;
+                    Book.Comments = comments;
+
+                    Book.Rating = comments.Average(x => x.ReaderRating);
+                    Book.CountRating = comments.Count;
+
+                    Book.BookChapters = chapters;
+
+                    UserSelectedBook userSelectedBook = new UserSelectedBook()
+                    {
+                        Book = Book,
+                        User = admin,
+                        BookState = (BookState)random.Next(0, 5),
+                        LastBookChapterNumber = random.Next(1, 4),
+                    };
+
+                    admin.UserSelectedBooks.Add(userSelectedBook);
+                }
+
+                int numeric = 0;
+                foreach (var book in bookDescriptions)
+                {
+                    var Book = new Book()
+                    {
+                        Title = book.Key,
+                        NormalizedTitle = (book.Key).ToUpper(),
+                        Author = admin,
+                        Description = book.Value,
+                        AgeRating = AgeRating.All,
+                        Permission = PublicationPermission.Approved,
+                        BookCover = files[numeric++]
+                    };
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var genre = genres[random.Next(0, 16)];
+                        Book.Genres.Add(genre);
+                    }
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var tag = tags[random.Next(0, 9)];
+                        Book.Tags.Add(tag);
+                    }
+
+
+                    BookChapter chapter = new BookChapter()
+                    {
+                        ChapterSections = new List<ChapterSection>()
+                                {
+                                    new ChapterSection()
+                                    {
+                                        Number = 1,
+                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
+                                    }
+                                }
+                    };
+
+                    BookChapter chapter2 = new BookChapter()
+                    {
+                        ChapterSections = new List<ChapterSection>()
+                                {
+                                    new ChapterSection()
+                                    {
+                                        Number = 2,
+                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
+                                    }
+                                }
+                    };
+
+                    BookChapter chapter3 = new BookChapter()
+                    {
+                        ChapterSections = new List<ChapterSection>()
+                                {
+                                    new ChapterSection()
+                                    {
+                                        Number = 3,
+                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
+                                    },
+                                    new ChapterSection()
+                                    {
+                                        Number = 4,
+                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
+                                    },
+                                    new ChapterSection()
+                                    {
+                                        Number = 5,
+                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
+                                    }
+                                }
+                    };
+
+                    Book.BookChapters = new List<BookChapter>() { chapter, chapter2, chapter3 };
+
+                    var comments = new List<Comment>();
+                    for (int i = 0; i < random.Next(5, 30); i++)
+                    {
+                        comments.Add(new Comment()
+                        {
+                            Commentator = admin,
+                            Text = "Это мой первый тестовый коммент, так что не судите строго. Я правда стараюсь, Ярик, пожалуйста, не делай со мной то, что ты делал со мной в прошлый раз. Пожалуйста",
+                            ReaderRating = random.Next(1, 6)
+                        });
+                        comments.Add(new Comment()
+                        {
+                            Commentator = admin,
+                            Text = "Это мой второй тестовый коммент, так что не судите строго. Эта книга — настоящий литературный шедевр! Автор с легкостью создает живописные образы и увлекательные сюжеты, погружая читателя в удивительный мир воображения. От момента первого взгляда до последней строки она дарит непередаваемые эмоции и заставляет задуматься над глубокими философскими вопросами. Страстные персонажи, захватывающие сюжеты и неожиданные повороты — все это делает книгу невероятно увлекательной и запоминающейся. Прочитав ее, вы погружаетесь в уникальный мир приключений и открываете для себя неизведанные грани литературы",
+                            ReaderRating = random.Next(1, 6)
+                        });
+                        comments.Add(new Comment()
+                        {
+                            Commentator = admin,
+                            Text = "Это мой третий тестовый коммент, так что не судите строго. Увлекательная история, наполненная волнующими поворотами сюжета и захватывающими персонажами. Книга, которая поднимает важные вопросы о судьбе, предательстве и вечной борьбе добра со злом. Мастерски прописанные детали создают неповторимую атмосферу, погружая читателя в удивительный мир авторского воображения. Здесь найдется место как для приключений, так и для глубоких размышлений. Невозможно оторваться от страниц, пока герои ведут нас через запутанные лабиринты загадок и тайн. Великолепное произведение, которое оставит неизгладимый след в сердце каждого читателя",
+                            ReaderRating = random.Next(1, 6)
+                        });
+                    }
+
+                    Book.Comments = comments;
+
+                    Book.Rating = comments.Average(x => x.ReaderRating);
+                    Book.CountRating = comments.Count;
+
+                    admin.Books.Add(Book);
+                }
+
+                int n = 0;
+                for (int b = 0; b < 100; b++)
+                {
+                    User user = new User()
+                    {
+                        UserName = $"JSUser{b}",
+                        Description = "Люблю Ярика",
+                        Email = "Kekus132@gmail.com",
+                        Method = RegistrationMethod.Email,
+                        EmailConfirmed = true,
+                        LogoUrl = "java-script.png",
+                        Name = usersName[n],
+                        LastName = usersLastName[n],
+                    };
+
+                    n = (n + 1) % 10;
+
+                    await userManager.CreateAsync(user, "ЮрикИзМножества_ЯрикИзСкриптеров_СаняИзНарода123");
+                    await context.Users.AddAsync(user);
+
+                    int num = 0;
+
                     foreach (var book in bookDescriptions)
                     {
                         var Book = new Book()
                         {
-                            Title = book.Key,
-                            NormalizedTitle = (book.Key).ToUpper(),
-                            Author = admin,
-                            Description = book.Value,
+                            Title = book.Key + b.ToString(),
+                            NormalizedTitle = (book.Key + b.ToString()).ToUpper(),
+                            Author = user,
+                            Description = book.Value + b.ToString(),
                             AgeRating = AgeRating.All,
                             Permission = PublicationPermission.Approved,
-                            BookCover = files[numeric++]
+                            BookCover = files[num]
                         };
+                        num++;
 
                         for (int i = 0; i < 3; i++)
                         {
@@ -398,23 +519,23 @@ namespace AuthorVerseServer.Data
                         Book.BookChapters = new List<BookChapter>() { chapter, chapter2, chapter3 };
 
                         var comments = new List<Comment>();
-                        for (int i = 0; i < random.Next(5, 30); i++)
+                        for (int i = 0; i < random.Next(10, 50); i++)
                         {
                             comments.Add(new Comment()
                             {
-                                Commentator = admin,
+                                Commentator = user,
                                 Text = "Это мой первый тестовый коммент, так что не судите строго. Я правда стараюсь, Ярик, пожалуйста, не делай со мной то, что ты делал со мной в прошлый раз. Пожалуйста",
                                 ReaderRating = random.Next(1, 6)
                             });
                             comments.Add(new Comment()
                             {
-                                Commentator = admin,
+                                Commentator = user,
                                 Text = "Это мой второй тестовый коммент, так что не судите строго. Эта книга — настоящий литературный шедевр! Автор с легкостью создает живописные образы и увлекательные сюжеты, погружая читателя в удивительный мир воображения. От момента первого взгляда до последней строки она дарит непередаваемые эмоции и заставляет задуматься над глубокими философскими вопросами. Страстные персонажи, захватывающие сюжеты и неожиданные повороты — все это делает книгу невероятно увлекательной и запоминающейся. Прочитав ее, вы погружаетесь в уникальный мир приключений и открываете для себя неизведанные грани литературы",
                                 ReaderRating = random.Next(1, 6)
                             });
                             comments.Add(new Comment()
                             {
-                                Commentator = admin,
+                                Commentator = user,
                                 Text = "Это мой третий тестовый коммент, так что не судите строго. Увлекательная история, наполненная волнующими поворотами сюжета и захватывающими персонажами. Книга, которая поднимает важные вопросы о судьбе, предательстве и вечной борьбе добра со злом. Мастерски прописанные детали создают неповторимую атмосферу, погружая читателя в удивительный мир авторского воображения. Здесь найдется место как для приключений, так и для глубоких размышлений. Невозможно оторваться от страниц, пока герои ведут нас через запутанные лабиринты загадок и тайн. Великолепное произведение, которое оставит неизгладимый след в сердце каждого читателя",
                                 ReaderRating = random.Next(1, 6)
                             });
@@ -425,144 +546,15 @@ namespace AuthorVerseServer.Data
                         Book.Rating = comments.Average(x => x.ReaderRating);
                         Book.CountRating = comments.Count;
 
-                        admin.Books.Add(Book);
+                        user.Books.Add(Book);
                     }
 
-                    int n = 0;
-                    for (int b = 0; b < 100; b++)
-                    {
-                        User user = new User()
-                        {
-                            UserName = $"JSUser{b}",
-                            Description = "Люблю Ярика",
-                            Email = "Kekus132@gmail.com",
-                            Method = RegistrationMethod.Email,
-                            EmailConfirmed = true,
-                            LogoUrl = "java-script.png",
-                            Name = usersName[n],
-                            LastName = usersLastName[n],
-                        };
 
-                        n = (n + 1) % 10;
-
-                        await userManager.CreateAsync(user, "ЮрикИзМножества_ЯрикИзСкриптеров_СаняИзНарода123");
-                        await context.Users.AddAsync(user);
-
-                        int num = 0;
-
-                        foreach (var book in bookDescriptions)
-                        {
-                            var Book = new Book()
-                            {
-                                Title = book.Key + b.ToString(),
-                                NormalizedTitle = (book.Key + b.ToString()).ToUpper(),
-                                Author = user,
-                                Description = book.Value + b.ToString(),
-                                AgeRating = AgeRating.All,
-                                Permission = PublicationPermission.Approved,
-                                BookCover = files[num]
-                            };
-                            num++;
-
-                            for (int i = 0; i < 3; i++)
-                            {
-                                var genre = genres[random.Next(0, 16)];
-                                Book.Genres.Add(genre);
-                            }
-
-                            for (int i = 0; i < 3; i++)
-                            {
-                                var tag = tags[random.Next(0, 9)];
-                                Book.Tags.Add(tag);
-                            }
-
-
-                            BookChapter chapter = new BookChapter()
-                            {
-                                ChapterSections = new List<ChapterSection>()
-                                {
-                                    new ChapterSection()
-                                    {
-                                        Number = 1,
-                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
-                                    }
-                                }
-                            };
-
-                            BookChapter chapter2 = new BookChapter()
-                            {
-                                ChapterSections = new List<ChapterSection>()
-                                {
-                                    new ChapterSection()
-                                    {
-                                        Number = 2,
-                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
-                                    }
-                                }
-                            };
-
-                            BookChapter chapter3 = new BookChapter()
-                            {
-                                ChapterSections = new List<ChapterSection>()
-                                {
-                                    new ChapterSection()
-                                    {
-                                        Number = 3,
-                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
-                                    },
-                                    new ChapterSection()
-                                    {
-                                        Number = 4,
-                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
-                                    },
-                                    new ChapterSection()
-                                    {
-                                        Number = 5,
-                                        Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!"
-                                    }
-                                }
-                            };
-
-                            Book.BookChapters = new List<BookChapter>() { chapter, chapter2, chapter3 };
-
-                            var comments = new List<Comment>();
-                            for (int i = 0; i < random.Next(10, 50); i++)
-                            {
-                                comments.Add(new Comment()
-                                {
-                                    Commentator = user,
-                                    Text = "Это мой первый тестовый коммент, так что не судите строго. Я правда стараюсь, Ярик, пожалуйста, не делай со мной то, что ты делал со мной в прошлый раз. Пожалуйста",
-                                    ReaderRating = random.Next(1, 6)
-                                });
-                                comments.Add(new Comment()
-                                {
-                                    Commentator = user,
-                                    Text = "Это мой второй тестовый коммент, так что не судите строго. Эта книга — настоящий литературный шедевр! Автор с легкостью создает живописные образы и увлекательные сюжеты, погружая читателя в удивительный мир воображения. От момента первого взгляда до последней строки она дарит непередаваемые эмоции и заставляет задуматься над глубокими философскими вопросами. Страстные персонажи, захватывающие сюжеты и неожиданные повороты — все это делает книгу невероятно увлекательной и запоминающейся. Прочитав ее, вы погружаетесь в уникальный мир приключений и открываете для себя неизведанные грани литературы",
-                                    ReaderRating = random.Next(1, 6)
-                                });
-                                comments.Add(new Comment()
-                                {
-                                    Commentator = user,
-                                    Text = "Это мой третий тестовый коммент, так что не судите строго. Увлекательная история, наполненная волнующими поворотами сюжета и захватывающими персонажами. Книга, которая поднимает важные вопросы о судьбе, предательстве и вечной борьбе добра со злом. Мастерски прописанные детали создают неповторимую атмосферу, погружая читателя в удивительный мир авторского воображения. Здесь найдется место как для приключений, так и для глубоких размышлений. Невозможно оторваться от страниц, пока герои ведут нас через запутанные лабиринты загадок и тайн. Великолепное произведение, которое оставит неизгладимый след в сердце каждого читателя",
-                                    ReaderRating = random.Next(1, 6)
-                                });
-                            }
-
-                            Book.Comments = comments;
-
-                            Book.Rating = comments.Average(x => x.ReaderRating);
-                            Book.CountRating = comments.Count;
-
-                            user.Books.Add(Book);
-                        }
-
-
-                    }
-
-                    await context.SaveChangesAsync();
                 }
-            }
 
+                await context.SaveChangesAsync();
+            }
         }
+
     }
 }
