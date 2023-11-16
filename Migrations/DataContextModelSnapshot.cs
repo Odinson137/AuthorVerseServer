@@ -527,7 +527,7 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("BookState")
                         .HasColumnType("int");
 
-                    b.Property<int>("LastBookChapterBookChapterId")
+                    b.Property<int>("LastBookChapterNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -536,8 +536,6 @@ namespace AuthorVerseServer.Migrations
                     b.HasKey("UserBookId");
 
                     b.HasIndex("BookId");
-
-                    b.HasIndex("LastBookChapterBookChapterId");
 
                     b.HasIndex("UserBookId");
 
@@ -838,20 +836,12 @@ namespace AuthorVerseServer.Migrations
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("AuthorVerseServer.Models.BookChapter", "LastBookChapter")
-                        .WithMany()
-                        .HasForeignKey("LastBookChapterBookChapterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("AuthorVerseServer.Models.User", "User")
                         .WithMany("UserSelectedBooks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Book");
-
-                    b.Navigation("LastBookChapter");
 
                     b.Navigation("User");
                 });

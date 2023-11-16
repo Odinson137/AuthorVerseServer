@@ -35,7 +35,6 @@ namespace AuthorVerseServer.Migrations
                     LogoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Method = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -54,11 +53,6 @@ namespace AuthorVerseServer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -231,12 +225,17 @@ namespace AuthorVerseServer.Migrations
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_Friendships", x => new { x.User1Id, x.User2Id, x.Status });
+                    table.ForeignKey(
+                        name: "FK_Friendships_AspNetUsers_User1Id",
+                        column: x => x.User1Id,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Friendships_AspNetUsers_User2Id",
                         column: x => x.User2Id,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -265,6 +264,8 @@ namespace AuthorVerseServer.Migrations
                 {
                     BookChapterId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    BookChapterNumber = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BookId = table.Column<int>(type: "int", nullable: false),
                     PublicationData = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -385,8 +386,8 @@ namespace AuthorVerseServer.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     BookId = table.Column<int>(type: "int", nullable: false),
-                    BookState = table.Column<int>(type: "int", nullable: false),
-                    LastBookChapterId = table.Column<int>(type: "int", nullable: false)
+                    LastBookChapterNumber = table.Column<int>(type: "int", nullable: false),
+                    BookState = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -524,11 +525,6 @@ namespace AuthorVerseServer.Migrations
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_UserId",
-                table: "AspNetUsers",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",

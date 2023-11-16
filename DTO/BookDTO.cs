@@ -99,7 +99,7 @@ namespace AuthorVerseServer.DTO
     {
         public int BookId { get; set; }
         public string BookTitle { get; set; } = null!;
-        public int ChapterIndex { get; set; }
-        public string? ChapterTitle { get; set; }
+        public int ChapterNumber { get; set; }
+        public string? BookCoverUrl { get; set; }
     }
 }

@@ -371,7 +371,7 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
-            _mockAccount.Setup(a => a.CheckUserUpdates(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
+            _mockAccount.Setup(a => a.CheckUserUpdatesAsync(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
 
             // Act
             var result = await _accountController.GetUserBooksUpdates();
@@ -384,8 +384,8 @@ namespace AuthorVerseServer.Tests.Units
         public async Task GetUserBooksUpdates_OkResult_ShouldReturOkResult()
         {
             // Arrange
-            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
-            _mockAccount.Setup(a => a.CheckUserUpdates(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockAccount.Setup(a => a.CheckUserUpdatesAsync(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
 
             // Act
             var result = await _accountController.GetUserBooksUpdates();
@@ -399,8 +399,8 @@ namespace AuthorVerseServer.Tests.Units
         public async Task GetUserBooksUpdates_OkObjectResult_ShouldReturOkResult()
         {
             // Arrange
-            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
-            _mockAccount.Setup(a => a.CheckUserUpdates(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockAccount.Setup(a => a.CheckUserUpdatesAsync(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
 
             // Act
             var result = await _accountController.GetUserBooksUpdates();

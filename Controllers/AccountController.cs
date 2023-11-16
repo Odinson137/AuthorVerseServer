@@ -76,10 +76,17 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("Updates")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<UpdateAccountBook>>> GetUserBooksUpdates()
         {
-            // userId from token
-            return Ok(new List<UpdateAccountBook>());
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            var books = await _account.CheckUserUpdatesAsync(userId);
+
+            return Ok(books);
         }
     }
 }

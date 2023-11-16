@@ -12,6 +12,6 @@ namespace AuthorVerseServer.Interfaces
         Task<ICollection<FriendDTO>> GetUserFriendsAsync(string userId);
         Task<ICollection<UserBookDTO>> GetUserBooksAsync(string userId); // то что сам пишет
 
-        Task<ICollection<UpdateAccountBook>> CheckUserUpdates(string userId); // должен выводить последние вышедшие главы, если юзер их ещё не прочитал
+        Task<ICollection<UpdateAccountBook>> CheckUserUpdatesAsync(string userId); // должен выводить последние вышедшие главы, если юзер их ещё не прочитал
     }
 }

@@ -189,7 +189,7 @@ namespace AuthorVerseServer.Tests.Integrations
         public async Task GetUserBooksUpdates_Ok_ReturnsOkResult()
         {
             // Arrange
-            var uri = "api/Account/Profile/Updates";
+            var uri = "api/Account/Updates";
 
             var response = await _client.GetAsync(uri);
 
@@ -199,11 +199,14 @@ namespace AuthorVerseServer.Tests.Integrations
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(books);
 
+            Assert.True(books.Count > 0 && books.Count != 10);
+
             foreach (var book in books)
             {
                 Assert.False(string.IsNullOrEmpty(book.BookTitle));
                 Assert.True(book.BookId > 0);
-                Assert.True(book.ChapterIndex > 0);
+                Assert.False(string.IsNullOrEmpty(book.BookTitle));
+                Assert.True(book.ChapterNumber > 0);
             }
         }
     }

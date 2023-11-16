@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorVerseServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231112123716_ChangeComment")]
-    partial class ChangeComment
+    [Migration("20231116113339_CreateTables")]
+    partial class CreateTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,6 +91,9 @@ namespace AuthorVerseServer.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookChapterId"));
+
+                    b.Property<int>("BookChapterNumber")
+                        .HasColumnType("int");
 
                     b.Property<int>("BookId")
                         .HasColumnType("int");
@@ -282,16 +285,16 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
                 {
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<string>("User1Id")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("User2Id")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("User1Id", "User2Id", "Status");
 
                     b.HasIndex("Status");
 
@@ -496,9 +499,6 @@ namespace AuthorVerseServer.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -512,8 +512,6 @@ namespace AuthorVerseServer.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -532,7 +530,7 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("BookState")
                         .HasColumnType("int");
 
-                    b.Property<int>("LastBookChapterBookChapterId")
+                    b.Property<int>("LastBookChapterNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -541,8 +539,6 @@ namespace AuthorVerseServer.Migrations
                     b.HasKey("UserBookId");
 
                     b.HasIndex("BookId");
-
-                    b.HasIndex("LastBookChapterBookChapterId");
 
                     b.HasIndex("UserBookId");
 
@@ -790,11 +786,19 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.Friendship", b =>
                 {
-                    b.HasOne("AuthorVerseServer.Models.User", "User2")
-                        .WithMany()
-                        .HasForeignKey("User2Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("AuthorVerseServer.Models.User", "User1")
+                        .WithMany("InitiatorFriendships")
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("AuthorVerseServer.Models.User", "User2")
+                        .WithMany("TargetFriendships")
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User1");
 
                     b.Navigation("User2");
                 });
@@ -828,13 +832,6 @@ namespace AuthorVerseServer.Migrations
                     b.Navigation("ChapterSection");
                 });
 
-            modelBuilder.Entity("AuthorVerseServer.Models.User", b =>
-                {
-                    b.HasOne("AuthorVerseServer.Models.User", null)
-                        .WithMany("Friends")
-                        .HasForeignKey("UserId");
-                });
-
             modelBuilder.Entity("AuthorVerseServer.Models.UserSelectedBook", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.Book", "Book")
@@ -842,20 +839,12 @@ namespace AuthorVerseServer.Migrations
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("AuthorVerseServer.Models.BookChapter", "LastBookChapter")
-                        .WithMany()
-                        .HasForeignKey("LastBookChapterBookChapterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("AuthorVerseServer.Models.User", "User")
                         .WithMany("UserSelectedBooks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Book");
-
-                    b.Navigation("LastBookChapter");
 
                     b.Navigation("User");
                 });
@@ -945,7 +934,9 @@ namespace AuthorVerseServer.Migrations
 
                     b.Navigation("Comments");
 
-                    b.Navigation("Friends");
+                    b.Navigation("InitiatorFriendships");
+
+                    b.Navigation("TargetFriendships");
 
                     b.Navigation("UserSelectedBooks");
                 });

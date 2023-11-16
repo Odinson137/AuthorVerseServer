@@ -2,6 +2,7 @@
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
@@ -14,9 +15,21 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public Task<ICollection<UpdateAccountBook>> CheckUserUpdates(string userId)
+        public async Task<ICollection<UpdateAccountBook>> CheckUserUpdatesAsync(string userId)
         {
-            throw new NotImplementedException();
+            var books = _context.UserSelectedBooks
+                .AsNoTracking()
+                .Where(book => book.UserId == userId)
+                .Where(book => book.LastBookChapterNumber != book.Book.BookChapters.Max(chapter => chapter.BookChapterNumber))
+                .Select(book => new UpdateAccountBook
+                {
+                    BookId = book.BookId,
+                    BookTitle = book.Book.Title,
+                    ChapterNumber = book.LastBookChapterNumber,
+                    BookCoverUrl = book.Book.BookCover,
+                });
+
+            return await books.ToListAsync();
         }
 
         public async Task<UserProfileDTO> GetUserAsync(string userId)
@@ -49,7 +62,7 @@ namespace AuthorVerseServer.Repository
             throw new NotImplementedException();
         }
 
-        public Task<ICollection<UserSelectedBookDTO>> GetUserSelectedBooksAsync(string userId)
+        public async Task<ICollection<UserSelectedBookDTO>> GetUserSelectedBooksAsync(string userId)
         {
             throw new NotImplementedException();
         }

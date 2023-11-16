@@ -12,7 +12,7 @@ namespace AuthorVerseServer.Models
         public User User { get; set; } = null!;
         public int BookId { get; set; }
         public Book Book { get; set; } = null!;
-        public BookChapter LastBookChapter { get; set; } = null!;
+        public int LastBookChapterNumber { get; set; } = 1;
         public BookState BookState { get; set; }
     }
 }
