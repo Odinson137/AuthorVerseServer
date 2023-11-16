@@ -48,8 +48,11 @@ namespace AuthorVerseServer.Controllers
         [HttpGet("SelectedBooks")]
         public async Task<ActionResult<ICollection<UserSelectedBookDTO>>> GetSelectedBooks()
         {
-            // userId from token
-            return Ok(new List<UserSelectedBookDTO>());
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            return Ok(await _account.GetUserSelectedBooksAsync(userId));
         }
 
         [HttpGet("UserComments")]

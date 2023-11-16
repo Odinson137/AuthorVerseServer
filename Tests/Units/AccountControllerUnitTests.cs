@@ -97,7 +97,7 @@ namespace AuthorVerseServer.Tests.Units
         public async Task GetSelectedBooks_UserIdNotCorrect_ShouldReturBadRequest()
         {
             // Arrange
-            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("");
             _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<UserSelectedBookDTO>());
 
             // Act

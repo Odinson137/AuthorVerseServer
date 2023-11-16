@@ -79,7 +79,7 @@ namespace AuthorVerseServer.Tests.Integrations
         public async Task GetUserComments_EmptyRequest_ReturnsOkResult()
         {
             // Arrange
-            var uri = "api/Account/Profile/GetUserComments";
+            var uri = "api/Account/GetUserComments";
 
             var response = await _client.GetAsync(uri);
 
@@ -116,7 +116,7 @@ namespace AuthorVerseServer.Tests.Integrations
 
             var queryString = new FormUrlEncodedContent(queryParams);
 
-            var uriBuilder = new UriBuilder("api/Account/Profile/GetUserComments")
+            var uriBuilder = new UriBuilder("api/Account/GetUserComments")
             {
                 Query = queryString.ReadAsStringAsync().Result
             };
@@ -166,7 +166,7 @@ namespace AuthorVerseServer.Tests.Integrations
         public async Task GetUserBooks_Ok_ReturnsOkResult()
         {
             // Arrange
-            var uri = "api/Account/Profile/UserBooks";
+            var uri = "api/Account/SelectedBooks";
 
             var response = await _client.GetAsync(uri);
 
