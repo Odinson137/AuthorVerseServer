@@ -1,12 +1,8 @@
 ﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Newtonsoft.Json;
-using StackExchange.Redis;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -15,9 +11,9 @@ namespace AuthorVerseServer.Controllers
     public class TagController : ControllerBase
     {
         private readonly ITag _tag;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
 
-        public TagController(ITag tag, IMemoryCache cache)
+        public TagController(ITag tag, IDistributedCache cache)
         {
             _tag = tag;
             _cache = cache;
@@ -28,14 +24,22 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<TagDTO>>> GetTag()
         {
-            var tags = await _cache.GetOrCreateAsync("tags", async entry =>
+            var tags = await _cache.GetStringAsync("tags");
+
+            if (tags == null)
             {
                 var tagsDb = await _tag.GetTagAsync();
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-                return tagsDb;
-            });
 
-            return Ok(tags);
+                await _cache.SetStringAsync("tags", JsonConvert.SerializeObject(tagsDb), new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+                });
+
+                return Ok(tagsDb);
+            }
+
+            var deserializedTags = JsonConvert.DeserializeObject<List<TagDTO>>(tags);
+            return Ok(deserializedTags);
         }
 
         [HttpPost("{name}")]

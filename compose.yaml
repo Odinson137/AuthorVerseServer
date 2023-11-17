@@ -6,7 +6,7 @@ networks:
 
 services:
   db:
-    container_name: db
+    container_name: authorverse-db
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
         - 1433:1433
@@ -16,14 +16,27 @@ services:
     networks:
         - serverapp
 
+  redis:
+    container_name: authorverse-redis
+    image: redis
+    ports:
+        - 6379:6379 
+    networks:
+        - serverapp
+
   server:
-    container_name: server
+    container_name: authorverse-server
     build:
       context: .
       target: final
     ports:
       - 7069:80
+    develop:
+      watch:
+        - action: rebuild
+          path: .
     depends_on:
       - db
     networks:
       - serverapp
+

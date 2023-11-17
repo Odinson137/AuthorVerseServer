@@ -11,6 +11,7 @@ using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.OpenApi.Models;
 using AuthorVerseServer.Filters;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -43,7 +44,22 @@ services.AddSwaggerGen(s =>
     s.OperationFilter<SwaggerAuthorizedMiddleware>();
 });
 
-services.AddMemoryCache();
+ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddConsole(); // Добавьте необходимые провайдеры логирования
+    builder.AddDebug();
+});
+
+services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379"));
+
+services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "redis:6379";
+    options.InstanceName = "RedisCache";
+});
+
+
+
 
 string str = "Server=db,1433;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True";
 
