@@ -43,33 +43,14 @@ services.AddSwaggerGen(s =>
     s.OperationFilter<SwaggerAuthorizedMiddleware>();
 });
 
-//string redisConnection = builder.Configuration.GetConnectionString("Redis");
-
-//services.AddStackExchangeRedisCache(redisOptions =>
-//{
-//    string connection = redisConnection;
-//    redisOptions.Configuration = connection;
-//});
-
-
-//services.AddSingleton<IDatabase>(provider =>
-//{
-//    var connectionMultiplexer = ConnectionMultiplexer.Connect(redisConnection);
-//    return connectionMultiplexer.GetDatabase();
-//});
-
 services.AddMemoryCache();
 
+string str = "Server=db,1433;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True";
 
-//var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
-
-var connectionString = $"Data Source=app-db;Initial Catalog=AuthorVerseDb;User ID=sa;Password=PaASasssword@#Q@123456";
 services.AddDbContext<DataContext>(options =>
 {
-    options.UseSqlServer(connectionString);
+    options.UseSqlServer(str);
 });
-
-//services.AddDbContext<DataContext>(options => options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
 
 var policyName = "AllowReactApp";
 services.AddCors(options =>
