@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using StackExchange.Redis;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Units;
@@ -19,6 +20,7 @@ public class BookControllerUnitTests
     readonly Mock<IMemoryCache> mockMemoryCache;
     readonly Mock<ILoadImage> mockLoadImage;
     readonly BookController controller;
+    private readonly Mock<IDatabase> _redis;
     public BookControllerUnitTests()
     {
         mockBookRepository = new Mock<IBook>();
@@ -26,7 +28,12 @@ public class BookControllerUnitTests
         var mockMemoryCache = new Mock<IMemoryCache>();
         var mockLoadImage = new Mock<ILoadImage>();
 
-        controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
+        var redisConnection = new Mock<IConnectionMultiplexer>();
+
+        var databaseMock = new Mock<IDatabase>();
+        redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(databaseMock.Object);
+
+        controller = new BookController(mockBookRepository.Object, mockUserManager.Object, redisConnection.Object, mockLoadImage.Object);
 
     }
 

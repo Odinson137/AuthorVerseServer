@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 using System;
 
 namespace AuthorVerseServer.Controllers
@@ -17,14 +19,14 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IBook _book;
         private readonly UserManager<User> _userManager;
-        private readonly IMemoryCache _cache;
+        private readonly IDatabase _cache;
         private readonly ILoadImage _loadImage;
 
-        public BookController(IBook book, UserManager<User> userManager, IMemoryCache cache, ILoadImage loadImage)
+        public BookController(IBook book, UserManager<User> userManager, IConnectionMultiplexer redisConnection, ILoadImage loadImage)
         {
             _book = book;
             _userManager = userManager;
-            _cache = cache;
+            _cache = redisConnection.GetDatabase();
             _loadImage = loadImage;
         }
 
@@ -32,25 +34,33 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<int>> GetBooksCount()
         {
-            var books = await _cache.GetOrCreateAsync("booksCount", async entry =>
+            var count = await _cache.StringGetAsync("booksCount");
+            if (string.IsNullOrEmpty(count))
             {
-                var bookDb = await _book.GetCountBooks();
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-                return bookDb;
-            });
-            return Ok(books);
+                count = await _book.GetCountBooks();
+                await _cache.StringSetAsync("booksCount", count, TimeSpan.FromHours(1));
+            }
+
+            return Ok(count);
         }
 
         [HttpGet("Popular")]
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetPopularBooks()
         {
-            var books = await _cache.GetOrCreateAsync("popularMainBooks", async entry =>
+            var booksCache = await _cache.StringGetAsync("popularMainBooks");
+
+            ICollection<PopularBook>? books;
+            if (string.IsNullOrEmpty(booksCache))
             {
-                var bookDb = await _book.GetPopularBooks();
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-                return bookDb;
-            });
+                books = await _book.GetPopularBooks();
+                var newCache = JsonConvert.SerializeObject(books);
+                await _cache.StringSetAsync("popularMainBooks", newCache, TimeSpan.FromHours(1));
+            } else
+            {
+                books = JsonConvert.DeserializeObject<ICollection<PopularBook>>(booksCache);
+            }
+
             return Ok(books);
         }
 
@@ -58,12 +68,19 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks()
         {
-            var books = await _cache.GetOrCreateAsync("lastMainBooks", async entry =>
+            var booksCache = await _cache.StringGetAsync("lastMainBooks");
+
+            ICollection<PopularBook>? books;
+            if (string.IsNullOrEmpty(booksCache))
             {
-                var bookDb = await _book.GetLastBooks();
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-                return bookDb;
-            });
+                books = await _book.GetLastBooks();
+                var newCache = JsonConvert.SerializeObject(books);
+                await _cache.StringSetAsync("lastMainBooks", newCache, TimeSpan.FromHours(1));
+            }
+            else
+            {
+                books = JsonConvert.DeserializeObject<ICollection<PopularBook>>(booksCache);
+            }
 
             return Ok(books);
         }
@@ -185,12 +202,19 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<MainPopularBook>>> GetMainPopularBooks()
         {
-            var books = await _cache.GetOrCreateAsync("mainPopularBooks", async entry =>
+            var booksCache = await _cache.StringGetAsync("mainPopularBooks");
+
+            ICollection<MainPopularBook>? books;
+            if (string.IsNullOrEmpty(booksCache))
             {
-                var bookDb = await _book.GetMainPopularBook();
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-                return bookDb;
-            });
+                books = await _book.GetMainPopularBook();
+                var newCache = JsonConvert.SerializeObject(books);
+                await _cache.StringSetAsync("mainPopularBooks", newCache, TimeSpan.FromHours(1));
+            }
+            else
+            {
+                books = JsonConvert.DeserializeObject<ICollection<MainPopularBook>>(booksCache);
+            }
 
             return Ok(books);
         }
