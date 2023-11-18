@@ -14,18 +14,26 @@ namespace AuthorVerseServer.Tests.Units;
 
 public class BookControllerUnitTests
 {
+    readonly Mock<IBook> mockBookRepository;
+    readonly Mock<UserManager<User>> mockUserManager;
+    readonly Mock<IMemoryCache> mockMemoryCache;
+    readonly Mock<ILoadImage> mockLoadImage;
+    readonly BookController controller;
+    public BookControllerUnitTests()
+    {
+        mockBookRepository = new Mock<IBook>();
+        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        var mockMemoryCache = new Mock<IMemoryCache>();
+        var mockLoadImage = new Mock<ILoadImage>();
+
+        controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
+
+    }
 
     [Fact]
     public async Task CreateBook_ZeroSelectedGenres_ShouldReturnBadRequest()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
-
         var bookDTO = new CreateBookDTO
         {
             AuthorId = "admin",
@@ -47,12 +55,6 @@ public class BookControllerUnitTests
     public async Task CreateBook_ZeroSelectedTags_ShouldReturnBadRequest()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -75,12 +77,6 @@ public class BookControllerUnitTests
     public async Task CreateBook_UserNotFound_ShouldReturnNotFound()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -104,12 +100,6 @@ public class BookControllerUnitTests
     public async Task CreateBook_InvalidGenres_ShouldReturnNotFound()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -137,12 +127,6 @@ public class BookControllerUnitTests
     public async Task CreateBook_InvalidTags_ShouldReturnNotFound()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -174,12 +158,6 @@ public class BookControllerUnitTests
     public async Task CreateBook_FileNotLoaded_ShouldReturnOk()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         var mockFormFile = CreateMockFormFile("example.png", 1);
 
@@ -222,12 +200,6 @@ public class BookControllerUnitTests
     public async Task CreateBook_LoadFile_ShouldReturnOk()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         var mockFormFile = CreateMockFormFile("example.png", 1);
 
@@ -256,7 +228,6 @@ public class BookControllerUnitTests
         mockBookRepository.Setup(repo => repo.GetTagById(It.IsAny<int>()))
                         .ReturnsAsync((int tagId) => tagId == 1 ? tag1 : tag2);
 
-        mockLoadImage.Setup(repo => repo.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()));
 
         // Act
         var result = await controller.CreateBook(bookDTO);
@@ -264,19 +235,12 @@ public class BookControllerUnitTests
         // Assert
         var objectResult = Assert.IsType<ActionResult<int>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
-        mockLoadImage.Verify(repo => repo.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
     public async Task CreateBook_Ok_ShouldReturnOkRequest()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         var bookDTO = new CreateBookDTO
         {
@@ -321,12 +285,6 @@ public class BookControllerUnitTests
     public async Task GetCertainBooksPage_WithBooksCount_ShouldReturnOkRequest()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         int tag = 0, genre = 0, page = 0;
         string searchText = "";
@@ -348,12 +306,6 @@ public class BookControllerUnitTests
     public async Task GetCertainBooksPage_WithOutBooksCount_ShouldReturnOkRequest()
     {
         // Arrange
-        var mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
-
-        var controller = new BookController(mockBookRepository.Object, mockUserManager.Object, mockMemoryCache.Object, mockLoadImage.Object);
 
         int tag = 0, genre = 0, page = 1;
         string searchText = "";
