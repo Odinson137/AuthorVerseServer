@@ -80,7 +80,7 @@ namespace AuthorVerseServer.Repository
                     ImageUrl = data.Book.BookCover,
                     BookState = data.BookState,
                     PublicationData = DateOnly.FromDateTime(data.Book.PublicationData.Date),
-                    LastReadingChapter = data.LastBookChapter.BookChapterNumber,
+                    LastReadingChapter = data.LastBookChapterNumber,
                     LastBookChapter = data.Book.BookChapters.Max(x=> x.BookChapterNumber),
                 }).ToListAsync();
         }
