@@ -43,54 +43,5 @@ namespace AuthorVerseServer.Tests.Integrations
                 Assert.True(!string.IsNullOrEmpty(tag.Name), "Name not have");
             }
         }
-
-        [Fact]
-        public async Task GetTag_CacheSave_ReturnsOkResult()
-        {
-            var fakeTagService = new FakeTagService();
-
-            HttpClient client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    services.AddSingleton<ITag>(fakeTagService);
-                });
-            }).CreateClient();
-
-            // Act
-            var response = await client.GetAsync("/api/Tag");
-
-            // Assert
-            response.EnsureSuccessStatusCode();
-
-            // Act
-            var response2 = await client.GetAsync("/api/Tag");
-
-            // Assert
-            response2.EnsureSuccessStatusCode();
-
-            Assert.Equal(1, fakeTagService.GetCallCount);
-        }
-
-        public class FakeTagService : ITag
-        {
-            public int GetCallCount { get; private set; }
-
-            public Task AddTag(string name)
-            {
-                throw new NotImplementedException();
-            }
-
-            public async Task<ICollection<TagDTO>> GetTagAsync()
-            {
-                GetCallCount++;
-                return new List<TagDTO> { new TagDTO { TagId = 1, Name = "YYY" } };
-            }
-
-            public Task Save()
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
 }

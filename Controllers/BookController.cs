@@ -2,14 +2,11 @@
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
-using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using StackExchange.Redis;
-using System;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -34,14 +31,15 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<int>> GetBooksCount()
         {
-            var count = await _cache.StringGetAsync("booksCount");
-            if (string.IsNullOrEmpty(count))
+            if (int.TryParse(await _cache.StringGetAsync("booksCount"), out var cachedValue))
             {
-                count = await _book.GetCountBooks();
-                await _cache.StringSetAsync("booksCount", count, TimeSpan.FromHours(1));
+                return Ok(cachedValue);
             }
 
-            return Ok(count);
+            int countDb = await _book.GetCountBooks();
+
+            await _cache.StringSetAsync("booksCount", countDb, TimeSpan.FromHours(1));
+            return Ok(countDb);
         }
 
         [HttpGet("Popular")]
@@ -54,8 +52,10 @@ namespace AuthorVerseServer.Controllers
             if (string.IsNullOrEmpty(booksCache))
             {
                 books = await _book.GetPopularBooks();
-                var newCache = JsonConvert.SerializeObject(books);
-                await _cache.StringSetAsync("popularMainBooks", newCache, TimeSpan.FromHours(1));
+                await _cache.StringSetAsync(
+                    "popularMainBooks", 
+                    JsonConvert.SerializeObject(books), 
+                    TimeSpan.FromHours(1));
             } else
             {
                 books = JsonConvert.DeserializeObject<ICollection<PopularBook>>(booksCache);
@@ -74,8 +74,10 @@ namespace AuthorVerseServer.Controllers
             if (string.IsNullOrEmpty(booksCache))
             {
                 books = await _book.GetLastBooks();
-                var newCache = JsonConvert.SerializeObject(books);
-                await _cache.StringSetAsync("lastMainBooks", newCache, TimeSpan.FromHours(1));
+                await _cache.StringSetAsync(
+                    "lastMainBooks", 
+                    JsonConvert.SerializeObject(books), 
+                    TimeSpan.FromHours(1));
             }
             else
             {
@@ -208,8 +210,10 @@ namespace AuthorVerseServer.Controllers
             if (string.IsNullOrEmpty(booksCache))
             {
                 books = await _book.GetMainPopularBook();
-                var newCache = JsonConvert.SerializeObject(books);
-                await _cache.StringSetAsync("mainPopularBooks", newCache, TimeSpan.FromHours(1));
+                await _cache.StringSetAsync(
+                    "mainPopularBooks", 
+                    JsonConvert.SerializeObject(books), 
+                    TimeSpan.FromHours(1));
             }
             else
             {

@@ -37,6 +37,9 @@ services:
           path: .
     depends_on:
       - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+      - MSSQL_SA_PASSWORD=S3cur3P@ssW0rd!
     networks:
       - serverapp
 

@@ -21,12 +21,12 @@ namespace AuthorVerseServer.Controllers
         private readonly UserManager<User> _userManager;
         private readonly MailService _mailService;
         private readonly CreateJWTtokenService _jWTtokenService;
-        private readonly GenerateRandomName _generateNameService;
+        private readonly GenerateRandomNameService _generateNameService;
         private readonly IDatabase _redis;
         public UserController(
             IUser user, IConnectionMultiplexer redisConnection,
             UserManager<User> userManager, MailService mailService, 
-            CreateJWTtokenService jWTtokenService, GenerateRandomName generateRandomName)
+            CreateJWTtokenService jWTtokenService, GenerateRandomNameService generateRandomName)
         {
             _user = user;
             _redis = redisConnection.GetDatabase();

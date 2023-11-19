@@ -32,7 +32,7 @@ namespace AuthorVerseServer.Tests.Units
             _mockEmailService = new Mock<MailService>();
             _mockJWTTokenService = new Mock<CreateJWTtokenService>();
 
-            var generateRandomName = new Mock<GenerateRandomName>();
+            var generateRandomName = new Mock<GenerateRandomNameService>();
 
             var databaseMock = new Mock<IDatabase>();
             redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(databaseMock.Object);

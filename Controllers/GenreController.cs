@@ -36,6 +36,8 @@ namespace AuthorVerseServer.Controllers
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 });
 
+                return Ok(genresDb);
+
             }
             return Ok(genres);
         }

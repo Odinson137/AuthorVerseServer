@@ -15,6 +15,7 @@ namespace AuthorVerseServer.Data
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
             var databaseCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+
             if (databaseCreator != null)
             {
                 if (!databaseCreator.CanConnect()) databaseCreator.Create();

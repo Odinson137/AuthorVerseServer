@@ -12,6 +12,7 @@ using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.OpenApi.Models;
 using AuthorVerseServer.Filters;
 using StackExchange.Redis;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -33,7 +34,7 @@ services.AddScoped<ITag, TagRepository>();
 
 services.AddScoped<ILoadImage, LoadImageService>();
 services.AddTransient<MailService>();
-services.AddTransient<GenerateRandomName>();
+services.AddTransient<GenerateRandomNameService>();
 services.AddSingleton<CreateJWTtokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -46,26 +47,23 @@ services.AddSwaggerGen(s =>
 
 ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
 {
-    builder.AddConsole(); // Добавьте необходимые провайдеры логирования
+    builder.AddConsole(); 
     builder.AddDebug();
 });
 
-services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379"));
+services.AddDbContext<DataContext>(options =>
+{
+    var password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+    string str = $"Server=localhost;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True";
+    options.UseSqlServer(str);
+});
+
+services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false"));
 
 services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "redis:6379";
+    options.Configuration = "localhost:6379,abortConnect=false";
     options.InstanceName = "RedisCache";
-});
-
-
-
-
-string str = "Server=db,1433;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True";
-
-services.AddDbContext<DataContext>(options =>
-{
-    options.UseSqlServer(str);
 });
 
 var policyName = "AllowReactApp";
@@ -133,6 +131,8 @@ services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+#if !DEBUG
+
 using (var scope = app.Services.CreateScope())
 {
     var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
@@ -141,6 +141,8 @@ using (var scope = app.Services.CreateScope())
 
     await Seed.SeedData(dataContext, roleManager, userManager);
 }
+
+#endif
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
