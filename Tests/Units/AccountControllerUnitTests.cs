@@ -18,21 +18,17 @@ namespace AuthorVerseServer.Tests.Units
         private readonly Mock<IAccount> _mockAccount;
         private readonly AccountController _accountController;
         private readonly Mock<UserManager<User>> _mockUserManager;
-        private readonly Mock<MailService> _mockEmailService;
         private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
-        private readonly Mock<IMemoryCache> _mockCache;
 
         public AccountControllerUnitTests()
         {
             _mockAccount = new Mock<IAccount>();
-            _mockCache = new Mock<IMemoryCache>();
             _mockUserManager = new Mock<UserManager<User>>(
                 Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-            _mockEmailService = new Mock<MailService>();
             _mockJWTTokenService = new Mock<CreateJWTtokenService>();
 
             _accountController = new AccountController(
-                _mockAccount.Object, _mockUserManager.Object, _mockEmailService.Object, _mockJWTTokenService.Object, _mockCache.Object);
+                _mockAccount.Object, _mockJWTTokenService.Object);
         }
 
         [Fact]
@@ -98,7 +94,7 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("");
-            _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<UserSelectedBookDTO>());
+            _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<SelectedUserBookDTO>());
 
             // Act
             var result = await _accountController.GetSelectedBooks();
@@ -112,7 +108,7 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
-            _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<UserSelectedBookDTO>());
+            _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<SelectedUserBookDTO>());
 
             // Act
             var result = await _accountController.GetSelectedBooks();
@@ -126,14 +122,14 @@ namespace AuthorVerseServer.Tests.Units
         {
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
-            _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<UserSelectedBookDTO>());
+            _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<SelectedUserBookDTO>());
 
             // Act
             var result = await _accountController.GetSelectedBooks();
 
             // Assert
             Assert.IsType<OkObjectResult>(result.Result);
-            var objectResult = Assert.IsType<ActionResult<ICollection<UserSelectedBookDTO>>>(result);
+            var objectResult = Assert.IsType<ActionResult<ICollection<SelectedUserBookDTO>>>(result);
         }
 
         [Fact]

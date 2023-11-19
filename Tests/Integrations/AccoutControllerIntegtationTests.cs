@@ -38,11 +38,8 @@ namespace AuthorVerseServer.Tests.Integrations
         [Fact]
         public async Task GetUserProfile_Ok_ReturnsOkResult()
         {
-            // Arrange
-            string jwtToken = _token.GenerateJwtToken("admin");
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
-
-            var response = await _client.GetAsync("api/Account/Profile");
+            // Act
+            var response = await _client.GetAsync("/api/Account/Profile");
 
             var content = await response.Content.ReadAsStringAsync();
             var userProfile = JsonConvert.DeserializeObject<UserProfileDTO>(content);
@@ -59,7 +56,7 @@ namespace AuthorVerseServer.Tests.Integrations
             var response = await _client.GetAsync("/api/Account/SelectedBooks");
 
             var content = await response.Content.ReadAsStringAsync();
-            var selectedBooks = JsonConvert.DeserializeObject<ICollection<UserSelectedBookDTO>>(content);
+            var selectedBooks = JsonConvert.DeserializeObject<ICollection<SelectedUserBookDTO>>(content);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(selectedBooks);
@@ -116,7 +113,7 @@ namespace AuthorVerseServer.Tests.Integrations
 
             var queryString = new FormUrlEncodedContent(queryParams);
 
-            var uriBuilder = new UriBuilder("api/Account/GetUserComments")
+            var uriBuilder = new UriBuilder("api/Account/UserComments")
             {
                 Query = queryString.ReadAsStringAsync().Result
             };
@@ -144,7 +141,7 @@ namespace AuthorVerseServer.Tests.Integrations
         public async Task GetFriends_Ok_ReturnsOkResult()
         {
             // Arrange
-            var uri = "api/Account/Profile/GetFriends";
+            var uri = "api/Account/Friends";
 
             var response = await _client.GetAsync(uri);
 
@@ -166,9 +163,7 @@ namespace AuthorVerseServer.Tests.Integrations
         public async Task GetUserBooks_Ok_ReturnsOkResult()
         {
             // Arrange
-            var uri = "api/Account/SelectedBooks";
-
-            var response = await _client.GetAsync(uri);
+            var response = await _client.GetAsync("/api/Account/UserBooks");
 
             var content = await response.Content.ReadAsStringAsync();
             var books = JsonConvert.DeserializeObject<ICollection<UserBookDTO>>(content);

@@ -13,14 +13,14 @@ namespace AuthorVerseServer.Data
             var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
             if (pendingMigrations.Any())
             {
-                await context.Database.EnsureDeletedAsync();
+                //await context.Database.EnsureDeletedAsync();
                 await context.Database.MigrateAsync();
             }
 
             if (!context.Books.Any() || !context.Friendships.Any())
             {
                 //await context.Database.EnsureDeletedAsync();
-                await context.Database.EnsureCreatedAsync();
+                //await context.Database.EnsureCreatedAsync();
 
                 User admin = new User()
                 {
@@ -422,7 +422,7 @@ namespace AuthorVerseServer.Data
                 }
 
                 int n = 0;
-                for (int b = 0; b < 100; b++)
+                for (int b = 0; b < 1; b++)
                 {
                     User user = new User()
                     {
@@ -545,6 +545,59 @@ namespace AuthorVerseServer.Data
 
                         Book.Rating = comments.Average(x => x.ReaderRating);
                         Book.CountRating = comments.Count;
+
+                        user.Books.Add(Book);
+                    }
+                }
+
+                n = 0;
+
+                for (int b = 0; b < 90; b++)
+                {
+                    User user = new User()
+                    {
+                        UserName = $"PyUser{b}",
+                        Description = "Люблю Ярика",
+                        Email = "Putus132@gmail.com",
+                        Method = RegistrationMethod.Email,
+                        EmailConfirmed = true,
+                        LogoUrl = "java-script.png",
+                        Name = usersName[n],
+                        LastName = usersLastName[n],
+                    };
+
+                    n = (n + 1) % 10;
+
+                    await userManager.CreateAsync(user, "ЮрикИзМножества_ЯрикИзСкриптеров_СаняИзНарода123");
+                    await context.Users.AddAsync(user);
+
+                    int num = 0;
+
+                    foreach (var book in bookDescriptions)
+                    {
+                        var Book = new Book()
+                        {
+                            Title = book.Key + b.ToString(),
+                            NormalizedTitle = (book.Key + b.ToString()).ToUpper(),
+                            Author = user,
+                            Description = book.Value + b.ToString(),
+                            AgeRating = AgeRating.All,
+                            Permission = PublicationPermission.Approved,
+                            BookCover = files[num]
+                        };
+                        num++;
+
+                        for (int i = 0; i < 3; i++)
+                        {
+                            var genre = genres[random.Next(0, 16)];
+                            Book.Genres.Add(genre);
+                        }
+
+                        for (int i = 0; i < 3; i++)
+                        {
+                            var tag = tags[random.Next(0, 9)];
+                            Book.Tags.Add(tag);
+                        }
 
                         user.Books.Add(Book);
                     }

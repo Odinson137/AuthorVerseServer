@@ -54,9 +54,21 @@ namespace AuthorVerseServer.Repository
             throw new NotImplementedException();
         }
 
-        public Task<ICollection<UserBookDTO>> GetUserBooksAsync(string userId)
+        public async Task<ICollection<UserBookDTO>> GetUserBooksAsync(string userId)
         {
-            throw new NotImplementedException();
+            var books = _context.Books
+                .Where(book => book.AuthorId == userId)
+                .Select(book => new UserBookDTO
+                {
+                    BookId = book.BookId,
+                    Title = book.Title,
+                    Description = book.Description,
+                    BookCoverUrl = book.BookCover,
+                    PublicationData = DateOnly.FromDateTime(book.PublicationData),
+                    Earnings = book.Earnings
+                });
+
+            return await books.ToListAsync();
         }
 
         public Task<ICollection<CommentProfileDTO>> GetUserCommentsAsync(CommentType commentType, int page, string searchComment)
@@ -69,11 +81,11 @@ namespace AuthorVerseServer.Repository
             throw new NotImplementedException();
         }
 
-        public async Task<ICollection<UserSelectedBookDTO>> GetUserSelectedBooksAsync(string userId)
+        public async Task<ICollection<SelectedUserBookDTO>> GetUserSelectedBooksAsync(string userId)
         {
             return await _context.UserSelectedBooks
                 .Where(data => data.UserId == userId)
-                .Select(data=> new UserSelectedBookDTO
+                .Select(data=> new SelectedUserBookDTO
                 {
                     BookId = data.BookId,
                     Title = data.Book.Title,

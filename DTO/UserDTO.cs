@@ -3,24 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.DTO
 {
-    public class FriendDTO
-    {
-        public string Id { get; set; }
-        public string UserName { get; set; }
-        public DateOnly FriendShipTime { get; set; }
-        public FriendshipStatus Status { get; set; }
-    }
     public class UserDTO
     {
         public string Id { get; set; }
         public string UserName { get; set; }
-    }
-
-    public class UserProfileDTO
-    {
-        public string UserName { get; set; }
-        public string Description { get; set; }
-        public string LogoUrl { get; set; }
     }
 
     public class UserLoginDTO

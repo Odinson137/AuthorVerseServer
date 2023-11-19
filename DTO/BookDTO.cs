@@ -25,17 +25,6 @@ namespace AuthorVerseServer.DTO
         public DateOnly PublicationData { get; set; }
     }
 
-    public class UserBookDTO
-    {
-        public int BookId { get; set; }
-        public string Title { get; set; } = null!;
-        public string Description { get; set; } = null!;
-        public string? BookCoverUrl { get; set; }
-        public DateOnly PublicationData { get; set; }
-        public int ReadersCount { get; set; }
-        public int Earnings { get; set; }
-    }
-
     public class DetailBookDTO
     {
         public int BookId { get; set; }
@@ -95,11 +84,6 @@ namespace AuthorVerseServer.DTO
         public DateTime PublicationData { get; set; }
     }
 
-    public class UpdateAccountBook
-    {
-        public int BookId { get; set; }
-        public string BookTitle { get; set; } = null!;
-        public int ChapterNumber { get; set; }
-        public string? BookCoverUrl { get; set; }
-    }
+
+
 }

@@ -13,23 +13,6 @@ namespace AuthorVerseServer.DTO
         public DateOnly CommentCreatedDateTime { get; set; }
     }
 
-    public class CommentPageDTO
-    {
-        public int PagesCount { get; set; }
-        public List<CommentProfileDTO> comments = new List<CommentProfileDTO>();
-    }
-
-    public class CommentProfileDTO
-    {
-        public int CommentId { get; set; }
-        public string Text { get; set; } = null!;
-        public int Rating { get; set; }
-        public CommentType CommentType { get; set; }
-        public string BookTitle { get; set; } = null!;
-        public int ChapterNumber { get; set; }
-        public string? ChapterTitle { get; set; }
-        public DateOnly CommentCreatedDateTime { get; set; }
-    }
 
     public class CreateCommentDTO
     {
@@ -39,4 +22,5 @@ namespace AuthorVerseServer.DTO
         [MinLength(50, ErrorMessage = "Messege's too short")]
         public string Text { get; set; } = null!;
     }
+
 }

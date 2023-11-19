@@ -7,7 +7,6 @@ using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using AuthorVerseServer.Data.Enums;
-using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 

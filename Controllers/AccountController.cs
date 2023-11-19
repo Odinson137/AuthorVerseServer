@@ -6,7 +6,6 @@ using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -16,21 +15,18 @@ namespace AuthorVerseServer.Controllers
     public class AccountController :  ControllerBase
     {
         private readonly IAccount _account;
-        private readonly UserManager<User> _userManager;
-        private readonly MailService _mailService;
         private readonly CreateJWTtokenService _jWTtokenService;
-        private readonly IMemoryCache _cache;
         public AccountController(
-            IAccount account, UserManager<User> userManager, MailService mailService, CreateJWTtokenService jWTtokenService, IMemoryCache cache)
+            IAccount account, CreateJWTtokenService jWTtokenService)
         {
             _account = account;
-            _userManager = userManager;
-            _mailService = mailService;
             _jWTtokenService = jWTtokenService;
-            _cache = cache;
         }
 
         [HttpGet("Profile")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<ActionResult<UserProfileDTO>> GetUserProfile()
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -46,7 +42,7 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("SelectedBooks")]
-        public async Task<ActionResult<ICollection<UserSelectedBookDTO>>> GetSelectedBooks()
+        public async Task<ActionResult<ICollection<SelectedUserBookDTO>>> GetSelectedBooks()
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
@@ -72,10 +68,16 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("UserBooks")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<UserBookDTO>>> GetUserBooks()
         {
-            // userId from token
-            return Ok(new List<UserBookDTO>());
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            var books = await _account.GetUserBooksAsync(userId);
+            return Ok(books);
         }
 
         [HttpGet("Updates")]
