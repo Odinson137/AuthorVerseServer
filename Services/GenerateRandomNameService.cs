@@ -2,7 +2,7 @@
 
 namespace AuthorVerseServer.Services
 {
-    public class GenerateRandomName
+    public class GenerateRandomNameService
     {
         private static string allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
         public string GenerateRandomUsername()

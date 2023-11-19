@@ -114,6 +114,11 @@ namespace AuthorVerseServer.Controllers
             else
                 return NotFound("Comment from this user to this book not found");
 
+            if (await _comment.Save() == 0)
+            {
+                return BadRequest("There are problems with save");
+            }
+
             return Ok();
         }
 

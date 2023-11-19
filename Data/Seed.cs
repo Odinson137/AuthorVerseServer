@@ -548,8 +548,6 @@ namespace AuthorVerseServer.Data
 
                         user.Books.Add(Book);
                     }
-
-
                 }
 
                 await context.SaveChangesAsync();

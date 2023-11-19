@@ -11,6 +11,8 @@ using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.OpenApi.Models;
 using AuthorVerseServer.Filters;
+using StackExchange.Redis;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -32,7 +34,7 @@ services.AddScoped<ITag, TagRepository>();
 
 services.AddScoped<ILoadImage, LoadImageService>();
 services.AddTransient<MailService>();
-services.AddTransient<GenerateRandomName>();
+services.AddTransient<GenerateRandomNameService>();
 services.AddSingleton<CreateJWTtokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -43,31 +45,26 @@ services.AddSwaggerGen(s =>
     s.OperationFilter<SwaggerAuthorizedMiddleware>();
 });
 
-//string redisConnection = builder.Configuration.GetConnectionString("Redis");
-
-//services.AddStackExchangeRedisCache(redisOptions =>
-//{
-//    string connection = redisConnection;
-//    redisOptions.Configuration = connection;
-//});
-
-
-//services.AddSingleton<IDatabase>(provider =>
-//{
-//    var connectionMultiplexer = ConnectionMultiplexer.Connect(redisConnection);
-//    return connectionMultiplexer.GetDatabase();
-//});
-
-services.AddMemoryCache();
-
-var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddConsole(); 
+    builder.AddDebug();
+});
 
 services.AddDbContext<DataContext>(options =>
 {
-    options.UseSqlServer(connectionString);
+    var password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+    string str = $"Server=localhost;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True";
+    options.UseSqlServer(str);
 });
 
-//services.AddDbContext<DataContext>(options => options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
+services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false"));
+
+services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379,abortConnect=false";
+    options.InstanceName = "RedisCache";
+});
 
 var policyName = "AllowReactApp";
 services.AddCors(options =>
@@ -134,6 +131,8 @@ services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+#if !DEBUG
+
 using (var scope = app.Services.CreateScope())
 {
     var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
@@ -142,6 +141,8 @@ using (var scope = app.Services.CreateScope())
 
     await Seed.SeedData(dataContext, roleManager, userManager);
 }
+
+#endif
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

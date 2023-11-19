@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using StackExchange.Redis;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Units
@@ -19,21 +20,25 @@ namespace AuthorVerseServer.Tests.Units
         private readonly Mock<UserManager<User>> _mockUserManager;
         private readonly Mock<MailService> _mockEmailService;
         private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
-        private readonly Mock<IMemoryCache> _mockCache;
+        private readonly Mock<IDatabase> _redis;
 
         public UserControllerUnitTests()
         {
             _mockUser = new Mock<IUser>();
-            _mockCache = new Mock<IMemoryCache>();
+            _redis = new Mock<IDatabase>();
+            var redisConnection = new Mock<IConnectionMultiplexer>();
             _mockUserManager = new Mock<UserManager<User>>(
                 Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
             _mockEmailService = new Mock<MailService>();
             _mockJWTTokenService = new Mock<CreateJWTtokenService>();
 
-            var generateRandomName = new Mock<GenerateRandomName>();
+            var generateRandomName = new Mock<GenerateRandomNameService>();
+
+            var databaseMock = new Mock<IDatabase>();
+            redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(databaseMock.Object);
 
             _userController = new UserController(
-                _mockUser.Object, _mockCache.Object, _mockUserManager.Object, _mockEmailService.Object, _mockJWTTokenService.Object, generateRandomName.Object);
+                _mockUser.Object, redisConnection.Object, _mockUserManager.Object, _mockEmailService.Object, _mockJWTTokenService.Object, generateRandomName.Object);
         }
 
         [Fact]
@@ -42,6 +47,9 @@ namespace AuthorVerseServer.Tests.Units
             // Arrange
             _mockUserManager.Setup(um => um.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync(new User());
+
+            _redis.Setup(um => um.StringGetAsync("user:existingUser", CommandFlags.None))
+                .ReturnsAsync("someSerializedUserJson");
 
             // Act
             var result = await _userController.Registration(new UserRegistrationDTO { UserName = "existingUser" });
@@ -56,6 +64,9 @@ namespace AuthorVerseServer.Tests.Units
         public async Task Registration_ExistingEmail_ReturnsBadRequest()
         {
             // Arrange
+            _redis.Setup(um => um.StringGetAsync($"user:{It.IsAny<string>}", CommandFlags.None))
+                .ReturnsAsync("someSerializedUserJson");
+
             _mockUserManager.Setup(um => um.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((User?)null);
 

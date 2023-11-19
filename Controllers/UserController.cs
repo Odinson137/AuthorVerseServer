@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using AuthorVerseServer.Data.Enums;
 using Microsoft.Extensions.Caching.Memory;
+using StackExchange.Redis;
+using Newtonsoft.Json;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -19,15 +21,15 @@ namespace AuthorVerseServer.Controllers
         private readonly UserManager<User> _userManager;
         private readonly MailService _mailService;
         private readonly CreateJWTtokenService _jWTtokenService;
-        private readonly GenerateRandomName _generateNameService;
-        private readonly IMemoryCache _cache;
+        private readonly GenerateRandomNameService _generateNameService;
+        private readonly IDatabase _redis;
         public UserController(
-            IUser user, IMemoryCache cache,
+            IUser user, IConnectionMultiplexer redisConnection,
             UserManager<User> userManager, MailService mailService, 
-            CreateJWTtokenService jWTtokenService, GenerateRandomName generateRandomName)
+            CreateJWTtokenService jWTtokenService, GenerateRandomNameService generateRandomName)
         {
             _user = user;
-            _cache = cache;
+            _redis = redisConnection.GetDatabase();
             _mailService = mailService;
             _jWTtokenService = jWTtokenService;
             _userManager = userManager;
@@ -44,7 +46,8 @@ namespace AuthorVerseServer.Controllers
 
         private async Task<string> Send(UserRegistrationDTO user)
         {
-            _cache.Set($"user:{user.UserName}", user, TimeSpan.FromMinutes(15));
+            string jsonUSer = JsonConvert.SerializeObject(user);
+            await _redis.StringSetAsync($"user:{user.UserName}", jsonUSer, TimeSpan.FromMinutes(15));
 
             var token = _jWTtokenService.GenerateJwtTokenEmail(user);
             string result = await _mailService.SendEmail(token, user.Email);
@@ -73,7 +76,8 @@ namespace AuthorVerseServer.Controllers
 
             var userName = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("unique_name"))?.Value;
 
-            var user = _cache.Get<UserRegistrationDTO>($"user:{userName}");
+            string jsonUser = await _redis.StringGetAsync($"user:{userName}");
+            var user = JsonConvert.DeserializeObject<UserRegistrationDTO>(jsonUser);
 
             if (user == null)
             {
@@ -132,9 +136,9 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<MessageDTO>> Registration(UserRegistrationDTO registeredUser)
         {
             User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
-            var userCache = _cache.Get($"user:{registeredUser.UserName}");
+            var userCache = await _redis.StringGetAsync($"user:{registeredUser.UserName}");
 
-            if (checkUser != null || userCache != null)
+            if (checkUser != null || !string.IsNullOrEmpty(userCache))
             {
                 return BadRequest(new MessageDTO { message = "This name is already taken" });
             }

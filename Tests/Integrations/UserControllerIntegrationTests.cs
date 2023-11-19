@@ -69,7 +69,7 @@ namespace AuthorVerseServer.Tests.Integrations
         [Fact]
         public async Task ConfirmEmail_FaildInCache_ReturnsBadRequest()
         {
-            var generate = new GenerateRandomName();
+            var generate = new GenerateRandomNameService();
 
             // Arrange
             var userName = generate.GenerateRandomUsername();
@@ -91,7 +91,7 @@ namespace AuthorVerseServer.Tests.Integrations
         [Fact]
         public async Task ConfirmEmail_Ok_ReturnsOkResult()
         {
-            var generate = new GenerateRandomName();
+            var generate = new GenerateRandomNameService();
 
             // Arrange
             var userName = generate.GenerateRandomUsername();
@@ -115,7 +115,7 @@ namespace AuthorVerseServer.Tests.Integrations
         [Fact]
         public async Task Login_Ok_ReturnsOkResult()
         {
-            var generate = new GenerateRandomName();
+            var generate = new GenerateRandomNameService();
 
             // Arrange
             var userDTO = new UserLoginDTO
