@@ -15,6 +15,12 @@ services:
         - MSSQL_SA_PASSWORD=S3cur3P@ssW0rd!
     networks:
         - serverapp
+    healthcheck:
+        test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "S3cur3P@ssW0rd!" -Q "SELECT 1" || exit 1
+        interval: 5s
+        timeout: 3s
+        retries: 10
+        start_period: 10s
 
   redis:
     container_name: authorverse-redis
@@ -25,6 +31,7 @@ services:
         - serverapp
 
   server:
+    restart: always
     container_name: authorverse-server
     build:
       context: .
@@ -36,10 +43,10 @@ services:
         - action: rebuild
           path: .
     depends_on:
-      - db
+        db:
+            condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=development
-      - MSSQL_SA_PASSWORD=S3cur3P@ssW0rd!
     networks:
       - serverapp
 

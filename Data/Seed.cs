@@ -13,7 +13,7 @@ namespace AuthorVerseServer.Data
             var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
             if (pendingMigrations.Any())
             {
-                //await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureDeletedAsync();
                 await context.Database.MigrateAsync();
             }
 

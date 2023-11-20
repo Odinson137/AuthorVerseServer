@@ -51,12 +51,31 @@ ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
     builder.AddDebug();
 });
 
+
+
 services.AddDbContext<DataContext>(options =>
 {
-    var password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+#if !DEBUG
+    string str = $"Server=db;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=50;MultipleActiveResultSets=True";
+#else
     string str = $"Server=localhost;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True";
+#endif
+
     options.UseSqlServer(str);
 });
+
+#if !DEBUG
+
+services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379,abortConnect=false"));
+
+services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "redis:6379,abortConnect=false";
+    options.InstanceName = "RedisCache";
+});
+
+
+#else
 
 services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false"));
 
@@ -65,6 +84,11 @@ services.AddStackExchangeRedisCache(options =>
     options.Configuration = "localhost:6379,abortConnect=false";
     options.InstanceName = "RedisCache";
 });
+
+
+#endif
+
+
 
 var policyName = "AllowReactApp";
 services.AddCors(options =>
