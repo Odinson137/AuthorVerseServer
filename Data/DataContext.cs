@@ -1,12 +1,8 @@
-﻿using AuthorVerseServer.Data.Enums;
-using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Hosting;
 
 namespace AuthorVerseServer.Data
 {
@@ -39,7 +35,6 @@ namespace AuthorVerseServer.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
             //modelBuilder.Entity<Friendship>().Ignore(u => u.User1);            modelBuilder.Entity<Friendship>()
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
 

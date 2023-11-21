@@ -31,7 +31,6 @@ services:
         - serverapp
 
   server:
-    restart: always
     container_name: authorverse-server
     build:
       context: .
