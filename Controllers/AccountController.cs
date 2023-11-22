@@ -3,6 +3,7 @@ using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
+using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -59,10 +60,18 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<CommentPageDTO>> GetUserComments(
             CommentType commentType = CommentType.All, int page = 1, string searchComment = "") // показывать на одной странице по 10 комментов
         {
-            var a = Enum.IsDefined(typeof(CommentType), commentType);
-            // userId from token
-            return Ok(new CommentPageDTO());
-        }
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            if (--page < 0)
+                return BadRequest("Page is smaller than zero");
+
+            var comments = await _account.GetCommentsPagesCount(commentType, page, searchComment, userId);
+
+            return Ok(comments);
+/*            return Ok(new CommentPageDTO());
+*/        }
 
         [HttpGet("Friends")]
         public async Task<ActionResult<ICollection<FriendDTO>>> GetFriends()

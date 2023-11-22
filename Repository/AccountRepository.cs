@@ -3,6 +3,7 @@ using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
@@ -40,18 +41,48 @@ namespace AuthorVerseServer.Repository
                 Description = data.Description,
                 LogoUrl = data.LogoUrl,
             }).FirstOrDefaultAsync();
-
-            /*return await _context.Users.Select(data => new UserProfileDTO
-            {
-                UserName = data.UserName,
-                Description = data.Description,
-                LogoUrl = data.LogoUrl,
-            }).FirstOrDefaultAsync();*/
         }
 
-        public Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment)
+        private async Task<IQueryable<Comment>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
         {
-            throw new NotImplementedException();
+            User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+            if(commentType == CommentType.All)
+            {
+                return (IQueryable<Comment>)user.Comments.Where(x => x.CommentatorId == userId);
+            }//Протестировать
+            /*var query = _context.Books
+                .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
+
+            if (tagId != 0)
+            {
+                query = query.Where(book => book.Tags.Any(tag => tag.TagId == tagId));
+            }
+
+            if (genreId != 0)
+            {
+                query = query.Where(book => book.Genres.Any(genre => genre.GenreId == genreId));
+            }
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                query = query.Where(book => book.NormalizedTitle.Contains(searchText));
+            }
+            */
+            return (IQueryable<Comment>)user.Comments.Where(x => x.CommentatorId == userId);
+        }
+
+        public async Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment, string userId)
+        {//Пользователя
+            IQueryable<Comment> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
+            return await query.CountAsync();
+
+        }
+
+        public Task<ICollection<CommentProfileDTO>> GetUserCommentsAsync(CommentType commentType, int page, string searchComment)
+        {
+            //var query = _context.Comments.Where()
+            return null;
         }
 
         public Task<ICollection<UserBookDTO>> GetUserBooksAsync(string userId)
@@ -59,10 +90,6 @@ namespace AuthorVerseServer.Repository
             throw new NotImplementedException();
         }
 
-        public Task<ICollection<CommentProfileDTO>> GetUserCommentsAsync(CommentType commentType, int page, string searchComment)
-        {
-            throw new NotImplementedException();
-        }
 
         public Task<ICollection<FriendDTO>> GetUserFriendsAsync(string userId)
         {
