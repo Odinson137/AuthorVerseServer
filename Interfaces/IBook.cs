@@ -1,5 +1,4 @@
 ﻿namespace AuthorVerseServer.Interfaces;
-
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Models;
 using MailKit.Search;
@@ -7,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 public interface IBook
 {
+    Task Save();
     Task<ICollection<Book>> GetBooksAsync();
     Task<int> GetCountBooks();
     Task<ICollection<PopularBook>> GetPopularBooks();
@@ -19,6 +19,6 @@ public interface IBook
     Task<Genre?> GetGenreById(int id);
     Task<Tag?> GetTagById(int id);
     Task<ICollection<AuthorMinimalBook>> GetAuthorBooksAsync(string userId);
-    Task Save();
+    Task<ICollection<BookQuotes>> GetBookQuotes();
 }
 

@@ -225,5 +225,10 @@ namespace AuthorVerseServer.Repository
                 .ToListAsync();
             return books;
         }
+
+        public Task<ICollection<BookQuotes>> GetBookQuotes()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

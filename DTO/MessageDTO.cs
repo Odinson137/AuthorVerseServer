@@ -2,6 +2,6 @@
 {
     public class MessageDTO
     {
-        public string message = null!;
+        public string Message { get; set; } = null!;
     }
 }

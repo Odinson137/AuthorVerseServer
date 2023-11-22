@@ -8,8 +8,6 @@ namespace AuthorVerseServer.Models
         public int CommentRatingId { get; set; }
         public int CommentId { get; set; }
         public string UserCommentedId { get; set; }
-        public int Likes { get; set; }
-        public int DisLikes { get; set; }
-
+        public LikeRating Rating { get; set; }
     }
 }

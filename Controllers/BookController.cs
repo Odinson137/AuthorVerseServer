@@ -229,12 +229,17 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("AuthorBooks")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> GetAuthorBooks(string authorId)
+        public async Task<ActionResult<ICollection<AuthorMinimalBook>>> GetAuthorBooks(string authorId)
         {
             var books = await _book.GetAuthorBooksAsync(authorId);
             return Ok(books);
+        }
+
+        [HttpGet("BookQuotes")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult> GetAuthorBooks(int bookId)
+        {
+            return null;
         }
     }
 }
