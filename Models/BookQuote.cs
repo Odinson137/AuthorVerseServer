@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
-    public class BookQuotes
+    public class BookQuote
     {
         [Key]
         public int BookQuotesId { get; set; }

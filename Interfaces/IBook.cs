@@ -19,6 +19,6 @@ public interface IBook
     Task<Genre?> GetGenreById(int id);
     Task<Tag?> GetTagById(int id);
     Task<ICollection<AuthorMinimalBook>> GetAuthorBooksAsync(string userId);
-    Task<ICollection<BookQuotes>> GetBookQuotes();
+    Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page);
 }
 

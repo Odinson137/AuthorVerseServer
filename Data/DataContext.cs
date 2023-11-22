@@ -31,11 +31,11 @@ namespace AuthorVerseServer.Data
         public DbSet<Note> Notes { get; set; }
         public DbSet<Character> Characters { get; set; }
         public DbSet<MicrosoftUser> MicrosoftUsers { get; set; }
+        public DbSet<BookQuote> BookQuotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            //modelBuilder.Entity<Friendship>().Ignore(u => u.User1);            modelBuilder.Entity<Friendship>()
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
 
             modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
@@ -137,6 +137,18 @@ namespace AuthorVerseServer.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+            modelBuilder.Entity<Book>()
+                .HasMany(c => c.BookQuotes)
+                .WithOne(c => c.Book)
+                .HasForeignKey(c => c.BookId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<User>()
+                .HasMany(c => c.BookQuotes)
+                .WithOne(c => c.Quoter)
+                .HasForeignKey(c => c.QuoterId)
+                .IsRequired(false);
 
 
 

@@ -1,5 +1,6 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
+using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
 using MailKit.Search;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -284,7 +285,7 @@ namespace AuthorVerseServer.Tests.Integrations
         }
 
         [Fact]
-        public async Task GetAuthorWithout_Ok_ReturnsOkResult()
+        public async Task GetAuthorBooks_Ok_ReturnsOkResult()
         {
             // Arrange
             string userId = "admin";
@@ -304,6 +305,54 @@ namespace AuthorVerseServer.Tests.Integrations
             {
                 Assert.NotEmpty(book.Title);
                 Assert.True(book.BookId > 0);
+            }
+        }
+
+        [Fact]
+        public async Task GetBookQuotes_GetFullPageOfQuotes_ReturnsOkResult()
+        {
+            // Arrange
+            int bookId = 1;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/BookQuotes?bookId={bookId}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var quotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(content);
+
+            Assert.NotNull(quotes);
+            Assert.True(quotes.Any());
+            Assert.True(quotes.Count() > 0);
+
+            foreach (var book in quotes)
+            {
+                Assert.False(string.IsNullOrEmpty(book.Text));
+                Assert.False(string.IsNullOrEmpty(book.Quoter.Id));
+            }
+        }
+
+        [Fact]
+        public async Task GetBookQuotes_NotFullContent_ReturnsOkResult()
+        {
+            // Arrange
+            int bookId = 1, page = 100;
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/BookQuotes?bookId={bookId}&page={page}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var quotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(content);
+
+            Assert.NotNull(quotes);
+            Assert.True(quotes.Any());
+            Assert.True(quotes.Count() > 0);
+
+            foreach (var book in quotes)
+            {
+                Assert.False(string.IsNullOrEmpty(book.Text));
+                Assert.False(string.IsNullOrEmpty(book.Quoter.Id));
             }
         }
     }

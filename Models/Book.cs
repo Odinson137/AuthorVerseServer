@@ -23,6 +23,7 @@ namespace AuthorVerseServer.Models
         public ICollection<Character> Characters { get; set; } = new List<Character>();
         public ICollection<BookChapter> BookChapters { get; set; } = new List<BookChapter>();
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>();
+        public ICollection<BookQuote> BookQuotes { get; set; } = new List<BookQuote>();
         public DateTime PublicationData { get; } = DateTime.Now; // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги
         public AgeRating AgeRating { get; set; }
         public string? BookCover { get; set; }

@@ -216,6 +216,7 @@ namespace AuthorVerseServer.Repository
         public async Task<ICollection<AuthorMinimalBook>> GetAuthorBooksAsync(string userId)
         {
             var books = await _context.Books
+                .AsNoTracking()
                 .Where(book => book.AuthorId == userId)
                 .Select(book => new AuthorMinimalBook() {
                     BookId = book.BookId,
@@ -226,9 +227,28 @@ namespace AuthorVerseServer.Repository
             return books;
         }
 
-        public Task<ICollection<BookQuotes>> GetBookQuotes()
+        public async Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page)
         {
-            throw new NotImplementedException();
+            var quotes = await _context.BookQuotes
+                .AsNoTracking()
+                .Skip(5 * page)
+                .Take(5)
+                .Where(quote => quote.BookId == bookId)
+                .Select(quote => new QuoteDTO
+                {
+                    QuoteId = quote.BookQuotesId,
+                    Text = quote.Text,
+                    Quoter = new UserDTO
+                    {
+                        Id = quote.QuoterId,
+                        UserName = quote.Quoter.UserName
+                    },
+                    LikeCount = quote.Likes,
+                    DisLikesCount = quote.DisLikes,
+                    QuoteCreatedDateTime = DateOnly.FromDateTime(quote.QuoteCreatedDateTime)
+                }).ToListAsync();
+
+            return quotes;
         }
     }
 }

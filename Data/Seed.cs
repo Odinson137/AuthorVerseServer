@@ -155,8 +155,9 @@ namespace AuthorVerseServer.Data
                 {
                     var genre = new Genre { Name = genreName };
                     genres.Add(genre);
-                    context.Add(genre);
                 }
+
+                await context.AddRangeAsync(genres);
 
                 var tags = new List<Tag>();
 
@@ -164,8 +165,9 @@ namespace AuthorVerseServer.Data
                 {
                     var tag = new Tag { Name = tagName };
                     tags.Add(tag);
-                    context.Add(tag);
                 }
+
+                await context.AddRangeAsync(tags);
 
                 if (!await roleManager.RoleExistsAsync("Admin"))
                 {
@@ -210,7 +212,10 @@ namespace AuthorVerseServer.Data
                     {
                         Title = book.Key,
                         NormalizedTitle = (book.Key).ToUpper(),
-                        Author = new User { UserName = $"CCharpProger_{numer}" },
+                        Author = new User { UserName = $"CCharpProger_{numer}", 
+                            Name = usersName[numer],
+                            LastName = usersLastName[numer]
+                        },
                         Description = book.Value,
                         AgeRating = AgeRating.All,
                         Permission = PublicationPermission.Approved,
@@ -275,7 +280,7 @@ namespace AuthorVerseServer.Data
                         } };
 
                     var comments = new List<Comment>();
-                    for (int i = 0; i < random.Next(5, 30); i++)
+                    for (int i = 0; i < random.Next(5, 20); i++)
                     {
                         comments.Add(new Comment()
                         {
@@ -326,7 +331,39 @@ namespace AuthorVerseServer.Data
                         Description = book.Value,
                         AgeRating = AgeRating.All,
                         Permission = PublicationPermission.Approved,
-                        BookCover = files[numeric++]
+                        BookCover = files[numeric++],
+                        BookQuotes = new List<BookQuote> { 
+                            new BookQuote
+                            {
+                                Quoter = admin,
+                                Text = "Огонь не тот, кто ярко пляшет, а тот, кто всё уничтожает"
+                            },
+                            new BookQuote
+                            {
+                                Quoter = admin,
+                                Text = "Я не дорожу вашим мнением, оно вращается в туалете семенем"
+                            },
+                            new BookQuote
+                            {
+                                Quoter = admin,
+                                Text = "Огонь не тот, кто ярко пляшет, а тот, кто всё уничтожает"
+                            },
+                            new BookQuote
+                            {
+                                Quoter = admin,
+                                Text = "Я не дорожу вашим мнением, оно вращается в туалете семенем"
+                            },
+                            new BookQuote
+                            {
+                                Quoter = admin,
+                                Text = "Огонь не тот, кто ярко пляшет, а тот, кто всё уничтожает"
+                            },
+                            new BookQuote
+                            {
+                                Quoter = admin,
+                                Text = "Я не дорожу вашим мнением, оно вращается в туалете семенем"
+                            },
+                        }
                     };
 
                     for (int i = 0; i < 3; i++)
@@ -438,7 +475,7 @@ namespace AuthorVerseServer.Data
 
                     n = (n + 1) % 10;
 
-                    await userManager.CreateAsync(user, "ЮрикИзМножества_ЯрикИзСкриптеров_СаняИзНарода123");
+                    //await userManager.CreateAsync(user, "ЮрикИзМножества_ЯрикИзСкриптеров_СаняИзНарода123");
                     await context.Users.AddAsync(user);
 
                     int num = 0;
@@ -568,7 +605,7 @@ namespace AuthorVerseServer.Data
 
                     n = (n + 1) % 10;
 
-                    await userManager.CreateAsync(user, "ЮрикИзМножества_ЯрикИзСкриптеров_СаняИзНарода123");
+                    //await userManager.CreateAsync(user, "ЮрикИзМножества_ЯрикИзСкриптеров_СаняИзНарода123");
                     await context.Users.AddAsync(user);
 
                     int num = 0;

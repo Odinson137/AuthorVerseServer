@@ -237,9 +237,15 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("BookQuotes")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult> GetAuthorBooks(int bookId)
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ICollection<QuoteDTO>>> GetBookQuotes(int bookId, int page = 1)
         {
-            return null;
+            if (--page < 0)
+            {
+                return BadRequest("Error page");
+            }
+            var quotes = await _book.GetBookQuotesAsync(bookId, page);
+            return Ok(quotes);
         }
     }
 }
