@@ -156,7 +156,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task AddBook(Book book)
         {
-            await _context.Books.AddAsync(book);
+            await _context.AddAsync(book);
         }
 
         public async Task Save()
@@ -211,6 +211,19 @@ namespace AuthorVerseServer.Repository
                 .Take(5);
 
             return await books.ToListAsync();
+        }
+
+        public async Task<ICollection<AuthorMinimalBook>> GetAuthorBooksAsync(string userId)
+        {
+            var books = await _context.Books
+                .Where(book => book.AuthorId == userId)
+                .Select(book => new AuthorMinimalBook() {
+                    BookId = book.BookId,
+                    Title = book.Title,
+                    BookCoverUrl = book.BookCover,
+                })
+                .ToListAsync();
+            return books;
         }
     }
 }

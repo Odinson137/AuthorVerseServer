@@ -24,14 +24,14 @@ public class BookControllerUnitTests
     public BookControllerUnitTests()
     {
         mockBookRepository = new Mock<IBook>();
-        var mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        var mockMemoryCache = new Mock<IMemoryCache>();
-        var mockLoadImage = new Mock<ILoadImage>();
+        mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+        mockMemoryCache = new Mock<IMemoryCache>();
+        mockLoadImage = new Mock<ILoadImage>();
 
         var redisConnection = new Mock<IConnectionMultiplexer>();
 
-        var databaseMock = new Mock<IDatabase>();
-        redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(databaseMock.Object);
+        _redis = new Mock<IDatabase>();
+        redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(_redis.Object);
 
         controller = new BookController(mockBookRepository.Object, mockUserManager.Object, redisConnection.Object, mockLoadImage.Object);
 
@@ -166,7 +166,7 @@ public class BookControllerUnitTests
     {
         // Arrange
 
-        var mockFormFile = CreateMockFormFile("example.png", 1);
+        //var mockFormFile = CreateMockFormFile("example.png", 1);
 
         var bookDTO = new CreateBookDTO
         {
@@ -293,19 +293,20 @@ public class BookControllerUnitTests
     {
         // Arrange
 
-        int tag = 0, genre = 0, page = 0;
+        int tag = 0, genre = 0, page = 1;
         string searchText = "";
 
         mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page, string.Empty)).ReturnsAsync(new List<BookDTO>());
+        mockBookRepository.Setup(um => um.GetBooksCountByTagsAndGenres(tag, genre, searchText)).ReturnsAsync(1);
 
         // Act
-        var result = await controller.GetCertainBooksPage(tag, genre, page);
+        var result = await controller.GetCertainBooksPage(tag, genre, page, searchText);
 
         // Assert
         var objectResult = Assert.IsType<ActionResult<BookPageDTO>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
 
-        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page, string.Empty), Times.Once);
+        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page - 1, searchText), Times.Once);
         mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre, searchText), Times.Once);
     }
 
@@ -314,11 +315,11 @@ public class BookControllerUnitTests
     {
         // Arrange
 
-        int tag = 0, genre = 0, page = 1;
+        int tag = 0, genre = 0, page = 2;
         string searchText = "";
 
-        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page, string.Empty)).ReturnsAsync(new List<BookDTO>());
-        mockBookRepository.Setup(um => um.GetBooksCountByTagsAndGenres(tag, genre, searchText)).ReturnsAsync(1);
+        mockBookRepository.Setup(um => um.GetCertainBooksPage(tag, genre, page, searchText)).ReturnsAsync(new List<BookDTO>());
+        mockBookRepository.Setup(um => um.GetBooksCountByTagsAndGenres(tag, genre, searchText)).ReturnsAsync(0);
 
         // Act
         var result = await controller.GetCertainBooksPage(tag, genre, page);
@@ -327,7 +328,7 @@ public class BookControllerUnitTests
         var objectResult = Assert.IsType<ActionResult<BookPageDTO>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
 
-        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page, string.Empty), Times.Once);
+        mockBookRepository.Verify(repo => repo.GetCertainBooksPage(tag, genre, page - 1, searchText), Times.Once);
         mockBookRepository.Verify(repo => repo.GetBooksCountByTagsAndGenres(tag, genre, searchText), Times.Never);
     }
 

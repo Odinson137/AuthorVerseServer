@@ -107,21 +107,6 @@ namespace AuthorVerseServer.Controllers
             });
         }
 
-        [HttpGet("{bookId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<DetailBookDTO>> GetBook(int bookId)
-        {
-            var book = await _book.GetBookById(bookId);
-
-            if (book == null)
-            {
-                return NotFound("This book not found");
-            }
-
-            return book;
-        }
-
         [Authorize]
         [HttpPost("Create")]
         [ProducesResponseType(200)]
@@ -150,6 +135,7 @@ namespace AuthorVerseServer.Controllers
                 Author = user,
                 AuthorId = bookDTO.AuthorId,
                 Title = bookDTO.Title,
+                NormalizedTitle = bookDTO.Title.ToUpper(),
                 Description = bookDTO.Description,
                 AgeRating = bookDTO.AgeRating,
             };
@@ -160,8 +146,6 @@ namespace AuthorVerseServer.Controllers
                 await _loadImage.CreateImageAsync(bookDTO.BookCoverImage, nameFile, "Images");
                 book.BookCover = nameFile;
             }
-
-            await _book.AddBook(book);
 
             foreach (var genreId in bookDTO.GenresId)
             {
@@ -190,11 +174,14 @@ namespace AuthorVerseServer.Controllers
                 }
             }
 
-            await _book.Save();
+            await _book.AddBook(book);
 
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest("Book not create");
+                await _book.Save();
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
             }
 
             return Ok(book.BookId);
@@ -223,14 +210,31 @@ namespace AuthorVerseServer.Controllers
             return Ok(books);
         }
 
-        [Authorize]
-        [HttpPut("Confirm")]
+
+        [HttpGet("{bookId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<DetailBookDTO>> GetBook(int bookId)
+        {
+            var book = await _book.GetBookById(bookId);
+
+            if (book == null)
+            {
+                return NotFound("This book not found");
+            }
+
+            return book;
+        }
+
+
+        [HttpGet("AuthorBooks")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> ConfirmBook(int bookId)
+        public async Task<ActionResult> GetAuthorBooks(string authorId)
         {
-            return Ok(1);
+            var books = await _book.GetAuthorBooksAsync(authorId);
+            return Ok(books);
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using AuthorVerseServer.Data.Enums;
-using AuthorVerseServer.Models;
-using Microsoft.Extensions.FileProviders;
 using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.DTO
@@ -84,6 +82,11 @@ namespace AuthorVerseServer.DTO
         public DateTime PublicationData { get; set; }
     }
 
-
+    public class AuthorMinimalBook
+    {
+        public int BookId { get; set; }
+        public string Title { get; set; } = null!;
+        public string? BookCoverUrl { get; set; }
+    }
 
 }

@@ -31,6 +31,9 @@ namespace AuthorVerseServer.Tests.Integrations
             var configuration = factory.Services.GetRequiredService<IConfiguration>();
 
             _token = new CreateJWTtokenService(configuration);
+
+            string jwtToken = _token.GenerateJwtToken("admin");
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
         }
 
         [Fact]
@@ -67,9 +70,6 @@ namespace AuthorVerseServer.Tests.Integrations
                 Description = "«Берсерк» - это японская манга, созданная Кентаро Миурой. Сюжет рассказывает о Гатсе, мстительном воине, путешествующем в мрачном мире средневековой Европы, сражаясь с демонами и чудовищами. Волнующий и темный рассказ о выживании, предательстве и потере человечности, \"Берсерк\" славится своим уникальным стилем и глубокими темами, привлекая миллионы читателей по всему миру.",
                 AgeRating = AgeRating.EighteenPlus,
             };
-
-            string jwtToken = _token.GenerateJwtToken("admin");
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
             var requestContent = new StringContent(JsonConvert.SerializeObject(bookDTO), Encoding.UTF8, "application/json");
 
@@ -116,7 +116,7 @@ namespace AuthorVerseServer.Tests.Integrations
             // Arrange
             int tagId = 0;
             int genreid = 0;
-            int page = 0;
+            int page = 1;
 
             // Act
             var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreid}&page={page}");
@@ -126,8 +126,8 @@ namespace AuthorVerseServer.Tests.Integrations
         }
 
         [Theory]
-        [InlineData(0, 0, 0)]
-        [InlineData(1, 1, 1)]
+        [InlineData(0, 0, 1)]
+        [InlineData(1, 1, 2)]
         public async Task GetPageBooksByGenreAndTags_GetObject_ReturnsOkResult(int tagId, int genreId, int page)
         {
             // Arrange
@@ -148,7 +148,7 @@ namespace AuthorVerseServer.Tests.Integrations
         {
             // Arrange
             int tagId = 60;
-            int genreId = 0, page = 0;
+            int genreId = 0, page = 1;
 
             // Act
             var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
@@ -167,7 +167,7 @@ namespace AuthorVerseServer.Tests.Integrations
             // Arrange
             int tagId = 0;
             int genreId = 0;
-            int page = 0;
+            int page = 1;
 
             // Act
             var response = await _client.GetAsync($"/api/Book/SearchBy?tagId={tagId}&genreId={genreId}&page={page}");
@@ -280,6 +280,30 @@ namespace AuthorVerseServer.Tests.Integrations
             foreach (var book in booksPage.Books)
             {
                 Assert.Contains(searchText, book.Title);
+            }
+        }
+
+        [Fact]
+        public async Task GetAuthorWithout_Ok_ReturnsOkResult()
+        {
+            // Arrange
+            string userId = "admin";
+
+            // Act
+            var response = await _client.GetAsync($"/api/Book/AuthorBooks?authorId={userId}");
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            var books = JsonConvert.DeserializeObject<ICollection<AuthorMinimalBook>>(content);
+
+            Assert.NotNull(books);
+            Assert.True(books.Any());
+            Assert.True(books.Count() > 0);
+
+            foreach (var book in books)
+            {
+                Assert.NotEmpty(book.Title);
+                Assert.True(book.BookId > 0);
             }
         }
     }
