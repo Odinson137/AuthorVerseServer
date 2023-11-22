@@ -138,13 +138,14 @@ namespace AuthorVerseServer.Tests.Units
             int page = 1;
             CommentType commentType = It.IsAny<CommentType>();
             string searchComment = "";
+            string userId = "admin";
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
             _mockAccount.Setup(a => a.GetUserCommentsAsync(
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment)).ReturnsAsync(1);
+                commentType, page, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -159,13 +160,14 @@ namespace AuthorVerseServer.Tests.Units
             int page = 0;
             CommentType commentType = It.IsAny<CommentType>();
             string searchComment = "";
+            string userId = "admin";
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
             _mockAccount.Setup(a => a.GetUserCommentsAsync(
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment)).ReturnsAsync(1);
+                commentType, page, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -180,13 +182,14 @@ namespace AuthorVerseServer.Tests.Units
             int page = 1;
             CommentType commentType = (CommentType)999;
             string searchComment = "";
+            string userId = "admin";
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
             _mockAccount.Setup(a => a.GetUserCommentsAsync(
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment)).ReturnsAsync(1);
+                commentType, page, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -201,13 +204,14 @@ namespace AuthorVerseServer.Tests.Units
             int page = 1;
             CommentType commentType = (CommentType)999;
             string searchComment = "";
+            string userId = "admin";
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
             _mockAccount.Setup(a => a.GetUserCommentsAsync(
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment)).ReturnsAsync(1);
+                commentType, page, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -223,13 +227,14 @@ namespace AuthorVerseServer.Tests.Units
             int page = 2;
             CommentType commentType = It.IsAny<CommentType>();
             string searchComment = "";
+            string userId = "admin";
             // Arrange
             _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
             _mockAccount.Setup(a => a.GetUserCommentsAsync(
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment)).ReturnsAsync(0);
+                commentType, page, searchComment, userId)).ReturnsAsync(0);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);

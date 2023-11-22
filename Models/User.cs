@@ -13,6 +13,7 @@ namespace AuthorVerseServer.Models
         public string? Description { get; set; }
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>();
         public ICollection<Book> Books { get; set; } = new List<Book>();
+        public ICollection<Note> Notes { get; set; } = new List<Note>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Friendship> InitiatorFriendships { get; set; } = new List<Friendship>();
         public ICollection<Friendship> TargetFriendships { get; set; } = new List<Friendship>();
