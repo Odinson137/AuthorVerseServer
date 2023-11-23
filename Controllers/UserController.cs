@@ -40,7 +40,7 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult> SendEmail([FromBody] UserRegistrationDTO user)
         {
             string result = await Send(user);
-            return Ok(new MessageDTO { message = result });
+            return Ok(new MessageDTO { Message = result });
         }
 
         private async Task<string> Send(UserRegistrationDTO user)
@@ -64,13 +64,13 @@ namespace AuthorVerseServer.Controllers
             var tokenExp = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("exp"))?.Value;
             if (tokenExp == null || !long.TryParse(tokenExp, out long expUnixTime))
             {
-                return BadRequest(new MessageDTO { message = "Invalid token" });
+                return BadRequest(new MessageDTO { Message = "Invalid token" });
             }
 
             var tokenDate = DateTimeOffset.FromUnixTimeSeconds(expUnixTime).UtcDateTime;
             if (tokenDate < DateTime.Now.ToUniversalTime())
             {
-                return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
+                return BadRequest(new MessageDTO { Message = "Token lifetime has run out" });
             }
 
             var userName = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("unique_name"))?.Value;
@@ -80,7 +80,7 @@ namespace AuthorVerseServer.Controllers
 
             if (user == null)
             {
-                return BadRequest(new MessageDTO { message = "Token lifetime has run out" });
+                return BadRequest(new MessageDTO { Message = "Token lifetime has run out" });
             }
 
             User newUser = new User()
@@ -99,7 +99,7 @@ namespace AuthorVerseServer.Controllers
             }
             else
             {
-                return BadRequest(new MessageDTO { message = string.Join(", ", result.Errors) });
+                return BadRequest(new MessageDTO { Message = string.Join(", ", result.Errors) });
             }
         }
 
@@ -124,9 +124,9 @@ namespace AuthorVerseServer.Controllers
                         Token = Token
                     });
                 }
-                return BadRequest(new MessageDTO { message = "Password is not correct" });
+                return BadRequest(new MessageDTO { Message = "Password is not correct" });
             }
-            return BadRequest(new MessageDTO { message = "User do not exist" });
+            return BadRequest(new MessageDTO { Message = "User do not exist" });
         }
 
         [HttpPost("Registration")]
@@ -139,19 +139,19 @@ namespace AuthorVerseServer.Controllers
 
             if (checkUser != null || !string.IsNullOrEmpty(userCache))
             {
-                return BadRequest(new MessageDTO { message = "This name is already taken" });
+                return BadRequest(new MessageDTO { Message = "This name is already taken" });
             }
 
             User? checkEmail = await _userManager.FindByEmailAsync(registeredUser.Email);
 
             if (checkEmail != null)
             {
-                return BadRequest(new MessageDTO { message = "This email is already taken" });
+                return BadRequest(new MessageDTO { Message = "This email is already taken" });
             }
 
             string result = await Send(registeredUser);
 
-            return Ok(new MessageDTO { message = result });
+            return Ok(new MessageDTO { Message = result });
          }
 
         [HttpPost("reg-google")]
@@ -161,12 +161,12 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<UserGoogleVerify>> RegWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
-            if (userInfo == null) return BadRequest(new MessageDTO { message = "Error token" });
+            if (userInfo == null) return BadRequest(new MessageDTO { Message = "Error token" });
 
             User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user != null)
             {
-                return BadRequest( new MessageDTO { message = "This user has already existed" });
+                return BadRequest( new MessageDTO { Message = "This user has already existed" });
             }
 
             User createUser = new User()
@@ -184,7 +184,7 @@ namespace AuthorVerseServer.Controllers
 
             if (!result.Succeeded)
             {
-                return BadRequest(new MessageDTO { message = "Failed to create user" });
+                return BadRequest(new MessageDTO { Message = "Failed to create user" });
             }
 
             UserGoogleVerify userGoogle = new UserGoogleVerify()
@@ -205,12 +205,12 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<UserGoogleVerify>> SignInWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
-            if (userInfo == null) return BadRequest(new MessageDTO { message = "Error token" });
+            if (userInfo == null) return BadRequest(new MessageDTO { Message = "Error token" });
 
             User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user == null)
             {
-                return BadRequest(new MessageDTO { message = "User not found" });
+                return BadRequest(new MessageDTO { Message = "User not found" });
             }
 
             UserGoogleVerify userGoogle = new UserGoogleVerify()
@@ -233,7 +233,7 @@ namespace AuthorVerseServer.Controllers
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser == null)
             {
-                return BadRequest(new MessageDTO { message = "User not found" });
+                return BadRequest(new MessageDTO { Message = "User not found" });
             }
 
             User user = microsoftUser.User;
@@ -258,7 +258,7 @@ namespace AuthorVerseServer.Controllers
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser != null)
             {
-                return BadRequest(new MessageDTO { message = "User has already exist" });
+                return BadRequest(new MessageDTO { Message = "User has already exist" });
             }
 
             User user = new User()
@@ -271,7 +271,7 @@ namespace AuthorVerseServer.Controllers
             var result = await _userManager.CreateAsync(user);
             if (!result.Succeeded)
             {
-                return BadRequest(new MessageDTO { message = "Failed to create user" });
+                return BadRequest(new MessageDTO { Message = "Failed to create user" });
             }
 
             await _user.CreateMicrosoftUser(new MicrosoftUser()

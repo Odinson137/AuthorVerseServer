@@ -43,10 +43,9 @@ namespace AuthorVerseServer.Tests.Integrations
             // Arrange
             var bookDTO = new CreateBookDTO
             {
-                AuthorId = string.Empty,
                 GenresId = new List<int> { 1, 2 },
                 TagsId = new List<int> { 1, 2 },
-                Title = "Берсерк",
+                Title = string.Empty,
                 Description = "«Берсерк» - это японская манга, созданная Кентаро Миурой. Сюжет рассказывает о Гатсе, мстительном воине, путешествующем в мрачном мире средневековой Европы, сражаясь с демонами и чудовищами. Волнующий и темный рассказ о выживании, предательстве и потере человечности, \"Берсерк\" славится своим уникальным стилем и глубокими темами, привлекая миллионы читателей по всему миру.",
                 AgeRating = AgeRating.EighteenPlus,
             };
@@ -64,7 +63,6 @@ namespace AuthorVerseServer.Tests.Integrations
             // Arrange
             var bookDTO = new CreateBookDTO
             {
-                AuthorId = "admin",
                 GenresId = new List<int> { 1, 2 },
                 TagsId = new List<int> { 1, 2 },
                 Title = "Берсерк",
@@ -308,52 +306,5 @@ namespace AuthorVerseServer.Tests.Integrations
             }
         }
 
-        [Fact]
-        public async Task GetBookQuotes_GetFullPageOfQuotes_ReturnsOkResult()
-        {
-            // Arrange
-            int bookId = 1;
-
-            // Act
-            var response = await _client.GetAsync($"/api/Book/BookQuotes?bookId={bookId}");
-
-            // Assert
-            var content = await response.Content.ReadAsStringAsync();
-            var quotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(content);
-
-            Assert.NotNull(quotes);
-            Assert.True(quotes.Any());
-            Assert.True(quotes.Count() > 0);
-
-            foreach (var book in quotes)
-            {
-                Assert.False(string.IsNullOrEmpty(book.Text));
-                Assert.False(string.IsNullOrEmpty(book.Quoter.Id));
-            }
-        }
-
-        [Fact]
-        public async Task GetBookQuotes_NotFullContent_ReturnsOkResult()
-        {
-            // Arrange
-            int bookId = 1, page = 100;
-
-            // Act
-            var response = await _client.GetAsync($"/api/Book/BookQuotes?bookId={bookId}&page={page}");
-
-            // Assert
-            var content = await response.Content.ReadAsStringAsync();
-            var quotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(content);
-
-            Assert.NotNull(quotes);
-            Assert.True(quotes.Any());
-            Assert.True(quotes.Count() > 0);
-
-            foreach (var book in quotes)
-            {
-                Assert.False(string.IsNullOrEmpty(book.Text));
-                Assert.False(string.IsNullOrEmpty(book.Quoter.Id));
-            }
-        }
     }
 }

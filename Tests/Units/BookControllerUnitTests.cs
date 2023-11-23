@@ -4,11 +4,13 @@ using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
+using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using StackExchange.Redis;
+using System.Security.Claims;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Units;
@@ -17,23 +19,22 @@ public class BookControllerUnitTests
 {
     readonly Mock<IBook> mockBookRepository;
     readonly Mock<UserManager<User>> mockUserManager;
-    readonly Mock<IMemoryCache> mockMemoryCache;
     readonly Mock<ILoadImage> mockLoadImage;
     readonly BookController controller;
     private readonly Mock<IDatabase> _redis;
+    private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
     public BookControllerUnitTests()
     {
         mockBookRepository = new Mock<IBook>();
         mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        mockMemoryCache = new Mock<IMemoryCache>();
         mockLoadImage = new Mock<ILoadImage>();
-
+        _mockJWTTokenService = new Mock<CreateJWTtokenService>();
         var redisConnection = new Mock<IConnectionMultiplexer>();
 
         _redis = new Mock<IDatabase>();
         redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(_redis.Object);
 
-        controller = new BookController(mockBookRepository.Object, mockUserManager.Object, redisConnection.Object, mockLoadImage.Object);
+        controller = new BookController(mockBookRepository.Object, redisConnection.Object, mockLoadImage.Object, _mockJWTTokenService.Object);
 
     }
 
@@ -41,9 +42,9 @@ public class BookControllerUnitTests
     public async Task CreateBook_ZeroSelectedGenres_ShouldReturnBadRequest()
     {
         // Arrange
+        string tokenUserId = "admin";
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "admin",
             GenresId = new List<int>(),
             TagsId = new List<int>() { 1, 2 },
             Title = "Берсерк",
@@ -52,6 +53,7 @@ public class BookControllerUnitTests
         };
 
         // Act
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(tokenUserId);
         var result = await controller.CreateBook(bookDTO);
 
         // Assert
@@ -62,16 +64,40 @@ public class BookControllerUnitTests
     public async Task CreateBook_ZeroSelectedTags_ShouldReturnBadRequest()
     {
         // Arrange
-
+        string tokenUserId = "admin";
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "admin",
             GenresId = new List<int>() { 1, 2 },
             TagsId = new List<int>(),
             Title = "Берсерк",
             Description = "Черный мечник идёт за тобой",
             AgeRating = AgeRating.EighteenPlus,
         };
+
+        // Act
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(tokenUserId);
+        var result = await controller.CreateBook(bookDTO);
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task CreateBook_UncorrectToket_ShouldReturnBadRequest()
+    {
+        // Arrange
+        string tokenUserId = "";
+        var bookDTO = new CreateBookDTO
+        {
+            GenresId = new List<int> { 1, 2 },
+            TagsId = new List<int> { 1, 2 },
+            Title = "Берсерк",
+            Description = "Черный мечник идёт за тобой",
+            AgeRating = AgeRating.EighteenPlus,
+        };
+
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
+        mockUserManager.Setup(um => um.FindByIdAsync(tokenUserId)).ReturnsAsync((User?)null);
 
         // Act
         var result = await controller.CreateBook(bookDTO);
@@ -81,36 +107,12 @@ public class BookControllerUnitTests
     }
 
     [Fact]
-    public async Task CreateBook_UserNotFound_ShouldReturnNotFound()
-    {
-        // Arrange
-
-        var bookDTO = new CreateBookDTO
-        {
-            AuthorId = "admin",
-            GenresId = new List<int> { 1, 2 },
-            TagsId = new List<int> { 1, 2 },
-            Title = "Берсерк",
-            Description = "Черный мечник идёт за тобой",
-            AgeRating = AgeRating.EighteenPlus,
-        };
-        mockUserManager.Setup(um => um.FindByIdAsync(bookDTO.AuthorId)).ReturnsAsync((User)null);
-
-        // Act
-        var result = await controller.CreateBook(bookDTO);
-
-        // Assert
-        Assert.IsType<NotFoundObjectResult>(result.Result);
-    }
-
-    [Fact]
     public async Task CreateBook_InvalidGenres_ShouldReturnNotFound()
     {
         // Arrange
-
+        string tokenUserId = "admin";
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "admin",
             GenresId = new List<int> { 999 },
             TagsId = new List<int> { 1, 2 },
             Title = "Берсерк",
@@ -119,6 +121,7 @@ public class BookControllerUnitTests
         };
 
         // Setup mock Genre objects
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(tokenUserId);
         var genre1 = new Genre { GenreId = 17, Name = "Фантастика" };
         mockBookRepository.Setup(repo => repo.GetGenreById(It.IsAny<int>()))
                          .ReturnsAsync((int genreId) => genreId == 17 ? genre1 : null);
@@ -134,10 +137,9 @@ public class BookControllerUnitTests
     public async Task CreateBook_InvalidTags_ShouldReturnNotFound()
     {
         // Arrange
-
+        string tokenUserId = "admin";
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "admin",
             GenresId = new List<int> { 17 },
             TagsId = new List<int> { 1, 2 },
             Title = "Берсерк",
@@ -145,6 +147,7 @@ public class BookControllerUnitTests
             AgeRating = AgeRating.EighteenPlus,
         };
 
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(tokenUserId);
         var genre1 = new Genre { GenreId = 17, Name = "Фантастика" };
         var genre2 = new Genre { GenreId = 18, Name = "Детектив" };
         mockBookRepository.Setup(repo => repo.GetGenreById(It.IsAny<int>()))
@@ -167,10 +170,9 @@ public class BookControllerUnitTests
         // Arrange
 
         //var mockFormFile = CreateMockFormFile("example.png", 1);
-
+        string tokenUserId = "admin";
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "admin",
             GenresId = new List<int> { 17, 18 },
             TagsId = new List<int> { 1, 2 },
             Title = "Берсерк",
@@ -178,8 +180,8 @@ public class BookControllerUnitTests
             AgeRating = AgeRating.EighteenPlus,
         };
 
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(tokenUserId);
         // Setup mock User object
-        mockUserManager.Setup(um => um.FindByIdAsync(bookDTO.AuthorId)).ReturnsAsync(new User());
 
         // Setup mock Genre objects
         var genre1 = new Genre { GenreId = 17, Name = "Фантастика" };
@@ -207,12 +209,11 @@ public class BookControllerUnitTests
     public async Task CreateBook_LoadFile_ShouldReturnOk()
     {
         // Arrange
-
-        var mockFormFile = CreateMockFormFile("example.png", 1);
+        string tokenUserId = "admin";
+        //var mockFormFile = CreateMockFormFile("example.png", 1);
 
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "admin",
             GenresId = new List<int> { 17, 18 },
             TagsId = new List<int> { 1, 2 },
             Title = "Берсерк",
@@ -221,10 +222,8 @@ public class BookControllerUnitTests
             //BookCoverImage = mockFormFile,
         };
 
-        // Setup mock User object
-        mockUserManager.Setup(um => um.FindByIdAsync(bookDTO.AuthorId)).ReturnsAsync(new User());
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(tokenUserId);
 
-        // Setup mock Genre objects
         var genre1 = new Genre { GenreId = 17, Name = "Фантастика" };
         var genre2 = new Genre { GenreId = 18, Name = "Детектив" };
         mockBookRepository.Setup(repo => repo.GetGenreById(It.IsAny<int>()))
@@ -248,10 +247,9 @@ public class BookControllerUnitTests
     public async Task CreateBook_Ok_ShouldReturnOkRequest()
     {
         // Arrange
-
+        string tokenUserId = "admin";
         var bookDTO = new CreateBookDTO
         {
-            AuthorId = "admin",
             GenresId = new List<int> { 17, 18 },
             TagsId = new List<int> { 1, 2 },
             Title = "Берсерк",
@@ -259,10 +257,7 @@ public class BookControllerUnitTests
             AgeRating = AgeRating.EighteenPlus,
         };
 
-        // Setup mock User object
-        mockUserManager.Setup(um => um.FindByIdAsync(bookDTO.AuthorId)).ReturnsAsync(new User());
-
-        // Setup mock Genre objects
+        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(tokenUserId);
         var genre1 = new Genre { GenreId = 17, Name = "Фантастика" };
         var genre2 = new Genre { GenreId = 18, Name = "Детектив" };
         mockBookRepository.Setup(repo => repo.GetGenreById(It.IsAny<int>()))
@@ -280,7 +275,7 @@ public class BookControllerUnitTests
         var objectResult = Assert.IsType<ActionResult<int>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
 
-        mockUserManager.Verify(um => um.FindByIdAsync(bookDTO.AuthorId), Times.Once);
+        _mockJWTTokenService.Verify(um => um.GetIdFromToken(It.IsAny<ClaimsPrincipal>()), Times.Once);
         mockBookRepository.Verify(repo => repo.GetGenreById(17), Times.Once);
         mockBookRepository.Verify(repo => repo.GetGenreById(18), Times.Once);
         mockBookRepository.Verify(repo => repo.GetTagById(1), Times.Once);

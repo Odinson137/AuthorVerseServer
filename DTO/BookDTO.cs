@@ -50,8 +50,6 @@ namespace AuthorVerseServer.DTO
         [MinLength(50, ErrorMessage = "Description length is lower than 50 letter")]
         [MaxLength(1000, ErrorMessage = "Description length more than 1000 characters")]
         public string Description { get; set; } = null!;
-        [Required(ErrorMessage = "Author Id is required")]
-        public string AuthorId { get; set; } = null!;
         [Required(ErrorMessage = "Genre is required")]
         public ICollection<int> GenresId { get; set; } = null!;
         [Required(ErrorMessage = "Tag is required")]

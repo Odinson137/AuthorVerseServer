@@ -226,29 +226,5 @@ namespace AuthorVerseServer.Repository
                 .ToListAsync();
             return books;
         }
-
-        public async Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page)
-        {
-            var quotes = await _context.BookQuotes
-                .AsNoTracking()
-                .Skip(5 * page)
-                .Take(5)
-                .Where(quote => quote.BookId == bookId)
-                .Select(quote => new QuoteDTO
-                {
-                    QuoteId = quote.BookQuotesId,
-                    Text = quote.Text,
-                    Quoter = new UserDTO
-                    {
-                        Id = quote.QuoterId,
-                        UserName = quote.Quoter.UserName
-                    },
-                    LikeCount = quote.Likes,
-                    DisLikesCount = quote.DisLikes,
-                    QuoteCreatedDateTime = DateOnly.FromDateTime(quote.QuoteCreatedDateTime)
-                }).ToListAsync();
-
-            return quotes;
-        }
     }
 }

@@ -57,7 +57,7 @@ namespace AuthorVerseServer.Tests.Units
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             var message = Assert.IsType<MessageDTO>(badRequestResult.Value);
-            Assert.Equal("This name is already taken", message.message);
+            Assert.Equal("This name is already taken", message.Message);
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace AuthorVerseServer.Tests.Units
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             var message = Assert.IsType<MessageDTO>(badRequestResult.Value);
-            Assert.Equal("This email is already taken", message.message);
+            Assert.Equal("This email is already taken", message.Message);
         }
 
       

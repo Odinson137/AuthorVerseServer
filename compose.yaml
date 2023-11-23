@@ -37,10 +37,6 @@ services:
       target: final
     ports:
       - 7069:80
-    develop:
-      watch:
-        - action: rebuild
-          path: .
     depends_on:
         db:
             condition: service_healthy

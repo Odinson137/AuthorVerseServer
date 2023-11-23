@@ -31,6 +31,7 @@ services.AddScoped<ICharacter, CharacterRepository>();
 services.AddScoped<INote, NoteRepository>();
 services.AddScoped<IUser, UserRepository>();
 services.AddScoped<ITag, TagRepository>();
+services.AddScoped<IQuote, QuoteRepository>();
 
 services.AddScoped<ILoadImage, LoadImageService>();
 services.AddTransient<MailService>();

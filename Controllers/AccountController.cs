@@ -1,11 +1,8 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
-using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorVerseServer.Controllers
@@ -38,7 +35,6 @@ namespace AuthorVerseServer.Controllers
             if (profile == null)
                 return NotFound("User's not found");
 
-            // userId from token
             return Ok(profile);
         }
 

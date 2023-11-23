@@ -2,6 +2,7 @@
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
+using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,16 @@ namespace AuthorVerseServer.Controllers
     public class BookController : ControllerBase
     {
         private readonly IBook _book;
-        private readonly UserManager<User> _userManager;
         private readonly IDatabase _cache;
         private readonly ILoadImage _loadImage;
+        private readonly CreateJWTtokenService _jWTtokenService;
 
-        public BookController(IBook book, UserManager<User> userManager, IConnectionMultiplexer redisConnection, ILoadImage loadImage)
+        public BookController(IBook book, IConnectionMultiplexer redisConnection, ILoadImage loadImage, CreateJWTtokenService jWTtokenService)
         {
             _book = book;
-            _userManager = userManager;
             _cache = redisConnection.GetDatabase();
             _loadImage = loadImage;
+            _jWTtokenService = jWTtokenService;
         }
 
         [HttpGet("Count")]
@@ -115,6 +116,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateBook([FromBody] CreateBookDTO bookDTO)
         {
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
             if (bookDTO.GenresId.Count == 0)
             {
                 return BadRequest("Genres are not select");
@@ -123,17 +128,9 @@ namespace AuthorVerseServer.Controllers
             if (bookDTO.TagsId.Count == 0)
                 return BadRequest("Tags are not select");
 
-            User? user = await _userManager.FindByIdAsync(bookDTO.AuthorId);
-
-            if (user == null)
-            {
-                return NotFound("Author not found");
-            }
-
             Book book = new Book()
             {
-                Author = user,
-                AuthorId = bookDTO.AuthorId,
+                AuthorId = userId,
                 Title = bookDTO.Title,
                 NormalizedTitle = bookDTO.Title.ToUpper(),
                 Description = bookDTO.Description,
@@ -233,19 +230,6 @@ namespace AuthorVerseServer.Controllers
         {
             var books = await _book.GetAuthorBooksAsync(authorId);
             return Ok(books);
-        }
-
-        [HttpGet("BookQuotes")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<QuoteDTO>>> GetBookQuotes(int bookId, int page = 1)
-        {
-            if (--page < 0)
-            {
-                return BadRequest("Error page");
-            }
-            var quotes = await _book.GetBookQuotesAsync(bookId, page);
-            return Ok(quotes);
         }
     }
 }

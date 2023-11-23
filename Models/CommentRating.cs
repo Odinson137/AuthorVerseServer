@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AuthorVerseServer.Data.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
