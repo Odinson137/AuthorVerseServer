@@ -35,6 +35,14 @@ namespace AuthorVerseServer.Controllers
             _generateNameService = generateRandomName;
         }
 
+        [HttpGet("GetSuperUnSafeTokenOperation")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<string>> GetTokenAsync()
+        {
+            var token = _jWTtokenService.GenerateAdminJwtToken("admin");
+            return Ok(token);
+        }
+
         [HttpPost("Gmail")]
         [ProducesResponseType(200)]
         public async Task<ActionResult> SendEmail([FromBody] UserRegistrationDTO user)

@@ -40,10 +40,33 @@ services.AddSingleton<CreateJWTtokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen(s =>
+
+services.AddSwaggerGen(c =>
 {
-    s.SwaggerDoc("v1", new OpenApiInfo { Title = "Author Verse", Version = "v1" });
-    s.OperationFilter<SwaggerAuthorizedMiddleware>();
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyApi", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "JWT Authorization header using the Bearer scheme.",
+
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        new List<string>()
+                    }
+                });
 });
 
 ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
@@ -156,7 +179,7 @@ services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-#if !DEBUG
+//#if !DEBUG
 
 using (var scope = app.Services.CreateScope())
 {
@@ -167,7 +190,7 @@ using (var scope = app.Services.CreateScope())
     await Seed.SeedData(dataContext, roleManager, userManager);
 }
 
-#endif
+//#endif
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

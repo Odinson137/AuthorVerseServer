@@ -76,7 +76,7 @@ namespace AuthorVerseServer.Tests.Integrations
         public async Task GetUserComments_EmptyRequest_ReturnsOkResult()
         {
             // Arrange
-            var uri = "api/Account/GetUserComments";
+            var uri = "api/Account/UserComments";
 
             var response = await _client.GetAsync(uri);
 
