@@ -43,14 +43,23 @@ namespace AuthorVerseServer.Repository
             }).FirstOrDefaultAsync();
         }
 
-        private async Task<IQueryable<Comment>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
+        private async Task<ICollection<CommentProfileDTO>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
         {
             User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
 
-            if(commentType == CommentType.All)
+            if (commentType == CommentType.All)
             {
-                return (IQueryable<Comment>)user.Comments.Where(x => x.CommentatorId == userId);
-            }//Протестировать
+                var a = await _context.Comments.Select(x => new CommentProfileDTO
+                {
+
+                }).Union(_context.Notes.Select(x => new CommentProfileDTO
+                {
+
+                })).Where( x=> x.).ToListAsync();
+                return a;
+
+            }//Протестировать CommentProfileDTO - в это превратить
+           
             /*var query = _context.Books
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
 
