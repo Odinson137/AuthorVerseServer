@@ -49,17 +49,18 @@ namespace AuthorVerseServer.Repository
 
             if (commentType == CommentType.All)
             {
-                var a = await _context.Comments.Select(x => new CommentProfileDTO
-                {
-
-                }).Union(_context.Notes.Select(x => new CommentProfileDTO
-                {
-
-                })).Where( x=> x.).ToListAsync();
-                return a;
 
             }//Протестировать CommentProfileDTO - в это превратить
-           
+
+            var request = await _context.Comments.Select(x => new CommentProfileDTO
+            {
+
+            }).Union(_context.Notes.Select(x => new CommentProfileDTO
+            {
+
+            })).ToListAsync();
+            return request;
+
             /*var query = _context.Books
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
 
@@ -78,13 +79,12 @@ namespace AuthorVerseServer.Repository
                 query = query.Where(book => book.NormalizedTitle.Contains(searchText));
             }
             */
-            return (IQueryable<Comment>)user.Comments.Where(x => x.CommentatorId == userId);
         }
 
-        public async Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment, string userId)
+        public async Task<ICollection<CommentProfileDTO>> GetCommentsPagesCount(CommentType commentType, int page, string searchComment, string userId)
         {//Пользователя
-            IQueryable<Comment> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
-            return await query.CountAsync();
+            ICollection<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
+            return query;
 
         }
 
@@ -131,6 +131,11 @@ namespace AuthorVerseServer.Repository
                     LastReadingChapter = data.LastBookChapterNumber,
                     LastBookChapter = data.Book.BookChapters.Max(x=> x.BookChapterNumber),
                 }).ToListAsync();
+        }
+
+        Task<int> IAccount.GetCommentsPagesCount(CommentType commentType, int page, string searchComment, string userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
