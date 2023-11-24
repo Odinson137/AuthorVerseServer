@@ -3,6 +3,8 @@ using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
+using StackExchange.Redis;
+using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Text;
 using Xunit;
@@ -12,7 +14,7 @@ namespace AuthorVerseServer.Tests.Integrations
     public class QuoteControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
-        private readonly CreateJWTtokenService _token;
+        private readonly WebApplicationFactory<Program> _factory;
 
         public QuoteControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
@@ -25,11 +27,12 @@ namespace AuthorVerseServer.Tests.Integrations
 
             var configuration = factory.Services.GetRequiredService<IConfiguration>();
 
-            _token = new CreateJWTtokenService(configuration);
+            var token = new CreateJWTtokenService(configuration);
             _client = factory.CreateClient();
 
-            string jwtToken = _token.GenerateJwtToken("admin");
+            string jwtToken = token.GenerateJwtToken("admin");
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+            _factory = factory;
         }
 
         [Fact]
@@ -37,6 +40,10 @@ namespace AuthorVerseServer.Tests.Integrations
         {
             // Arrange
             int bookId = 1;
+
+            var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+            var redisDatabase = redisConnection.GetDatabase();
+            var value = await redisDatabase.KeyDeleteAsync($"quotes{bookId}-{0}");
 
             // Act
             var response = await _client.GetAsync($"/api/Quote?bookId={bookId}");
@@ -63,6 +70,10 @@ namespace AuthorVerseServer.Tests.Integrations
             // Arrange
             int bookId = 1, page = 100;
 
+            var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+            var redisDatabase = redisConnection.GetDatabase();
+            await redisDatabase.KeyDeleteAsync($"quotes{bookId}-{page - 1}");
+
             // Act
             var response = await _client.GetAsync($"/api/Quote?bookId={bookId}&page={page}");
 
@@ -70,27 +81,65 @@ namespace AuthorVerseServer.Tests.Integrations
             var content = await response.Content.ReadAsStringAsync();
             var quotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(content);
 
-            Assert.Null(quotes);
+            Assert.True(quotes.Count == 0);
         }
 
         [Fact]
-        public async Task PostNewBookQuote_NotFullContent_ReturnsOkResult()
+        public async Task GetBookQuotes_CachingCheck_ReturnsOkResult()
+        {
+            // Arrange
+            int bookId = 99, page = 99;
+
+            ICollection<QuoteDTO> quotes = new List<QuoteDTO>()
+            {
+                new QuoteDTO()
+            }; 
+
+            var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+            var redisDatabase = redisConnection.GetDatabase();
+            await redisDatabase.StringSetAsync($"quotes{bookId}-{page - 1}", JsonConvert.SerializeObject(quotes));
+
+            // Act
+            var cacheResponse = await _client.GetAsync($"/api/Quote?bookId={bookId}&page={page}");
+
+            // Assert
+            var content = await cacheResponse.Content.ReadAsStringAsync();
+            var checkQuotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(content);
+
+            Assert.NotNull(checkQuotes);
+            Assert.True(checkQuotes.Count == quotes.Count);
+        }
+
+        [Fact]
+        public async Task PostNewBookQuote_CreateQuote_ReturnsOkResult()
         {
             // Arrange
             int bookId = 1;
-            string text = "Сижу на уроке, в темнице сырой, Саша читает, а я это пишу";
-
-            string jsonContent = $"\"bookId\":\"{bookId}\",\"text\":\"{text}\"";
-            StringContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-            // Act
-            var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", content);
+            string text = "Эта цитата должна потом удалить";
+            StringContent requestContent = new StringContent("", Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", requestContent);
 
             // Assert
-            //var content = await response.Content.ReadAsStringAsync();
-            //int bookId = content;
-            //var quotes = JsonConvert.DeserializeObject>(content);
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.True(int.TryParse(content, out int i));
+            Assert.True(i > 0);
+        }
 
-            //Assert.Null(quotes);
+        [Fact]
+        public async Task DeleteBookQuote_CreateAndDeleteThisQuote_ReturnsOkResult()
+        {
+            // Arrange
+            int bookId = 1;
+            string text = "Эта цитата должна потом удалить";
+            StringContent requestContent = new StringContent("", Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", requestContent);
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            int quoteId = int.Parse(content);
+            var deleteResponse = await _client.DeleteAsync($"/api/Quote?quoteId={quoteId}");
+            Assert.True(deleteResponse.IsSuccessStatusCode);
+
         }
     }
 

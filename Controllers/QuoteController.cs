@@ -5,7 +5,9 @@ using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using StackExchange.Redis;
+using System.Text.Json.Serialization;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -31,8 +33,18 @@ namespace AuthorVerseServer.Controllers
             if (--page < 0)
                 return BadRequest("Zero count");
 
-            var quotes = await _quote.GetBookQuotesAsync(bookId, page);
-            return Ok(quotes);
+            string key = $"quotes{bookId}-{page}";
+            string? quotesJson = await _cache.StringGetAsync(key);
+
+            if (string.IsNullOrEmpty(quotesJson))
+            {
+                var quotes = await _quote.GetBookQuotesAsync(bookId, page);
+                await _cache.StringSetAsync(key, JsonConvert.SerializeObject(quotes), TimeSpan.FromMinutes(15));
+                return Ok(quotes);
+            }
+
+            var cacheQuotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(quotesJson);
+            return Ok(cacheQuotes);
         }
 
         [Authorize]
@@ -53,9 +65,9 @@ namespace AuthorVerseServer.Controllers
             };
 
             await _quote.AddBookQuoteAsync(quote);
-            //await _quote.SaveAsync();
+            await _quote.SaveAsync();
 
-            return Ok(quote.QuoterId);
+            return Ok(quote.BookQuotesId);
         }
 
         [Authorize]
@@ -64,7 +76,8 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteBookQuote(int quoteId)
         {
-            return Ok(1);
+            await _quote.DeleteBookQuoteAsync(quoteId);
+            return Ok();
         }
     }
 }

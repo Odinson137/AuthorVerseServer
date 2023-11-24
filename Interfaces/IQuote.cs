@@ -7,7 +7,7 @@ namespace AuthorVerseServer.Interfaces
     {
         Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page);
         Task AddBookQuoteAsync(BookQuote quote);
-        Task DeleteBookQuoteAsync(BookQuote deleteQuote);
+        Task DeleteBookQuoteAsync(int deleteQuoteId);
         Task SaveAsync();
     }
 }

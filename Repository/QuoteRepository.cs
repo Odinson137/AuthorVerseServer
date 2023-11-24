@@ -20,9 +20,9 @@ namespace AuthorVerseServer.Repository
             await _context.BookQuotes.AddAsync(quote);
         }
 
-        public async Task DeleteBookQuoteAsync(BookQuote deleteQuote)
+        public async Task DeleteBookQuoteAsync(int deleteQuoteId)
         {
-            await _context.BookQuotes.Where(quote => quote == deleteQuote).ExecuteDeleteAsync();
+            await _context.BookQuotes.Where(quote => quote.BookQuotesId == deleteQuoteId).ExecuteDeleteAsync();
         }
 
         public async Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page)
