@@ -37,9 +37,10 @@ namespace AuthorVerseServer.Controllers
                 });
 
                 return Ok(genresDb);
-
             }
-            return Ok(genres);
+
+            var genresCache = JsonConvert.DeserializeObject<List<GenreDTO>>(genres);
+            return Ok(genresCache);
         }
 
         [HttpPost("{name}")]

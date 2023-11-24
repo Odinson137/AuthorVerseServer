@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
+using System.Text;
 using Xunit;
 
 namespace AuthorVerseServer.Tests.Integrations
@@ -79,8 +80,10 @@ namespace AuthorVerseServer.Tests.Integrations
             int bookId = 1;
             string text = "Сижу на уроке, в темнице сырой, Саша читает, а я это пишу";
 
+            string jsonContent = $"\"bookId\":\"{bookId}\",\"text\":\"{text}\"";
+            StringContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
             // Act
-            //var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}");
+            var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", content);
 
             // Assert
             //var content = await response.Content.ReadAsStringAsync();
