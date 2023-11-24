@@ -49,17 +49,17 @@ namespace AuthorVerseServer.Repository
 
             if (commentType == CommentType.All)
             {
+                return await _context.Comments.Select(x => new CommentProfileDTO
+                {
+                    CommentId = x.CommentId
 
+                }).Union(_context.Notes.Select(x => new CommentProfileDTO
+                {
+                    CommentId = x.NoteId
+                })).OrderByDescending(x => x.CommentCreatedDateTime).ToListAsync();
             }//Протестировать CommentProfileDTO - в это превратить
-
-            var request = await _context.Comments.Select(x => new CommentProfileDTO
-            {
-
-            }).Union(_context.Notes.Select(x => new CommentProfileDTO
-            {
-
-            })).ToListAsync();
-            return request;
+            return null;
+            
 
             /*var query = _context.Books
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
@@ -81,10 +81,10 @@ namespace AuthorVerseServer.Repository
             */
         }
 
-        public async Task<ICollection<CommentProfileDTO>> GetCommentsPagesCount(CommentType commentType, int page, string searchComment, string userId)
+        public async Task<int> GetCommentsPagesCount(CommentType commentType, string searchComment, string userId)
         {//Пользователя
             ICollection<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
-            return query;
+            return 0;
 
         }
 
@@ -131,11 +131,6 @@ namespace AuthorVerseServer.Repository
                     LastReadingChapter = data.LastBookChapterNumber,
                     LastBookChapter = data.Book.BookChapters.Max(x=> x.BookChapterNumber),
                 }).ToListAsync();
-        }
-
-        Task<int> IAccount.GetCommentsPagesCount(CommentType commentType, int page, string searchComment, string userId)
-        {
-            throw new NotImplementedException();
         }
     }
 }
