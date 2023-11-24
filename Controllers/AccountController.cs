@@ -59,7 +59,7 @@ namespace AuthorVerseServer.Controllers
             if (--page < 0)
                 return BadRequest("Page is smaller than zero");
 
-            var comments = await _account.GetCommentsPagesCount(commentType, page, searchComment, userId);
+            var comments = await _account.GetCommentsPagesCount(commentType, searchComment, userId);
 
             return Ok(comments);
 /*            return Ok(new CommentPageDTO());

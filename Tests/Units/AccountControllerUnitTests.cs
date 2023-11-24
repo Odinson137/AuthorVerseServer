@@ -145,7 +145,7 @@ namespace AuthorVerseServer.Tests.Units
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment, userId)).ReturnsAsync(1);
+                commentType, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -167,7 +167,7 @@ namespace AuthorVerseServer.Tests.Units
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment, userId)).ReturnsAsync(1);
+                commentType, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -189,7 +189,7 @@ namespace AuthorVerseServer.Tests.Units
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment, userId)).ReturnsAsync(1);
+                commentType, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -211,7 +211,7 @@ namespace AuthorVerseServer.Tests.Units
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment, userId)).ReturnsAsync(1);
+                commentType, searchComment, userId)).ReturnsAsync(1);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);
@@ -234,7 +234,7 @@ namespace AuthorVerseServer.Tests.Units
                 commentType, page, searchComment)).ReturnsAsync(new List<CommentProfileDTO>());
 
             _mockAccount.Setup(a => a.GetCommentsPagesCount(
-                commentType, page, searchComment, userId)).ReturnsAsync(0);
+                commentType,  searchComment, userId)).ReturnsAsync(0);
 
             // Act
             var result = await _accountController.GetUserComments(commentType, page, searchComment);

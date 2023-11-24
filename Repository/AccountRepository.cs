@@ -43,14 +43,24 @@ namespace AuthorVerseServer.Repository
             }).FirstOrDefaultAsync();
         }
 
-        private async Task<IQueryable<Comment>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
+        private async Task<ICollection<CommentProfileDTO>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
         {
             User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
 
-            if(commentType == CommentType.All)
+            if (commentType == CommentType.All)
             {
-                return (IQueryable<Comment>)user.Comments.Where(x => x.CommentatorId == userId);
-            }//Протестировать
+                return await _context.Comments.Select(x => new CommentProfileDTO
+                {
+                    CommentId = x.CommentId
+
+                }).Union(_context.Notes.Select(x => new CommentProfileDTO
+                {
+                    CommentId = x.NoteId
+                })).OrderByDescending(x => x.CommentCreatedDateTime).ToListAsync();
+            }//Протестировать CommentProfileDTO - в это превратить
+            return null;
+            
+
             /*var query = _context.Books
                 .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
 
@@ -69,13 +79,12 @@ namespace AuthorVerseServer.Repository
                 query = query.Where(book => book.NormalizedTitle.Contains(searchText));
             }
             */
-            return (IQueryable<Comment>)user.Comments.Where(x => x.CommentatorId == userId);
         }
 
-        public async Task<int> GetCommentsPagesCount(CommentType commentType, int page, string searchComment, string userId)
+        public async Task<int> GetCommentsPagesCount(CommentType commentType, string searchComment, string userId)
         {//Пользователя
-            IQueryable<Comment> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
-            return await query.CountAsync();
+            ICollection<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
+            return 0;
 
         }
 
