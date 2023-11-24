@@ -89,6 +89,7 @@ namespace AuthorVerseServer.Tests.Integrations
             if (comments.comments.Count > 0)
                 Assert.True(comments.PagesCount > 0 );
 
+
             foreach (var comment in comments.comments)
             {
                 Assert.True(comment.CommentId > 0, "Невозможный id");
