@@ -63,13 +63,31 @@ namespace AuthorVerseServer.Tests.Integrations
             int bookId = 1, page = 100;
 
             // Act
-            var response = await _client.GetAsync($"/api/Quotes?bookId={bookId}&page={page}");
+            var response = await _client.GetAsync($"/api/Quote?bookId={bookId}&page={page}");
 
             // Assert
             var content = await response.Content.ReadAsStringAsync();
             var quotes = JsonConvert.DeserializeObject<ICollection<QuoteDTO>>(content);
 
             Assert.Null(quotes);
+        }
+
+        [Fact]
+        public async Task PostNewBookQuote_NotFullContent_ReturnsOkResult()
+        {
+            // Arrange
+            int bookId = 1;
+            string text = "Сижу на уроке, в темнице сырой, Саша читает, а я это пишу";
+
+            // Act
+            //var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}");
+
+            // Assert
+            //var content = await response.Content.ReadAsStringAsync();
+            //int bookId = content;
+            //var quotes = JsonConvert.DeserializeObject>(content);
+
+            //Assert.Null(quotes);
         }
     }
 

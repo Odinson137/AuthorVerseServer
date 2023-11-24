@@ -105,7 +105,7 @@ namespace AuthorVerseServer.Data
 
                 await userManager.CreateAsync(admin, "Password@123");
 
-                string folderPath = @"./wwwroot/Api/Images/";
+                string folderPath = @"./wwwroot/api/images/";
 
                 string[] fileNames = Directory.GetFiles(folderPath);
                 List<string> files = new List<string>(10);

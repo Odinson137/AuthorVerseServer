@@ -53,7 +53,7 @@ namespace AuthorVerseServer.Controllers
             };
 
             await _quote.AddBookQuoteAsync(quote);
-            await _quote.SaveAsync();
+            //await _quote.SaveAsync();
 
             return Ok(quote.QuoterId);
         }
