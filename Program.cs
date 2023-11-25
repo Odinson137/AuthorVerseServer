@@ -10,13 +10,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.OpenApi.Models;
-using AuthorVerseServer.Filters;
 using StackExchange.Redis;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
+
+services.AddControllers(options =>
+{
+    options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
+});
 
 // Add services to the container.
 services.AddControllers();
@@ -146,7 +151,6 @@ services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireNonAlphanumeric = false;
 })

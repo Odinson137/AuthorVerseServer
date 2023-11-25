@@ -2,11 +2,13 @@
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.FileProviders;
 using Moq;
 using System.Security.Claims;
 using Xunit;
@@ -19,16 +21,18 @@ namespace AuthorVerseServer.Tests.Units
         private readonly AccountController _accountController;
         private readonly Mock<UserManager<User>> _mockUserManager;
         private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
+        private readonly Mock<ILoadImage> _mockLoadImage;
 
         public AccountControllerUnitTests()
         {
             _mockAccount = new Mock<IAccount>();
+            _mockLoadImage = new Mock<ILoadImage>();
             _mockUserManager = new Mock<UserManager<User>>(
                 Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
             _mockJWTTokenService = new Mock<CreateJWTtokenService>();
 
             _accountController = new AccountController(
-                _mockAccount.Object, _mockJWTTokenService.Object);
+                _mockAccount.Object, _mockJWTTokenService.Object, _mockUserManager.Object, _mockLoadImage.Object);
         }
 
         [Fact]
@@ -408,6 +412,142 @@ namespace AuthorVerseServer.Tests.Units
 
             // Assert
             var objectResult = Assert.IsType<ActionResult<ICollection<UpdateAccountBook>>>(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserProfiles_ErrorToken_ShouldReturBadRequest()
+        {
+            // Arrange
+            var profileUser = new EditProfileDTO();
+
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("");
+
+            // Act
+            var result = await _accountController.ChangeUserProfile(profileUser) as ObjectResult;
+
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+
+        [Fact]
+        public async Task ChangeUserProfiles_UserNotFound_ShouldReturNotFound()
+        {
+            // Arrange
+            var profileUser = new EditProfileDTO();
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
+
+            // Act
+            var result = await _accountController.ChangeUserProfile(profileUser) as ObjectResult;
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserProfiles_PasswordDoesNotmatch_ShouldReturBadRequest()
+        {
+            // Arrange
+            var profileUser = new EditProfileDTO();
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+
+            var failedIdentityResult = new IdentityResult();
+            var type = failedIdentityResult.GetType();
+            var succeededProperty = type.GetProperty("Succeeded");
+            succeededProperty.SetValue(failedIdentityResult, false, null);
+
+            _mockUserManager.Setup(a => a.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(failedIdentityResult);
+
+            // Act
+            var result = await _accountController.ChangeUserProfile(profileUser) as ObjectResult;
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserProfiles_PasswordChange_ShouldReturBadRequest()
+        {
+            // Arrange
+            var profileUser = new EditProfileDTO();
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+
+            var failedIdentityResult = new IdentityResult();
+            var type = failedIdentityResult.GetType();
+            var succeededProperty = type.GetProperty("Succeeded");
+            succeededProperty.SetValue(failedIdentityResult, true, null);
+
+            _mockUserManager.Setup(a => a.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(failedIdentityResult);
+
+            _mockAccount.Setup(a => a.SaveAsync());
+
+            // Act
+            var result = await _accountController.ChangeUserProfile(profileUser);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserProfiles_ChangeImage_ShouldReturBadRequest()
+        {
+            // Arrange
+            var formFileMock = new Mock<IFormFile>();
+            var profileUser = new EditProfileDTO
+            {
+                Logo = formFileMock.Object
+            };
+
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
+
+            var failedIdentityResult = new IdentityResult();
+            var type = failedIdentityResult.GetType();
+            var succeededProperty = type.GetProperty("Succeeded");
+            succeededProperty.SetValue(failedIdentityResult, true, null);
+
+            _mockUserManager.Setup(a => a.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(failedIdentityResult);
+
+            _mockLoadImage.Setup(a => a.GetUniqueName(It.IsAny<IFormFile>())).Returns("uniqueName");
+            _mockLoadImage.Setup(a => a.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), "Images"));
+
+            _mockAccount.Setup(a => a.SaveAsync());
+
+            // Act
+            var result = await _accountController.ChangeUserProfile(profileUser);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserProfiles_ClearImage_ShouldReturBadRequest()
+        {
+            // Arrange
+            var profileUser = new EditProfileDTO();
+
+            _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+            _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User() { LogoUrl = "need_to_clear"});
+
+            var failedIdentityResult = new IdentityResult();
+            var type = failedIdentityResult.GetType();
+            var succeededProperty = type.GetProperty("Succeeded");
+            succeededProperty.SetValue(failedIdentityResult, true, null);
+
+            _mockUserManager.Setup(a => a.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(failedIdentityResult);
+
+            _mockLoadImage.Setup(a => a.GetUniqueName(It.IsAny<IFormFile>())).Returns("uniqueName");
+            _mockLoadImage.Setup(a => a.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), "Images"));
+
+            _mockAccount.Setup(a => a.SaveAsync());
+
+            // Act
+            var result = await _accountController.ChangeUserProfile(profileUser);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using AuthorVerseServer.Data.Enums;
+using AuthorVerseServer.DTO.CustomValidations;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.DTO
@@ -21,6 +23,7 @@ namespace AuthorVerseServer.DTO
     public class UserRegistrationDTO
     {
         [Required(ErrorMessage = "Username is required")]
+        //[RequiredMessage("Username is required")]
         public string UserName { get; set; }
 
         [Required(ErrorMessage = "Password is required")]

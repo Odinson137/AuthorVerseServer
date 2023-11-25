@@ -72,15 +72,14 @@ namespace AuthorVerseServer.Controllers
             var tokenExp = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("exp"))?.Value;
             if (tokenExp == null || !long.TryParse(tokenExp, out long expUnixTime))
             {
-                return BadRequest(new MessageDTO { Message = "Invalid token" });
+                return BadRequest(new MessageDTO ("Invalid token"));
             }
 
             var tokenDate = DateTimeOffset.FromUnixTimeSeconds(expUnixTime).UtcDateTime;
             if (tokenDate < DateTime.Now.ToUniversalTime())
             {
-                return BadRequest(new MessageDTO { Message = "Token lifetime has run out" });
+                return BadRequest(new MessageDTO ("Token lifetime has run out"));
             }
-
             var userName = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("unique_name"))?.Value;
 
             string jsonUser = await _redis.StringGetAsync($"user:{userName}");
@@ -88,7 +87,7 @@ namespace AuthorVerseServer.Controllers
 
             if (user == null)
             {
-                return BadRequest(new MessageDTO { Message = "Token lifetime has run out" });
+                return BadRequest(new MessageDTO ("Token lifetime has run out"));
             }
 
             User newUser = new User()
@@ -107,7 +106,7 @@ namespace AuthorVerseServer.Controllers
             }
             else
             {
-                return BadRequest(new MessageDTO { Message = string.Join(", ", result.Errors) });
+                return BadRequest(new MessageDTO(string.Join(", ", result.Errors)));
             }
         }
 
@@ -132,9 +131,9 @@ namespace AuthorVerseServer.Controllers
                         Token = Token
                     });
                 }
-                return BadRequest(new MessageDTO { Message = "Password is not correct" });
+                return BadRequest(new MessageDTO("Password is not correct"));
             }
-            return BadRequest(new MessageDTO { Message = "User do not exist" });
+            return BadRequest(new MessageDTO("User do not exist"));
         }
 
         [HttpPost("Registration")]

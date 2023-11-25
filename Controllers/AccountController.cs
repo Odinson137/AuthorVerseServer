@@ -1,8 +1,11 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Interfaces.ServiceInterfaces;
+using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorVerseServer.Controllers
@@ -14,17 +17,22 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IAccount _account;
         private readonly CreateJWTtokenService _jWTtokenService;
+        private readonly UserManager<User> _userManager;
+        private readonly ILoadImage _loadImage;
+
         public AccountController(
-            IAccount account, CreateJWTtokenService jWTtokenService)
+            IAccount account, CreateJWTtokenService jWTtokenService, UserManager<User> userManager, ILoadImage loadImage)
         {
             _account = account;
             _jWTtokenService = jWTtokenService;
+            _userManager = userManager;
+            _loadImage = loadImage;
         }
 
         [HttpGet("Profile")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        [ProducesResponseType(404, Type = typeof(string))]
         public async Task<ActionResult<UserProfileDTO>> GetUserProfile()
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -39,6 +47,8 @@ namespace AuthorVerseServer.Controllers
         }
 
         [HttpGet("SelectedBooks")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<ICollection<SelectedUserBookDTO>>> GetSelectedBooks()
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -74,7 +84,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("UserBooks")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<ICollection<UserBookDTO>>> GetUserBooks()
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -87,7 +97,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("Updates")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<ICollection<UpdateAccountBook>>> GetUserBooksUpdates()
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -97,6 +107,49 @@ namespace AuthorVerseServer.Controllers
             var books = await _account.CheckUserUpdatesAsync(userId);
 
             return Ok(books);
+        }
+
+        [HttpPut("ProfileChange")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(MessageDTO))]
+        [ProducesResponseType(404, Type = typeof(MessageDTO))]
+        public async Task<ActionResult> ChangeUserProfile(EditProfileDTO profile)
+        {
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new MessageDTO("User not found"));
+            }
+
+            var passwordCheck = await _userManager.ChangePasswordAsync(user, profile.CheckPassword, profile.Password);
+            if (passwordCheck.Succeeded == false)
+            {
+                return BadRequest(new MessageDTO(string.Join("; ", passwordCheck.Errors.Select(x => x.Description ))));
+            }
+
+            user.Name = profile.Name;
+            user.LastName = profile.LastName;
+            user.Description = profile.Description;
+            if (profile.Logo != null)
+            {
+                string nameFile = _loadImage.GetUniqueName(profile.Logo);
+                await _loadImage.CreateImageAsync(profile.Logo, nameFile, "Images");
+                user.LogoUrl = nameFile;
+            } else
+            {
+                if (!string.IsNullOrEmpty(user.LogoUrl))
+                {
+                    user.LogoUrl = string.Empty;
+                }
+            }
+
+            await _account.SaveAsync();
+
+            return Ok();
         }
     }
 }

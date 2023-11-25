@@ -4,9 +4,9 @@ namespace AuthorVerseServer.DTO
 {
     public class UserProfileDTO
     {
-        public string UserName { get; set; }
-        public string Description { get; set; }
-        public string LogoUrl { get; set; }
+        public string UserName { get; set; } = null!;
+        public string? Description { get; set; }
+        public string? LogoUrl { get; set; }
     }
     public class UpdateAccountBook
     {
@@ -59,9 +59,19 @@ namespace AuthorVerseServer.DTO
 
     public class FriendDTO
     {
-        public string Id { get; set; }
-        public string UserName { get; set; }
+        public string Id { get; set; } = null!;
+        public string UserName { get; set; } = null!;
         public DateOnly FriendShipTime { get; set; }
         public FriendshipStatus Status { get; set; }
+    }
+
+    public class EditProfileDTO
+    {
+        public string? Name { get; set; }
+        public string? LastName { get; set; }
+        public string? Description { get; set; }
+        public string Password { get; set; } = null!;
+        public string CheckPassword { get; set; } = null!;
+        public IFormFile? Logo { get; set; }
     }
 }

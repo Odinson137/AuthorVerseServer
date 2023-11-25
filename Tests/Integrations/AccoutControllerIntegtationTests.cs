@@ -64,7 +64,7 @@ namespace AuthorVerseServer.Tests.Integrations
             foreach (var selectedBook in selectedBooks)
             {
                 Assert.True(selectedBook.BookId > 0, "Невозможный id");
-                Assert.True(string.IsNullOrEmpty(selectedBook.Title), "Отсутствует название ");
+                Assert.False(string.IsNullOrEmpty(selectedBook.Title), "Отсутствует название ");
                 Assert.True(Enum.IsDefined(typeof(BookState), selectedBook.BookState), "Невозможная категория книги");
                 Assert.True(selectedBook.PublicationData != DateOnly.MinValue, "Невозможная дата");
                 Assert.True(selectedBook.LastReadingChapter > 0, "Такой главы нет");
@@ -204,6 +204,46 @@ namespace AuthorVerseServer.Tests.Integrations
                 Assert.False(string.IsNullOrEmpty(book.BookTitle));
                 Assert.True(book.ChapterNumber > 0);
             }
+        }
+
+        [Fact]
+        public async Task ChangeUserProfile_PasswordDoesNotMatch_ReturnsOkResult()
+        {
+            // Arrange
+            var userProfile = new EditProfileDTO()
+            {
+                Name = "Yuri",
+                LastName = "Metanit",
+                CheckPassword = "ErrorPaswword@123",
+                Description = "Люблю жизнь, она моя, она нагнула меня, но я не отчаиваюсь, живу",
+                Password = "Password@123",
+            };
+
+            var uri = "api/Account/ProfileChange";
+
+            var response = await _client.PutAsJsonAsync(uri, userProfile);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ChangeUserProfile_ChangeUser_ReturnsOkResult()
+        {
+            // Arrange
+            var userProfile = new EditProfileDTO()
+            {
+                Name = "Yuri",
+                LastName = "Metanit",
+                CheckPassword = "Password@123",
+                Description = "Люблю жизнь, она моя, она нагнула меня, но я не отчаиваюсь, живу",
+                Password = "Password@123",
+            };
+
+            var uri = "api/Account/ProfileChange";
+
+            var response = await _client.PutAsJsonAsync(uri, userProfile);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
     }
 }

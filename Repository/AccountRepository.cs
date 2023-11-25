@@ -132,5 +132,10 @@ namespace AuthorVerseServer.Repository
                     LastBookChapter = data.Book.BookChapters.Max(x=> x.BookChapterNumber),
                 }).ToListAsync();
         }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }
