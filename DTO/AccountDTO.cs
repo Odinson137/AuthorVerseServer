@@ -41,7 +41,7 @@ namespace AuthorVerseServer.DTO
     public class CommentPageDTO
     {
         public int PagesCount { get; set; }
-        public List<CommentProfileDTO> comments = new List<CommentProfileDTO>();
+        public ICollection<CommentProfileDTO> comments = new List<CommentProfileDTO>();
     }
 
 
@@ -50,6 +50,8 @@ namespace AuthorVerseServer.DTO
         public int CommentId { get; set; }
         public string Text { get; set; } = null!;
         public int Rating { get; set; }
+        public int Likes { get; set; } = 0;
+        public int DisLikes { get; set; } = 0;
         public CommentType CommentType { get; set; }
         public string BookTitle { get; set; } = null!;
         public int ChapterNumber { get; set; }

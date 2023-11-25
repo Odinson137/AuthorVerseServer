@@ -5,6 +5,8 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AuthorVerseServer.Repository
 {
@@ -43,55 +45,116 @@ namespace AuthorVerseServer.Repository
             }).FirstOrDefaultAsync();
         }
 
-        private async Task<ICollection<CommentProfileDTO>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
+        private async Task<IQueryable<CommentProfileDTO>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
         {
-            User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
-
-            if (commentType == CommentType.All)
+            if (commentType == CommentType.Chapter)
             {
-                return await _context.Comments.Select(x => new CommentProfileDTO
+                var query = await _context.Notes.Where(x => x.UserId == userId)
+                   .Select(x => new CommentProfileDTO
+                   {
+                       CommentId = x.NoteId,
+                       Text = x.Text,
+                       Likes = x.Likes,
+                       DisLikes = x.DisLikes,
+                       CommentType = CommentType.Chapter,
+                       BookTitle = x.BookChapter.Book.Title,
+                       ChapterNumber = x.BookChapter.BookChapterNumber,
+                       ChapterTitle = x.BookChapter.Title,
+                       CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
+                   }).ToListAsync();
+                return query.AsQueryable();
+            }
+            else if (commentType == CommentType.Book)
+            {
+                var query = await _context.Comments.Where(x => x.CommentatorId == userId)
+                    .Select(x => new CommentProfileDTO
+                    {
+                        CommentId = x.CommentId,
+                        Text = x.Text,
+                        Rating = x.ReaderRating,
+                        Likes = x.Likes,
+                        DisLikes = x.DisLikes,
+                        CommentType = CommentType.Book,
+                        BookTitle = x.Book.Title,
+                        CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
+                    }).ToListAsync();
+                return query.AsQueryable();
+            }
+            else if (!string.IsNullOrEmpty(searchComment))
+            {
+                var query = await _context.Comments.Where(x => x.CommentatorId == userId)
+                .Select(x => new CommentProfileDTO
                 {
-                    CommentId = x.CommentId
-
-                }).Union(_context.Notes.Select(x => new CommentProfileDTO
+                    CommentId = x.CommentId,
+                    Text = x.Text,
+                    Rating = x.ReaderRating,
+                    Likes = x.Likes,
+                    DisLikes = x.DisLikes,
+                    CommentType = CommentType.Book,
+                    BookTitle = x.Book.Title,
+                    CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
+                }).Union(_context.Notes.Where(x => x.UserId == userId)
+                .Where(x => x.UserId == userId)
+                .Select(x => new CommentProfileDTO
                 {
-                    CommentId = x.NoteId
-                })).OrderByDescending(x => x.CommentCreatedDateTime).ToListAsync();
-            }//Протестировать CommentProfileDTO - в это превратить
-            return null;
-            
-
-            /*var query = _context.Books
-                .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved);
-
-            if (tagId != 0)
-            {
-                query = query.Where(book => book.Tags.Any(tag => tag.TagId == tagId));
+                    CommentId = x.NoteId,
+                    Text = x.Text,
+                    Likes = x.Likes,
+                    DisLikes = x.DisLikes,
+                    CommentType = CommentType.Chapter,
+                    BookTitle = x.BookChapter.Book.Title,
+                    ChapterNumber = x.BookChapter.BookChapterNumber,
+                    ChapterTitle = x.BookChapter.Title,
+                    CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
+                })).Where(x => x.Text == searchComment).ToListAsync();
+                return query.AsQueryable();
             }
-
-            if (genreId != 0)
-            {
-                query = query.Where(book => book.Genres.Any(genre => genre.GenreId == genreId));
+            else
+            {//CommentType == CommentType.All
+                var query = await _context.Comments.Where(x => x.CommentatorId == userId)
+                .Select(x => new CommentProfileDTO
+                {
+                    CommentId = x.CommentId,
+                    Text = x.Text,
+                    Rating = x.ReaderRating,
+                    Likes = x.Likes,
+                    DisLikes = x.DisLikes,
+                    CommentType = CommentType.Book,
+                    BookTitle = x.Book.Title,
+                    CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
+                }).Union(_context.Notes.Where(x => x.UserId == userId)
+                .Where(x => x.UserId == userId)
+                .Select(x => new CommentProfileDTO
+                {
+                    CommentId = x.NoteId,
+                    Text = x.Text,
+                    Likes = x.Likes,
+                    DisLikes = x.DisLikes,
+                    CommentType = CommentType.Chapter,
+                    BookTitle = x.BookChapter.Book.Title,
+                    ChapterNumber = x.BookChapter.BookChapterNumber,
+                    ChapterTitle = x.BookChapter.Title,
+                    CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
+                })).ToListAsync();
+                return query.AsQueryable();
             }
-
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                query = query.Where(book => book.NormalizedTitle.Contains(searchText));
-            }
-            */
         }
 
         public async Task<int> GetCommentsPagesCount(CommentType commentType, string searchComment, string userId)
         {//Пользователя
-            ICollection<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
-            return 0;
-
+            IQueryable<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
+            return await query.CountAsync();
         }
 
-        public Task<ICollection<CommentProfileDTO>> GetUserCommentsAsync(CommentType commentType, int page, string searchComment)
+        public async Task<ICollection<CommentProfileDTO>> GetUserCommentsAsync(CommentType commentType, int page, string searchComment, string userId)
         {
-            //var query = _context.Comments.Where()
-            return null;
+            IQueryable<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
+            return await query
+                .AsNoTracking()
+                .OrderByDescending(x => x.CommentCreatedDateTime)
+                .Skip(page * 5)
+                .Take(5)
+                .ToListAsync();
         }
 
         public async Task<ICollection<UserBookDTO>> GetUserBooksAsync(string userId)
