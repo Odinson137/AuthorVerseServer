@@ -154,7 +154,21 @@ namespace AuthorVerseServer.Data
                 .HasMany(c => c.Notes)
                 .WithOne(c => c.BookChapter)
                 .HasForeignKey(c => c.BookChapterid)
-                .IsRequired(false);
+                .IsRequired(true);
+
+            modelBuilder.Entity<User>()
+                .HasMany(c => c.Notes)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
+                .IsRequired(true);
+
+            modelBuilder.Entity<Note>()
+                .HasMany(c => c.Replies)
+                .WithOne(c => c)
+                .HasForeignKey(c => c.ReplyToNoteId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
 
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.BookId);

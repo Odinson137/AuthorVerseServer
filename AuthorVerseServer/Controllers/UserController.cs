@@ -114,7 +114,7 @@ namespace AuthorVerseServer.Controllers
         [HttpPost("Login")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserVerify>> Login([FromBody] UserLoginDTO authUser)
+        public async Task<ActionResult<string>> Login([FromBody] UserLoginDTO authUser)
         {
             User? user = await _userManager.FindByNameAsync(authUser.UserName);
 
@@ -123,13 +123,18 @@ namespace AuthorVerseServer.Controllers
                 var passwordCheck = await _userManager.CheckPasswordAsync(user, authUser.Password);
                 if (passwordCheck)
                 {
-                    var Token = _jWTtokenService.GenerateJwtToken(user.Id);
-                    return Ok(new UserVerify()
+                    var token = _jWTtokenService.GenerateJwtToken(user.Id);
+                    var verifyUser = new UserVerify()
                     {
                         Id = user.Id,
                         UserName = user.UserName,
-                        Token = Token
-                    });
+                        Name = user.Name,
+                        LastName = user.LastName,
+                        LogoUrl = user.LogoUrl,
+                    };
+
+                    await _redis.StringSetAsync($"session-{verifyUser.Id}", JsonConvert.SerializeObject(verifyUser));
+                    return Ok(token);
                 }
                 return BadRequest(new MessageDTO("Password is not correct"));
             }
@@ -165,7 +170,7 @@ namespace AuthorVerseServer.Controllers
         [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(MessageDTO))]
-        public async Task<ActionResult<UserGoogleVerify>> RegWithGoogle([FromBody] AuthRequestModel token)
+        public async Task<ActionResult> RegWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
             if (userInfo == null) return BadRequest(new MessageDTO { Message = "Error token" });
@@ -194,15 +199,7 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest(new MessageDTO { Message = "Failed to create user" });
             }
 
-            UserGoogleVerify userGoogle = new UserGoogleVerify()
-            {
-                Id = createUser.Id,
-                UserName = createUser.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(createUser.Id),
-                IconUrl = userInfo.Picture
-            };
-
-            return Ok(userGoogle);
+            return Ok();
         }
 
         [HttpPost("signin-google")]
@@ -220,15 +217,18 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest(new MessageDTO { Message = "User not found" });
             }
 
-            UserGoogleVerify userGoogle = new UserGoogleVerify()
+            var jwToken = _jWTtokenService.GenerateJwtToken(user.Id);
+            var verifyUser = new UserVerify()
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user.Id),
-                IconUrl = userInfo.Picture
+                Name = user.Name,
+                LastName = user.LastName,
+                LogoUrl = user.LogoUrl,
             };
 
-            return Ok(userGoogle);
+            await _redis.StringSetAsync($"session-{user.Id}", JsonConvert.SerializeObject(verifyUser));
+            return Ok(jwToken);
         }
 
         [HttpPost("signin-microsoft")]
@@ -245,14 +245,18 @@ namespace AuthorVerseServer.Controllers
 
             User user = microsoftUser.User;
 
-            UserVerify userGoogle = new UserVerify()
+            var jwToken = _jWTtokenService.GenerateJwtToken(user.Id);
+            var verifyUser = new UserVerify()
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user.Id),
+                Name = user.Name,
+                LastName = user.LastName,
+                LogoUrl = user.LogoUrl,
             };
 
-            return Ok(userGoogle);
+            await _redis.StringSetAsync($"session-{user.Id}", JsonConvert.SerializeObject(verifyUser));
+            return Ok(jwToken);
         }
 
 
@@ -260,7 +264,7 @@ namespace AuthorVerseServer.Controllers
         [AllowAnonymous]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<UserVerify>> RegWithMicrosoft([FromBody] UserProfile userInfo)
+        public async Task<ActionResult> RegWithMicrosoft([FromBody] UserProfile userInfo)
         {
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser != null)
@@ -289,14 +293,7 @@ namespace AuthorVerseServer.Controllers
 
             await _user.Save();
 
-            UserVerify userMicrosoft = new UserVerify()
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Token = _jWTtokenService.GenerateJwtToken(user.Id),
-            };
-
-            return Ok(userMicrosoft);
+            return Ok();
         }
     }
 

@@ -40,7 +40,9 @@ namespace AuthorVerseServer.DTO
     {
         public string Id { get; set; } = null!;
         public string UserName { get; set; } = null!;
-        public string Token { get; set; } = null!;
+        public string? Name { get; set; }
+        public string? LastName { get; set; }
+        public string? LogoUrl { get; set; } = null!;
     }
 
     public class UserGoogleVerify
