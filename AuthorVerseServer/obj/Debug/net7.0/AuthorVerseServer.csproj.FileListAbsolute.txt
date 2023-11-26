@@ -1,0 +1,8 @@
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\AuthorVerseServer.csproj.AssemblyReference.cache
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\MvcTestingAppManifest.json
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\AuthorVerseServer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\AuthorVerseServer.AssemblyInfoInputs.cache
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\AuthorVerseServer.AssemblyInfo.cs
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\AuthorVerseServer.csproj.CoreCompileInputs.cache
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\AuthorVerseServer.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\buryy\source\repos\AuthorVerse\AuthorVerseServer\obj\Debug\net7.0\AuthorVerseServer.MvcApplicationPartsAssemblyInfo.cache

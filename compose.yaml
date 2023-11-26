@@ -35,6 +35,7 @@ services:
     build:
       context: .
       target: final
+      dockerfile: AuthorVerseServer/Dockerfile
     ports:
       - 7069:80
     depends_on:
@@ -44,4 +45,15 @@ services:
       - ASPNETCORE_ENVIRONMENT=development
     networks:
       - serverapp
-
+  forum:
+    container_name: authorverse-forum
+    build:
+      context: .
+      target: final
+      dockerfile: AuthorVerseForum/Dockerfile
+    ports:
+      - 7070:80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=development
+    networks:
+      - serverapp
