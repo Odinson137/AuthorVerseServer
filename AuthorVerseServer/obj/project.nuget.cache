@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "mYYFq12+bn7miTguM4kORvAUl/iu30s6TQvrZ1Ydzqc1w3/x9+13o5Ng4VX+EsO9eyfUshsfPr/OeS1gqvAB4w==",
+  "dgSpecHash": "yLYTe0zgTBj4eEn5+caDVOPWvSDHyfqN41c8bTSo0HD9+rtImPfZ4qxuW/I2mtY/WhxjZbWN9fbh3/NfiFZr7w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj",
+  "projectFilePath": "C:\\Users\\buryy\\Source\\Repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\buryy\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

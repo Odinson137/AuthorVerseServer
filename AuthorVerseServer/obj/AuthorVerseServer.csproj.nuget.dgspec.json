@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj": {}
+    "C:\\Users\\buryy\\Source\\Repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj": {}
   },
   "projects": {
-    "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj": {
+    "C:\\Users\\buryy\\Source\\Repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj",
+        "projectUniqueName": "C:\\Users\\buryy\\Source\\Repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj",
         "projectName": "AuthorVerseServer",
-        "projectPath": "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj",
+        "projectPath": "C:\\Users\\buryy\\Source\\Repos\\AuthorVerseServer\\AuthorVerseServer\\AuthorVerseServer.csproj",
         "packagesPath": "C:\\Users\\buryy\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer\\AuthorVerseServer\\obj\\",
+        "outputPath": "C:\\Users\\buryy\\Source\\Repos\\AuthorVerseServer\\AuthorVerseServer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\buryy\\AppData\\Roaming\\NuGet\\NuGet.Config",
