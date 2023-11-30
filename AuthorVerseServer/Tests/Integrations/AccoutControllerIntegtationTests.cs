@@ -2,11 +2,9 @@
 using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Text;
 using Xunit;
 using AuthorVerseServer.Data.Enums;
 

@@ -7,7 +7,6 @@ namespace AuthorVerseForum.Services
         public string GetUserId(string token)
         {
             var handler = new JwtSecurityTokenHandler();
-
             var jwtSecurityToken = handler.ReadJwtToken(token);
             string? userId = jwtSecurityToken.Claims.First().Value;
             return userId;

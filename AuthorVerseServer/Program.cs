@@ -11,7 +11,6 @@ using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);

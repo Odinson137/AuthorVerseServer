@@ -1,109 +1,177 @@
 ﻿using AuthorVerseForum.DTO;
 using Microsoft.AspNetCore.SignalR;
 using StackExchange.Redis;
-using Newtonsoft.Json;
-using System;
-using System.Runtime.CompilerServices;
 using AuthorVerseForum.Services;
-using Newtonsoft.Json.Linq;
+using AuthorVerseForum.Data.Enums;
+using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace AuthorVerseForum.Hubs
 {
+    //[Authorize]
     public class ForumHub : Hub
     {
-        private readonly ConnectionManager _connectionManager;
         private readonly IDatabase _redis;
 
         private readonly ILogger _logger;
         private readonly UncodingJwtoken _jwtoken;
 
-        public ForumHub(ConnectionManager connectionManager, IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken)
+        public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken)
         {
-            _connectionManager = connectionManager;
             _redis = redisConnection.GetDatabase();
             _jwtoken = jwtoken;
         }
 
-        private string GetForumUser()
+        private string GetConnectionId()
         {
-            return $"forumUser-{Context.ConnectionId}";
+            return $"connectionForum:{Context.ConnectionId}";
         }
 
-        private string GetForum(int bookId)
+        private string GetViewUserName(UserVerify user)
         {
-            return $"forum-{bookId}";
+            if (string.IsNullOrEmpty(user.Name))
+                return user.UserName;
+            else
+                return $"{user.Name} {user.LastName}";
+
         }
 
-        private string GetForumCount(int bookId)
+        public async Task SendMessage(string message)
         {
-            return $"forumCount-{bookId}";
+            string? connectorJson = await _redis.StringGetAsync(GetConnectionId());
+            Console.WriteLine($"Cinnector: {connectorJson}");
+
+            if (string.IsNullOrEmpty(connectorJson))
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 404, "User data is not exist");
+                return;
+            }
+
+            var connecter = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson);
+            if (connecter == null)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
+                return;
+            }
+
+            string? userJson = await _redis.StringGetAsync($"session:{connecter.UserId}");
+            if (userJson == null)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
+                return;
+            }
+
+            var user = JsonConvert.DeserializeObject<UserVerify>(userJson);
+
+            await Clients.Group($"group:{connecter.BookId}").SendAsync("ReceiveMessage", new MessageSendDTO
+            { 
+                BookId = connecter.BookId,
+                Text = message
+            }, new UserMessageDTO(user, connecter.UserId));
         }
 
-        public async Task AddToGroup(int bookId)
+        public async Task ChangeUserStatus(UserStatus status)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, bookId.ToString());
+            string? connectorJson = await _redis.StringGetAsync(GetConnectionId());
+            if (string.IsNullOrEmpty(connectorJson))
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 404, "User data is not exist");
+                return;
+            }
+
+            var connecter = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson);
+            if (connecter == null)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
+                return;
+            }
+
+            string? userJson = await _redis.StringGetAsync($"session:{connecter.UserId}");
+            if (userJson == null)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
+                return;
+            }
+
+            var user = JsonConvert.DeserializeObject<UserVerify>(userJson);
+            if (user == null)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
+                return;
+            }
+
+            await Clients.Group($"group:{connecter.BookId}").SendAsync("ChangeUserStatus", GetViewUserName(user), status);
         }
 
-        public async Task SendMessage(int bookId, string message)
+        public async Task AuthorizationConnection(string token, int bookId)
         {
-            await Clients.Group($"forum-{bookId}").SendAsync("ReceiveMessage", bookId, message);
-        }
+            Console.WriteLine("Личные данные пользователя:");
+            Console.WriteLine(token);
+            Console.WriteLine(bookId);
 
-        public async Task SendConnectedMessage(int bookId, UserVerify user)
-        {
-            await _redis.StringSetAsync(GetForumUser(), JsonConvert.SerializeObject(user));
+            Console.WriteLine("Расшифровка токена:");
 
-            var count = await _redis.StringIncrementAsync(GetForumCount(bookId));
+            string userId = _jwtoken.GetUserId(token); 
+            Console.WriteLine(userId);
 
-            await Clients.Group(GetForum(bookId)).SendAsync("UserCountMessage", count);
-        }
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token) || bookId <= 0)
+            {
+                await DisconnectWithError("Недостаточно данных для подключения");
+                return;
+            }
 
-        public async Task ChangeUserStatus(int bookId, UserVerify user)
-        {
-            await _redis.StringSetAsync(GetForumUser(), JsonConvert.SerializeObject(user));
+            var userJson = await _redis.StringGetAsync($"session:{userId}");
+            Console.Write("Сессия пользователя после авторизации: ");
+            Console.WriteLine(userJson);
 
-            var count = await _redis.StringIncrementAsync(GetForumCount(bookId));
+            if (string.IsNullOrEmpty(userJson))
+            {
+                await DisconnectWithError("Данные пользователя не найдены в сессии.");
+                return;
+            }
 
-            await Clients.Group(GetForum(bookId)).SendAsync("ChangeUserStatus", count);
+            var connecter = new ConnecterDTO()
+            {
+                UserId = userId,
+                BookId = bookId,
+            };
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"group:{bookId}");
+
+            var connectionId = GetConnectionId();
+            await _redis.StringSetAsync(connectionId, JsonConvert.SerializeObject(connecter));
+
+            var count = await _redis.StringIncrementAsync($"forumCount:{bookId}");
+            Console.WriteLine("Count - " + count);
+            await Clients.Group($"group:{bookId}").SendAsync("UserCountMessage", count);
         }
 
         public override async Task OnConnectedAsync()
         {
             Console.WriteLine("Подключился новый пользователь!");
-            var token = Context.GetHttpContext()?.Request.Query["token"].FirstOrDefault() ?? "";
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                await base.OnDisconnectedAsync((Exception?)null);
-                return;
-            }
-
-            var userId = _jwtoken.GetUserId(token);
-            if (userId == null)
-            {
-                await base.OnDisconnectedAsync((Exception?)null);
-                return;
-            }
-
-            var userJson = await _redis.StringGetAsync(userId);
-            if (string.IsNullOrEmpty(userJson))
-            {
-                await base.OnDisconnectedAsync((Exception?)null);
-                return;
-            }
-
-            //var user = JsonConvert.DeserializeObject<UserVerify>(userJson);
-
-            //await Groups.AddToGroupAsync(Context.ConnectionId, user.);
-
             await base.OnConnectedAsync();
+        }
+
+        private async Task DisconnectWithError(string errorMessage)
+        {
+            Console.WriteLine(errorMessage);
+            await base.OnDisconnectedAsync(new HubException(errorMessage));
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            string userConnectionId = Context.ConnectionId;
-            var user = await _redis.StringGetAsync($"");
-            Console.WriteLine("DicConnected - " + userConnectionId);
-            //await _connectionManager.DeleteUserByConnectionIdAsync(userConnectionId);
+            var connectorJson = await _redis.StringGetAsync(GetConnectionId());
+            if (!string.IsNullOrEmpty(connectorJson))
+            {
+                var connector = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson);
+                await _redis.KeyDeleteAsync(GetConnectionId());
+                var count = await _redis.StringDecrementAsync($"forumCount:{connector.BookId}");
+                await Clients.All.SendAsync("UserCountMessage", count);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group:{connector.BookId}");
+            }
+
+            Console.WriteLine($"DicConnected");
+
             await base.OnDisconnectedAsync(exception);
         }
     }

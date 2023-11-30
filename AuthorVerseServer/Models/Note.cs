@@ -18,6 +18,7 @@ namespace AuthorVerseServer.Models
         public DateTime NoteCreatedDateTime { get; set; } = DateTime.Now;
         public PublicationPermission Permission { get; set; } = PublicationPermission.Approved;
         public int? ReplyToNoteId { get; set; }
+        public Note? ReplyNote { get; set; }
         public ICollection<Note> Replies { get; set; } = new List<Note>();
     }
 }

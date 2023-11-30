@@ -26,9 +26,6 @@ namespace AuthorVerseServer.Tests.Units
 
             _redis = new Mock<IDatabase>();
             redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(_redis.Object);
-
-            //controller = new QuoteController(mockBookRepository.Object, mockUserManager.Object, redisConnection.Objec);
-
         }
     }
 }

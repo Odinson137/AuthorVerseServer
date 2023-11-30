@@ -168,8 +168,6 @@ public class BookControllerUnitTests
     public async Task CreateBook_FileNotLoaded_ShouldReturnOk()
     {
         // Arrange
-
-        //var mockFormFile = CreateMockFormFile("example.png", 1);
         string tokenUserId = "admin";
         var bookDTO = new CreateBookDTO
         {
@@ -234,13 +232,13 @@ public class BookControllerUnitTests
         mockBookRepository.Setup(repo => repo.GetTagById(It.IsAny<int>()))
                         .ReturnsAsync((int tagId) => tagId == 1 ? tag1 : tag2);
 
-
         // Act
         var result = await controller.CreateBook(bookDTO);
 
         // Assert
         var objectResult = Assert.IsType<ActionResult<int>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
+        mockLoadImage.Verify(repo => repo.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 
     [Fact]

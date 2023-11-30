@@ -3,6 +3,6 @@
     public enum UserStatus
     {
         Read,
-        Write
+        Write,
     }
 }

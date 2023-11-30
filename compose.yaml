@@ -46,6 +46,10 @@ services:
     networks:
       - serverapp
   forum:
+    develop:
+      watch:
+        - action: rebuild
+          path: .
     container_name: authorverse-forum
     build:
       context: .

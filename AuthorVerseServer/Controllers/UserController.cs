@@ -54,7 +54,7 @@ namespace AuthorVerseServer.Controllers
         private async Task<string> Send(UserRegistrationDTO user)
         {
             string jsonUSer = JsonConvert.SerializeObject(user);
-            await _redis.StringSetAsync($"user:{user.UserName}", jsonUSer, TimeSpan.FromMinutes(15));
+            await _redis.StringSetAsync($"registrationUser:{user.UserName}", jsonUSer, TimeSpan.FromMinutes(15));
 
             var token = _jWTtokenService.GenerateJwtTokenEmail(user);
             string result = await _mailService.SendEmail(token, user.Email);
@@ -82,7 +82,7 @@ namespace AuthorVerseServer.Controllers
             }
             var userName = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("unique_name"))?.Value;
 
-            string jsonUser = await _redis.StringGetAsync($"user:{userName}");
+            string jsonUser = await _redis.StringGetAsync($"registrationUser:{userName}");
             var user = JsonConvert.DeserializeObject<UserRegistrationDTO>(jsonUser);
 
             if (user == null)
@@ -124,16 +124,16 @@ namespace AuthorVerseServer.Controllers
                 if (passwordCheck)
                 {
                     var token = _jWTtokenService.GenerateJwtToken(user.Id);
+
                     var verifyUser = new UserVerify()
                     {
-                        Id = user.Id,
                         UserName = user.UserName,
                         Name = user.Name,
                         LastName = user.LastName,
                         LogoUrl = user.LogoUrl,
                     };
 
-                    await _redis.StringSetAsync($"session-{verifyUser.Id}", JsonConvert.SerializeObject(verifyUser));
+                    await _redis.StringSetAsync($"session:{user.Id}", JsonConvert.SerializeObject(verifyUser));
                     return Ok(token);
                 }
                 return BadRequest(new MessageDTO("Password is not correct"));
@@ -220,7 +220,6 @@ namespace AuthorVerseServer.Controllers
             var jwToken = _jWTtokenService.GenerateJwtToken(user.Id);
             var verifyUser = new UserVerify()
             {
-                Id = user.Id,
                 UserName = user.UserName,
                 Name = user.Name,
                 LastName = user.LastName,
@@ -248,7 +247,6 @@ namespace AuthorVerseServer.Controllers
             var jwToken = _jWTtokenService.GenerateJwtToken(user.Id);
             var verifyUser = new UserVerify()
             {
-                Id = user.Id,
                 UserName = user.UserName,
                 Name = user.Name,
                 LastName = user.LastName,

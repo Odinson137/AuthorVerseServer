@@ -14,12 +14,11 @@ namespace AuthorVerseServer.Tests.Integrations
     {
         private CreateJWTtokenService _createToken;
         private readonly HttpClient _client;
-        readonly string path;
 
         public UserControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
             var currentDirectory = Environment.CurrentDirectory;
-            path = Path.Combine(currentDirectory, "../../../");
+            string path = Path.Combine(currentDirectory, "../../../");
             factory = factory.WithWebHostBuilder(builder =>
             {
                 builder.UseSolutionRelativeContentRoot(path);

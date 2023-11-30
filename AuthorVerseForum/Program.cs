@@ -18,9 +18,16 @@ services.AddSingleton<IConnectionManager, ConnectionManager>(); // можно сделать
 services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
 
 services.AddSignalR();
+
+services.AddSwaggerGen();
+
+ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddConsole();
+    builder.AddDebug();
+});
 
 #if !DEBUG
 
@@ -75,7 +82,43 @@ services.AddAuthentication(options =>
     };
 });
 
+//var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]));
+//services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//})
+//.AddJwtBearer(options =>
+//{
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuer = false,
+//        ValidateAudience = false,
+//        ClockSkew = TimeSpan.Zero,
+//        ValidateLifetime = true,
+//        ValidateIssuerSigningKey = true,
+//        IssuerSigningKey = key,
+//    };
+//     options.Events = new JwtBearerEvents
+//     {
+//         OnMessageReceived = context =>
+//         {
+//             var accessToken = context.Request.Query["access_token"];
+
+//             var path = context.HttpContext.Request.Path;
+//             if (!string.IsNullOrEmpty(accessToken))
+//                 {
+//                    context.Token = accessToken;
+//                 }
+
+//             return Task.CompletedTask;
+//         }
+//     };
+// });
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -84,9 +127,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("AllowReactApp");
 
 app.MapHub<ForumHub>("/forum");
 app.Run();

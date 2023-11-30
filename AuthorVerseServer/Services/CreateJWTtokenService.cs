@@ -1,8 +1,8 @@
 ﻿using AuthorVerseServer.DTO;
-using AuthorVerseServer.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace AuthorVerseServer.Services
@@ -16,6 +16,17 @@ namespace AuthorVerseServer.Services
         {
             _configuration = configuration;
         }
+
+        private byte[] GenerateRandomKey(int length)
+        {
+            byte[] key = new byte[length];
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(key);
+            }
+            return key;
+        }
+
 
         public string GenerateAdminJwtToken(string userId)
         {

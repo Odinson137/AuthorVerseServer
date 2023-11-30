@@ -38,7 +38,6 @@ namespace AuthorVerseServer.DTO
 
     public class UserVerify
     {
-        public string Id { get; set; } = null!;
         public string UserName { get; set; } = null!;
         public string? Name { get; set; }
         public string? LastName { get; set; }
