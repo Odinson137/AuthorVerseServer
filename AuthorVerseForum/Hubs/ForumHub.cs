@@ -36,7 +36,7 @@ namespace AuthorVerseForum.Hubs
 
         }
 
-        public async Task SendMessage(string message)
+        public async Task SendMessage(string message, int answerMessageId)
         {
             string? connectorJson = await _redis.StringGetAsync(GetConnectionId());
             Console.WriteLine($"Cinnector: {connectorJson}");
@@ -100,7 +100,7 @@ namespace AuthorVerseForum.Hubs
                 return;
             }
 
-            await Clients.Group($"group:{connecter.BookId}").SendAsync("ChangeUserStatus", GetViewUserName(user), status);
+            await Clients.Group($"group:{connecter.BookId}").SendAsync("ChangeUserStatus", GetViewUserName(user), status); // исправить недочёт отправки сообщений не всекй группе
         }
 
         public async Task AuthorizationConnection(string token, int bookId)
