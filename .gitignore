@@ -1,3 +1,6 @@
+bin/
+obj/
+
 /bin/
 /obj/
 
@@ -11,3 +14,9 @@
 /AuthorVerseServer/.vs
 /.vs/AuthorVerse/FileContentIndex/b30a6a1d-1366-460f-b3bc-a0e1b595fc53.vsidx
 /.vs/AuthorVerseServer/FileContentIndex/c250c376-cea7-412a-b3bd-a6b50c38bdd3.vsidx
+
+/ForumHubTests/bin
+/ForumHubTests/obj
+
+/ServerTests/bin
+/ServerTests/obj
