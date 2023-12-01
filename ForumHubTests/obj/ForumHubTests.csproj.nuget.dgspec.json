@@ -148,10 +148,6 @@
               "target": "Package",
               "version": "[7.0.13, )"
             },
-            "Microsoft.AspNetCore.Mvc.Testing": {
-              "target": "Package",
-              "version": "[7.0.13, )"
-            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[7.0.13, )"
@@ -172,10 +168,6 @@
               "target": "Package",
               "version": "[17.7.2, )"
             },
-            "Moq": {
-              "target": "Package",
-              "version": "[4.20.69, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
@@ -183,10 +175,6 @@
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
               "version": "[7.0.3, )"
-            },
-            "xunit": {
-              "target": "Package",
-              "version": "[2.6.2, )"
             },
             "xunit.runner.visualstudio": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",

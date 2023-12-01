@@ -1,13 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "NYoWcbYwBVZqblyd+tCKoUqLctZPYZ/ZTYea4ItNt3qzEqHfck5Opwd8QPmkghTFnEINIYzBepRNtbcIgLb+EA==",
+  "dgSpecHash": "QaUBkwnkH4hLvHnpddiVNEsEAb0K86dj+bJMT9lYBvi8bPSXbfOef0VskCyKK4hyn9mO0zhLTk7uCAP7JVRixg==",
   "success": true,
   "projectFilePath": "C:\\Users\\buryy\\source\\repos\\AuthorVerseServer\\ForumHubTests\\ForumHubTests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\buryy\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\bouncycastle.cryptography\\2.2.1\\bouncycastle.cryptography.2.2.1.nupkg.sha512",
-    "C:\\Users\\buryy\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\coverlet.collector\\3.2.0\\coverlet.collector.3.2.0.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\google.apis\\1.64.0\\google.apis.1.64.0.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\google.apis.auth\\1.64.0\\google.apis.auth.1.64.0.nupkg.sha512",
@@ -107,7 +106,6 @@
     "C:\\Users\\buryy\\.nuget\\packages\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\mimekit\\4.3.0\\mimekit.4.3.0.nupkg.sha512",
-    "C:\\Users\\buryy\\.nuget\\packages\\moq\\4.20.69\\moq.4.20.69.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\buryy\\.nuget\\packages\\nuget.frameworks\\6.5.0\\nuget.frameworks.6.5.0.nupkg.sha512",
