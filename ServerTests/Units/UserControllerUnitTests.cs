@@ -53,7 +53,7 @@ public class UserControllerUnitTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-        var message = Assert.IsType<MessageDTO>(badRequestResult.Value);
+        var message = Assert.IsType<ErrorMessageDTO>(badRequestResult.Value);
         Assert.Equal("This name is already taken", message.Message);
     }
 
@@ -75,7 +75,7 @@ public class UserControllerUnitTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-        var message = Assert.IsType<MessageDTO>(badRequestResult.Value);
+        var message = Assert.IsType<ErrorMessageDTO>(badRequestResult.Value);
         Assert.Equal("This email is already taken", message.Message);
     }
 

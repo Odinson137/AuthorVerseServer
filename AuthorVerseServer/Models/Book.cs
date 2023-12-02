@@ -19,6 +19,7 @@ namespace AuthorVerseServer.Models
         public User Author { get; set; } = null!;
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+        public ICollection<ForumMessage> ForumMessages { get; set; } = new List<ForumMessage>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Character> Characters { get; set; } = new List<Character>();
         public ICollection<BookChapter> BookChapters { get; set; } = new List<BookChapter>();

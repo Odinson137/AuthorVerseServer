@@ -48,7 +48,7 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult> SendEmail([FromBody] UserRegistrationDTO user)
         {
             string result = await Send(user);
-            return Ok(new MessageDTO { Message = result });
+            return Ok(new ErrorMessageDTO { Message = result });
         }
 
         private async Task<string> Send(UserRegistrationDTO user)
@@ -63,7 +63,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpPost("EmailConfirm/{token}")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(MessageDTO))]
+        [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult<bool>> DecryptToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -72,13 +72,13 @@ namespace AuthorVerseServer.Controllers
             var tokenExp = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("exp"))?.Value;
             if (tokenExp == null || !long.TryParse(tokenExp, out long expUnixTime))
             {
-                return BadRequest(new MessageDTO ("Invalid token"));
+                return BadRequest(new ErrorMessageDTO ("Invalid token"));
             }
 
             var tokenDate = DateTimeOffset.FromUnixTimeSeconds(expUnixTime).UtcDateTime;
             if (tokenDate < DateTime.Now.ToUniversalTime())
             {
-                return BadRequest(new MessageDTO ("Token lifetime has run out"));
+                return BadRequest(new ErrorMessageDTO ("Token lifetime has run out"));
             }
             var userName = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type.Equals("unique_name"))?.Value;
 
@@ -87,7 +87,7 @@ namespace AuthorVerseServer.Controllers
 
             if (user == null)
             {
-                return BadRequest(new MessageDTO ("Token lifetime has run out"));
+                return BadRequest(new ErrorMessageDTO ("Token lifetime has run out"));
             }
 
             User newUser = new User()
@@ -106,7 +106,7 @@ namespace AuthorVerseServer.Controllers
             }
             else
             {
-                return BadRequest(new MessageDTO(string.Join(", ", result.Errors)));
+                return BadRequest(new ErrorMessageDTO(string.Join(", ", result.Errors)));
             }
         }
 
@@ -136,49 +136,49 @@ namespace AuthorVerseServer.Controllers
                     await _redis.StringSetAsync($"session:{user.Id}", JsonConvert.SerializeObject(verifyUser));
                     return Ok(token);
                 }
-                return BadRequest(new MessageDTO("Password is not correct"));
+                return BadRequest(new ErrorMessageDTO("Password is not correct"));
             }
-            return BadRequest(new MessageDTO("User do not exist"));
+            return BadRequest(new ErrorMessageDTO("User do not exist"));
         }
 
         [HttpPost("Registration")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(MessageDTO))]
-        public async Task<ActionResult<MessageDTO>> Registration(UserRegistrationDTO registeredUser)
+        [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
+        public async Task<ActionResult<ErrorMessageDTO>> Registration(UserRegistrationDTO registeredUser)
         {
             User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
             var userCache = await _redis.StringGetAsync($"user:{registeredUser.UserName}");
 
             if (checkUser != null || !string.IsNullOrEmpty(userCache))
             {
-                return BadRequest(new MessageDTO { Message = "This name is already taken" });
+                return BadRequest(new ErrorMessageDTO { Message = "This name is already taken" });
             }
 
             User? checkEmail = await _userManager.FindByEmailAsync(registeredUser.Email);
 
             if (checkEmail != null)
             {
-                return BadRequest(new MessageDTO { Message = "This email is already taken" });
+                return BadRequest(new ErrorMessageDTO { Message = "This email is already taken" });
             }
 
             string result = await Send(registeredUser);
 
-            return Ok(new MessageDTO { Message = result });
+            return Ok(new ErrorMessageDTO { Message = result });
          }
 
         [HttpPost("reg-google")]
         [AllowAnonymous]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(MessageDTO))]
+        [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult> RegWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
-            if (userInfo == null) return BadRequest(new MessageDTO { Message = "Error token" });
+            if (userInfo == null) return BadRequest(new ErrorMessageDTO { Message = "Error token" });
 
             User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user != null)
             {
-                return BadRequest( new MessageDTO { Message = "This user has already existed" });
+                return BadRequest( new ErrorMessageDTO { Message = "This user has already existed" });
             }
 
             User createUser = new User()
@@ -196,7 +196,7 @@ namespace AuthorVerseServer.Controllers
 
             if (!result.Succeeded)
             {
-                return BadRequest(new MessageDTO { Message = "Failed to create user" });
+                return BadRequest(new ErrorMessageDTO { Message = "Failed to create user" });
             }
 
             return Ok();
@@ -205,16 +205,16 @@ namespace AuthorVerseServer.Controllers
         [HttpPost("signin-google")]
         [AllowAnonymous]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(MessageDTO))]
+        [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult<UserGoogleVerify>> SignInWithGoogle([FromBody] AuthRequestModel token)
         {
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
-            if (userInfo == null) return BadRequest(new MessageDTO { Message = "Error token" });
+            if (userInfo == null) return BadRequest(new ErrorMessageDTO { Message = "Error token" });
 
             User? user = await _userManager.FindByNameAsync(userInfo.Email);
             if (user == null)
             {
-                return BadRequest(new MessageDTO { Message = "User not found" });
+                return BadRequest(new ErrorMessageDTO { Message = "User not found" });
             }
 
             var jwToken = _jWTtokenService.GenerateJwtToken(user.Id);
@@ -239,7 +239,7 @@ namespace AuthorVerseServer.Controllers
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser == null)
             {
-                return BadRequest(new MessageDTO { Message = "User not found" });
+                return BadRequest(new ErrorMessageDTO { Message = "User not found" });
             }
 
             User user = microsoftUser.User;
@@ -267,7 +267,7 @@ namespace AuthorVerseServer.Controllers
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser != null)
             {
-                return BadRequest(new MessageDTO { Message = "User has already exist" });
+                return BadRequest(new ErrorMessageDTO { Message = "User has already exist" });
             }
 
             User user = new User()
@@ -280,7 +280,7 @@ namespace AuthorVerseServer.Controllers
             var result = await _userManager.CreateAsync(user);
             if (!result.Succeeded)
             {
-                return BadRequest(new MessageDTO { Message = "Failed to create user" });
+                return BadRequest(new ErrorMessageDTO { Message = "Failed to create user" });
             }
 
             await _user.CreateMicrosoftUser(new MicrosoftUser()

@@ -11,12 +11,12 @@ namespace AuthorVerseServer.Data
     {
         public static async Task SeedData(DataContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
         {
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
-            {
-                await context.Database.EnsureDeletedAsync();
-                await context.Database.MigrateAsync();
-            }
+            //var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            //if (pendingMigrations.Any())
+            //{
+            //    await context.Database.EnsureDeletedAsync();
+            //    await context.Database.MigrateAsync();
+            //}
 
             if (!context.Books.Any() || !context.Friendships.Any())
             {
@@ -670,6 +670,49 @@ namespace AuthorVerseServer.Data
                         user.Books.Add(Book);
                     }
                 }
+
+                ForumMessage message = new ForumMessage()
+                {
+                    BookId = 1,
+                    UserId = "admin",
+                    Text = "В Африке, если человек на 80% состоит из воды, то считается, что он из благополучной семьи",
+                };
+
+                ForumMessage message1 = new ForumMessage()
+                {
+                    BookId = 1,
+                    UserId = "admin",
+                    Text = "Умер Гулливер… и лилипуты тихо сказали «Еб@ть копать…»",
+                    AnswerMessages = new List<ForumMessage>
+                    {
+                        new ForumMessage
+                        {
+                            BookId = 1,
+                            UserId = "admin",
+                            Text = "Когда вы плачете — никто не видит ваши слезы. Когда вы счастливы — никто не заметит вашу улыбку. Но попробуйте только пукнуть",
+                        },
+                        new ForumMessage
+                        {
+                            BookId = 1,
+                            UserId = "admin",
+                            Text = "Черепашки—ниндзя нападали вчетвером на одного, потому что у них тренер был крыса",
+                        },
+                        new ForumMessage
+                        {
+                            BookId = 1,
+                            UserId = "admin",
+                            Text = "Девушка не вовремя сделала каменное лицо и утонула",
+                        },
+                        new ForumMessage
+                        {
+                            BookId = 1,
+                            UserId = "admin",
+                            Text = "Митинг косоглазых состоялся на сорок метров левее здания городской администрации",
+                        }
+                    }
+                };
+
+                await context.ForumMessages.AddRangeAsync(message, message1);
 
                 await context.SaveChangesAsync();
             }

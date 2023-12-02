@@ -117,8 +117,8 @@ namespace AuthorVerseServer.Controllers
 
         [HttpPut("ProfileChange")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(MessageDTO))]
-        [ProducesResponseType(404, Type = typeof(MessageDTO))]
+        [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
+        [ProducesResponseType(404, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult> ChangeUserProfile(EditProfileDTO profile)
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -128,13 +128,13 @@ namespace AuthorVerseServer.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return NotFound(new MessageDTO("User not found"));
+                return NotFound(new ErrorMessageDTO("User not found"));
             }
 
             var passwordCheck = await _userManager.ChangePasswordAsync(user, profile.CheckPassword, profile.Password);
             if (passwordCheck.Succeeded == false)
             {
-                return BadRequest(new MessageDTO(string.Join("; ", passwordCheck.Errors.Select(x => x.Description ))));
+                return BadRequest(new ErrorMessageDTO(string.Join("; ", passwordCheck.Errors.Select(x => x.Description ))));
             }
 
             user.Name = profile.Name;

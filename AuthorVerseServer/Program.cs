@@ -12,6 +12,7 @@ using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -131,6 +132,10 @@ services.AddCors(options =>
 });
 
 services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         var builtInFactory = options.InvalidModelStateResponseFactory;
@@ -143,6 +148,7 @@ services.AddControllers()
             return builtInFactory(context);
         };
     });
+
 
 
 services.AddIdentity<User, IdentityRole>(options =>

@@ -11,6 +11,7 @@ namespace AuthorVerseServer.Models
         public string? LastName { get; set; }
         public string? LogoUrl { get; set; }
         public string? Description { get; set; }
+        public ICollection<ForumMessage> ForumMessages { get; set; } = new List<ForumMessage>();
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>();
         public ICollection<Book> Books { get; set; } = new List<Book>();
         public ICollection<Note> Notes { get; set; } = new List<Note>();

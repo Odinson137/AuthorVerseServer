@@ -19,6 +19,7 @@ namespace AuthorVerseServer.Data
             }
         }
 
+
         public DbSet<Book> Books { get; set; }
         public DbSet<BookChapter> BookChapters { get; set; }
         public DbSet<ChapterSection> ChapterSections { get; set; }
@@ -32,6 +33,7 @@ namespace AuthorVerseServer.Data
         public DbSet<Character> Characters { get; set; }
         public DbSet<MicrosoftUser> MicrosoftUsers { get; set; }
         public DbSet<BookQuote> BookQuotes { get; set; }
+        public DbSet<ForumMessage> ForumMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -169,6 +171,25 @@ namespace AuthorVerseServer.Data
                 .WithOne(c => c.ReplyNote)
                 .HasForeignKey(c => c.ReplyToNoteId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<Book>()
+                .HasMany(m => m.ForumMessages)
+                .WithOne(m => m.Book)
+                .HasForeignKey(m => m.BookId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasMany(m => m.ForumMessages)
+                .WithOne(m => m.User)
+                .HasForeignKey(m => m.User)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ForumMessage>()
+                .HasMany(m => m.AnswerMessages)
+                .WithOne(m => m.ParrentMessage)
+                .HasForeignKey(m => m.ParrentMessageId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.BookId);

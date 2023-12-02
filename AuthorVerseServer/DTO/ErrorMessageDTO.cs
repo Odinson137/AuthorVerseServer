@@ -1,10 +1,10 @@
 ﻿namespace AuthorVerseServer.DTO
 {
-    public class MessageDTO
+    public class ErrorMessageDTO
     {
         public string Message { get; set; } = null!;
-        public MessageDTO() {}
-        public MessageDTO(string error)
+        public ErrorMessageDTO() {}
+        public ErrorMessageDTO(string error)
         {
             Message = error;
         }
