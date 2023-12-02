@@ -4,7 +4,6 @@ using StackExchange.Redis;
 using AuthorVerseForum.Services;
 using AuthorVerseForum.Data.Enums;
 using Newtonsoft.Json;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace AuthorVerseForum.Hubs
 {
@@ -13,7 +12,6 @@ namespace AuthorVerseForum.Hubs
     {
         private readonly IDatabase _redis;
 
-        private readonly ILogger _logger;
         private readonly UncodingJwtoken _jwtoken;
 
         public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken)

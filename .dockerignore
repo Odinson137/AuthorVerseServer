@@ -9,6 +9,7 @@
 **/.dockerignore
 **/.env
 **/.git
+**/.github
 **/.gitignore
 **/.project
 **/.settings
@@ -21,6 +22,8 @@
 **/bin
 **/charts
 **/docker-compose*
+**/ForumHubTests
+**/ServerTests
 **/compose*
 **/Dockerfile*
 **/node_modules

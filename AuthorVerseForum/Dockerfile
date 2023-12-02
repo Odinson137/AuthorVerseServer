@@ -1,23 +1,20 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /src
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+COPY ["AuthorVerseForum/AuthorVerseForum.csproj", "AuthorVerseForum/"]
+RUN dotnet restore "AuthorVerseForum/AuthorVerseForum.csproj"
+
+COPY . .
+
+# Stage 2: Publish
+RUN dotnet publish "AuthorVerseForum/AuthorVerseForum.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Stage 3: Final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["AuthorVerseForum/AuthorVerseForum.csproj", "AuthorVerseForum/"]
-RUN dotnet restore "./AuthorVerseForum/./AuthorVerseForum.csproj"
-COPY . .
-WORKDIR "/src/AuthorVerseForum"
-RUN dotnet build "./AuthorVerseForum.csproj" -c $BUILD_CONFIGURATION -o /app/build
+COPY --from=build /app/publish .
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./AuthorVerseForum.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "AuthorVerseForum.dll"]
