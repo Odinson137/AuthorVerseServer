@@ -57,9 +57,6 @@ services:
       dockerfile: AuthorVerseForum/Dockerfile
     ports:
       - 7070:80
-    depends_on:
-        db:
-            condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=development
     networks:

@@ -11,7 +11,7 @@ namespace AuthorVerseServer.Models
         public required int BookId { get; set; } // & Название чата
         public User User { get; set; } = null!;
         public required string UserId { get; set; }
-        public int ParrentMessageId { get; set; }
+        public int? ParrentMessageId { get; set; }
         public ForumMessage? ParrentMessage { get; set; }
         public ICollection<ForumMessage> AnswerMessages { get; set; } = new List<ForumMessage>();
         public required string Text { get; set; }

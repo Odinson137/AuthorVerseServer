@@ -182,14 +182,14 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<User>()
                 .HasMany(m => m.ForumMessages)
                 .WithOne(m => m.User)
-                .HasForeignKey(m => m.User)
+                .HasForeignKey(m => m.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ForumMessage>()
                 .HasMany(m => m.AnswerMessages)
                 .WithOne(m => m.ParrentMessage)
                 .HasForeignKey(m => m.ParrentMessageId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.BookId);

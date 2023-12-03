@@ -2,7 +2,6 @@ using AuthorVerseForum.Data;
 using AuthorVerseForum.Hubs;
 using AuthorVerseForum.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Text;
