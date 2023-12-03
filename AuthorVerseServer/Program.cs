@@ -18,13 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-services.AddControllers(options =>
-{
-    options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
-});
 
 // Add services to the container.
-services.AddControllers();
 services.AddScoped<IChapterSection, ChapterSectionRepository>();
 services.AddScoped<IComment, CommentRepository>();
 services.AddScoped<IBookChapter, BookChapterRepository>();
@@ -37,6 +32,7 @@ services.AddScoped<INote, NoteRepository>();
 services.AddScoped<IUser, UserRepository>();
 services.AddScoped<ITag, TagRepository>();
 services.AddScoped<IQuote, QuoteRepository>();
+services.AddScoped<IForumMessage, ForumMessageRepository>();
 
 services.AddScoped<ILoadImage, LoadImageService>();
 services.AddTransient<MailService>();
@@ -44,6 +40,38 @@ services.AddTransient<GenerateRandomNameService>();
 services.AddSingleton<CreateJWTtokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+services.AddControllers(options =>
+    {
+        options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        var builtInFactory = options.InvalidModelStateResponseFactory;
+
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var logger = context.HttpContext.RequestServices
+                                .GetRequiredService<ILogger<Program>>();
+
+            return builtInFactory(context);
+        };
+    })
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
+
+        options.SerializerSettings.Error = (sender, args) =>
+        {
+            args.ErrorContext.Handled = true;
+        };
+
+        options.SerializerSettings.Error += (sender, args) =>
+        {
+            args.ErrorContext.Handled = true;
+        };
+    });
+
 services.AddEndpointsApiExplorer();
 
 services.AddSwaggerGen(c =>
@@ -130,26 +158,6 @@ services.AddCors(options =>
             .AllowCredentials();
     });
 });
-
-services.AddControllers()
-    .AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-    })
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        var builtInFactory = options.InvalidModelStateResponseFactory;
-
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var logger = context.HttpContext.RequestServices
-                                .GetRequiredService<ILogger<Program>>();
-
-            return builtInFactory(context);
-        };
-    });
-
-
 
 services.AddIdentity<User, IdentityRole>(options =>
 {

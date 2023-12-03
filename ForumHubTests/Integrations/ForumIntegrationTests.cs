@@ -1,5 +1,7 @@
 ﻿using AuthorVerseServer.DTO;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
 using System.Net;
 
@@ -12,6 +14,7 @@ public class ForumIntegrationTests : IClassFixture<WebApplicationFactory<Program
 
     public ForumIntegrationTests(WebApplicationFactory<Program> factory)
     {
+
         _client = factory.CreateClient();
         //string jwtToken = _token.GenerateJwtToken("admin");
         //_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
@@ -24,7 +27,17 @@ public class ForumIntegrationTests : IClassFixture<WebApplicationFactory<Program
         var response = await _client.GetAsync("/api/ForumMessage?bookId=1&page=1");
 
         var content = await response.Content.ReadAsStringAsync();
-        var messages = JsonConvert.DeserializeObject<ICollection<ForumMessageDTO>>(content);
+
+        var settings = new JsonSerializerSettings
+        {
+            MissingMemberHandling = MissingMemberHandling.Error, // Опция по умолчанию
+            Error = (sender, args) =>
+            {
+                args.ErrorContext.Handled = true;
+            }
+        };
+
+        var messages = JsonConvert.DeserializeObject<ICollection<ForumMessageDTO>>(content, settings);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(messages);

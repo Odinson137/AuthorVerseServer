@@ -32,7 +32,8 @@ public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<
         var response = await _client.GetAsync("/api/ForumMessage?bookId=1&page=1");
 
         var content = await response.Content.ReadAsStringAsync();
-        var messages = JsonConvert.DeserializeObject<ICollection<ForumMessageDTO>>(content);
+        string a = "asda";
+        var messages = JsonConvert.DeserializeObject<ICollection<ForumMessageDTO>>(a);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(messages);
