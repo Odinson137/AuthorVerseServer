@@ -209,7 +209,7 @@ namespace AuthorVerseServer.Data
                 int numer = 0;
                 foreach (var book in bookDescriptions)
                 {
-                    var Book = new Book()
+                    Book Book = new Book()
                     {
                         Title = book.Key,
                         NormalizedTitle = (book.Key).ToUpper(),
@@ -309,6 +309,8 @@ namespace AuthorVerseServer.Data
                             },
                         }
                     };
+
+                    admin.Notes.Add(note);
 
                     var comments = new List<Comment>();
                     for (int i = 0; i < random.Next(5, 20); i++)

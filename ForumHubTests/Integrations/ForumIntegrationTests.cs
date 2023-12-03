@@ -21,36 +21,6 @@ public class ForumIntegrationTests : IClassFixture<WebApplicationFactory<Program
     }
 
     [Fact]
-    public async Task GetMessages_CheckOkRequest_ReturnsOkResult()
-    {
-        // Arrange
-        var response = await _client.GetAsync("/api/ForumMessage?bookId=1&page=1");
-
-        var content = await response.Content.ReadAsStringAsync();
-
-        var settings = new JsonSerializerSettings
-        {
-            MissingMemberHandling = MissingMemberHandling.Error, // Опция по умолчанию
-            Error = (sender, args) =>
-            {
-                args.ErrorContext.Handled = true;
-            }
-        };
-
-        var messages = JsonConvert.DeserializeObject<ICollection<ForumMessageDTO>>(content, settings);
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(messages);
-
-        foreach (var message in messages)
-        {
-            Assert.False(string.IsNullOrEmpty(message.ViewName), "Отсутствует автор");
-            Assert.False(string.IsNullOrEmpty(message.Text), "Отсутствует название");
-            Assert.True(message.SendTime != DateTime.MinValue, "Невозможная дата");
-        }
-    }
-
-    [Fact]
     public async Task AddMessage_CheckOkRequest_ReturnsOkResult()
     {
         // Arrange

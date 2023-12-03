@@ -31,6 +31,7 @@ namespace AuthorVerseServer.Repository
                 {
                     MessageId = x.MessageId,
                     Text = x.Text,
+                    ParrentMessageId = x.ParrentMessageId,
                     ViewName = string.IsNullOrEmpty(x.User.Name) ? x.User.UserName : $"{x.User.UserName} {x.User.LastName}",
                     SendTime = x.SendTime,
                 }).ToArrayAsync();

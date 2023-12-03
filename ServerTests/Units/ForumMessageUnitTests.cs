@@ -23,8 +23,9 @@ namespace ServerTests.Units
         public ForumMessageUnitTests()
         {
             _redis = new Mock<IDatabase>();
+            var connection = new Mock<IConnectionMultiplexer>();
             _mockForumMessage = new Mock<IForumMessage>();
-            controller = new ForumMessageController(_mockForumMessage.Object, _redis.Object);
+            controller = new ForumMessageController(_mockForumMessage.Object, connection.Object);
         }
 
         [Fact]

@@ -43,8 +43,7 @@ namespace AuthorVerseServer.Controllers
             string? messageJson = await _redis.StringGetAsync($"add_message:{key}");
             if (string.IsNullOrEmpty(messageJson)) return NotFound("Value is not found");
 
-            string test = "asdasd";
-            var sendMessage = JsonConvert.DeserializeObject<SendForumMessageDTO>(test);
+            var sendMessage = JsonConvert.DeserializeObject<SendForumMessageDTO>(messageJson);
             if (sendMessage == null) return BadRequest("Bad data");
 
             var message = new ForumMessage
@@ -52,7 +51,7 @@ namespace AuthorVerseServer.Controllers
                 BookId = sendMessage.BookId,
                 Text = sendMessage.Text,
                 UserId = sendMessage.UserId,
-                ParrentMessageId = sendMessage.AnswerId,           
+                ParrentMessageId = null,           
             };
             
             await _forum.AddForumMessageAsync(message);

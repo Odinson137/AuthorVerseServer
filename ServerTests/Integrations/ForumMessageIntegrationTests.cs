@@ -5,6 +5,7 @@ using Castle.Core.Configuration;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using StackExchange.Redis;
 using System.Net;
 
 
@@ -13,16 +14,12 @@ namespace ServerTests.Integrations;
 public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
+    private readonly WebApplicationFactory<Program> _factory;
 
     public ForumMessageIntegrationTests(WebApplicationFactory<Program> factory)
     {
-        //var configuration = factory.Services.GetRequiredService<IConfiguration>();
-
-        //_token = new CreateJWTtokenService(configuration);
         _client = factory.CreateClient();
-
-        //string jwtToken = _token.GenerateJwtToken("admin");
-        //_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+        _factory = factory;
     }
 
     [Fact]
@@ -32,8 +29,8 @@ public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<
         var response = await _client.GetAsync("/api/ForumMessage?bookId=1&page=1");
 
         var content = await response.Content.ReadAsStringAsync();
-        string a = "asda";
-        var messages = JsonConvert.DeserializeObject<ICollection<ForumMessageDTO>>(a);
+
+        var messages = JsonConvert.DeserializeObject<ICollection<ForumMessageDTO>>(content);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(messages);
@@ -50,12 +47,26 @@ public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<
     public async Task AddMessage_CheckOkRequest_ReturnsOkResult()
     {
         // Arrange
-        string key = "3aedasdsad";
-        var response = await _client.PostAsync($"/api/ForumMessage?key={key}", null);
+        Guid newGuid = Guid.NewGuid();
+        string key = $"add_message:{newGuid}";
+
+        SendForumMessageDTO sendMessage = new SendForumMessageDTO
+        {
+            BookId = 1,
+            Text = "Hello",
+            UserId = "admin"
+        };
+
+        var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+        var redis = redisConnection.GetDatabase();
+        await redis.StringSetAsync(key, JsonConvert.SerializeObject(sendMessage));
+
+        var response = await _client.PostAsync($"/api/ForumMessage?key={newGuid}", null);
 
         var content = await response.Content.ReadAsStringAsync();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.True(int.TryParse(content, out int value));
+        Assert.True(value > 0);
     }
 
     [Fact]
