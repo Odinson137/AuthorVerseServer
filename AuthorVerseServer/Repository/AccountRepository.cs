@@ -46,11 +46,11 @@ namespace AuthorVerseServer.Repository
             }).FirstOrDefaultAsync();
         }
 
-        private async Task<IQueryable<CommentProfileDTO>> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
+        private IQueryable<CommentProfileDTO> GetQueryUserCommentsAsync(CommentType commentType, string searchComment, string userId)
         {
             if (commentType == CommentType.Chapter)
             {
-                var query = await _context.Notes.Where(x => x.UserId == userId)
+                var query = _context.Notes.Where(x => x.UserId == userId)
                    .Select(x => new CommentProfileDTO
                    {
                        CommentId = x.NoteId,
@@ -62,12 +62,13 @@ namespace AuthorVerseServer.Repository
                        ChapterNumber = x.BookChapter.BookChapterNumber,
                        ChapterTitle = x.BookChapter.Title,
                        CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
-                   }).ToListAsync();
-                return query.AsQueryable();
+                   });
+
+                return query;
             }
             else if (commentType == CommentType.Book)
             {
-                var query = await _context.Comments.Where(x => x.CommentatorId == userId)
+                var query = _context.Comments.Where(x => x.CommentatorId == userId)
                     .Select(x => new CommentProfileDTO
                     {
                         CommentId = x.CommentId,
@@ -78,14 +79,12 @@ namespace AuthorVerseServer.Repository
                         CommentType = CommentType.Book,
                         BookTitle = x.Book.Title,
                         CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
-                    }).ToListAsync();
-                return query.AsQueryable();
+                    });
+                return query;
             }
             else if (!string.IsNullOrEmpty(searchComment))
             {
-                if (_context.Notes.IsNullOrEmpty())//Если одна из таблиц пустая, то Union выдаст ошибку
-                {
-                    var query = await _context.Comments.Where(x => x.CommentatorId == userId)
+                var query1 = _context.Comments.Where(x => x.CommentatorId == userId)
                     .Select(x => new CommentProfileDTO
                     {
                         CommentId = x.CommentId,
@@ -96,108 +95,9 @@ namespace AuthorVerseServer.Repository
                         CommentType = CommentType.Book,
                         BookTitle = x.Book.Title,
                         CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
-                    }).ToListAsync();
-                    return query.AsQueryable();
-                }
-                else if (_context.Comments.IsNullOrEmpty())
-                {
-                    var query = await _context.Notes.Where(x => x.UserId == userId)
-                   .Select(x => new CommentProfileDTO
-                   {
-                       CommentId = x.NoteId,
-                       Text = x.Text,
-                       Likes = x.Likes,
-                       DisLikes = x.DisLikes,
-                       CommentType = CommentType.Chapter,
-                       BookTitle = x.BookChapter.Book.Title,
-                       ChapterNumber = x.BookChapter.BookChapterNumber,
-                       ChapterTitle = x.BookChapter.Title,
-                       CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
-                   }).ToListAsync();
-                    return query.AsQueryable();
+                    }).Where(x=>x.Text == searchComment);
 
-                }
-                else
-                {
-                    var query = await _context.Comments.Where(x => x.CommentatorId == userId)
-                .Select(x => new CommentProfileDTO
-                {
-                    CommentId = x.CommentId,
-                    Text = x.Text,
-                    Rating = x.ReaderRating,
-                    Likes = x.Likes,
-                    DisLikes = x.DisLikes,
-                    CommentType = CommentType.Book,
-                    BookTitle = x.Book.Title,
-                    CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
-                }).Union(_context.Notes.Where(x => x.UserId == userId)
-                .Where(x => x.UserId == userId)
-                .Select(x => new CommentProfileDTO
-                {
-                    CommentId = x.NoteId,
-                    Text = x.Text,
-                    Likes = x.Likes,
-                    DisLikes = x.DisLikes,
-                    CommentType = CommentType.Chapter,
-                    BookTitle = x.BookChapter.Book.Title,
-                    ChapterNumber = x.BookChapter.BookChapterNumber,
-                    ChapterTitle = x.BookChapter.Title,
-                    CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
-                })).Where(x => x.Text == searchComment).ToListAsync();
-                    return query.AsQueryable();
-                }
-            }
-            else
-            {//CommentType == CommentType.All
-                if (_context.Notes.IsNullOrEmpty())//Если одна из таблиц пустая, то Union выдаст ошибку
-                {
-                    var query = await _context.Comments.Where(x => x.CommentatorId == userId)
-                    .Select(x => new CommentProfileDTO
-                    {
-                        CommentId = x.CommentId,
-                        Text = x.Text,
-                        Rating = x.ReaderRating,
-                        Likes = x.Likes,
-                        DisLikes = x.DisLikes,
-                        CommentType = CommentType.Book,
-                        BookTitle = x.Book.Title,
-                        CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
-                    }).ToListAsync();
-                    return query.AsQueryable();
-                }
-                else if (_context.Comments.IsNullOrEmpty())
-                {
-                    var query = await _context.Notes.Where(x => x.UserId == userId)
-                   .Select(x => new CommentProfileDTO
-                   {
-                       CommentId = x.NoteId,
-                       Text = x.Text,
-                       Likes = x.Likes,
-                       DisLikes = x.DisLikes,
-                       CommentType = CommentType.Chapter,
-                       BookTitle = x.BookChapter.Book.Title,
-                       ChapterNumber = x.BookChapter.BookChapterNumber,
-                       ChapterTitle = x.BookChapter.Title,
-                       CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
-                   }).ToListAsync();
-                    return query.AsQueryable();
-
-                }
-                else
-                {
-                    var query = await _context.Comments.Where(x => x.CommentatorId == userId)
-                    .Select(x => new CommentProfileDTO
-                    {
-                        CommentId = x.CommentId,
-                        Text = x.Text,
-                        Rating = x.ReaderRating,
-                        Likes = x.Likes,
-                        DisLikes = x.DisLikes,
-                        CommentType = CommentType.Book,
-                        BookTitle = x.Book.Title,
-                        CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
-                    }).Union(_context.Notes.Where(x => x.UserId == userId)
-                    .Where(x => x.UserId == userId)
+                var query2 = _context.Notes.Where(x => x.UserId == userId)
                     .Select(x => new CommentProfileDTO
                     {
                         CommentId = x.NoteId,
@@ -209,29 +109,59 @@ namespace AuthorVerseServer.Repository
                         ChapterNumber = x.BookChapter.BookChapterNumber,
                         ChapterTitle = x.BookChapter.Title,
                         CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
-                    })).ToListAsync();
-                    return query.AsQueryable();
-                }
+                    }).Where(x => x.Text == searchComment);
+
+                var query3 = query1.Union(query2);
+                return query3;
+            }
+            else
+            {
+
+
+                var query1 = _context.Comments
+                    .OrderByDescending(x => x.CommentCreatedDateTime).Where(x => x.CommentatorId == userId)
+                    .Select(x => new CommentProfileDTO
+                    {
+                        CommentId = x.CommentId,
+                        Text = x.Text,
+                        Rating = x.ReaderRating,
+                        Likes = x.Likes,
+                        DisLikes = x.DisLikes,
+                        CommentType = CommentType.Book,
+                        BookTitle = x.Book.Title,
+                        CommentCreatedDateTime = DateOnly.FromDateTime(x.CommentCreatedDateTime)
+                    });
+
+                var query2 = _context.Notes.OrderByDescending(x => x.NoteCreatedDateTime).Where(x => x.UserId == userId)
+                .Select(x => new CommentProfileDTO
+                {
+                    CommentId = x.NoteId,
+                    Text = x.Text,
+                    Likes = x.Likes,
+                    DisLikes = x.DisLikes,
+                    CommentType = CommentType.Chapter,
+                    BookTitle = x.BookChapter.Book.Title,
+                    ChapterNumber = x.BookChapter.BookChapterNumber,
+                    ChapterTitle = x.BookChapter.Title,
+                    CommentCreatedDateTime = DateOnly.FromDateTime(x.NoteCreatedDateTime)
+                });
+
+                var query3 = query1.Union(query2);
+                return query3;
             }
         }
 
         public async Task<int> GetCommentsPagesCount(CommentType commentType, string searchComment, string userId)
         {//Пользователя
-            IQueryable<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
-            var test1 = query.Count();
-            var test2 = query.LongCount();
-            var test3 = await query.LongCountAsync();
-
-            var test = await query.CountAsync();
+            IQueryable<CommentProfileDTO> query = GetQueryUserCommentsAsync(commentType, searchComment, userId);
             return await query.CountAsync();
         }
 
         public async Task<ICollection<CommentProfileDTO>> GetUserCommentsAsync(CommentType commentType, int page, string searchComment, string userId)
         {
-            IQueryable<CommentProfileDTO> query = await GetQueryUserCommentsAsync(commentType, searchComment, userId);
+            IQueryable<CommentProfileDTO> query = GetQueryUserCommentsAsync(commentType, searchComment, userId);
             return await query
-                .AsNoTracking()
-                .OrderByDescending(x => x.CommentCreatedDateTime)
+                //.OrderByDescending(x => x.CommentCreatedDateTime)
                 .Skip(page * 5)
                 .Take(5)
                 .ToListAsync();
