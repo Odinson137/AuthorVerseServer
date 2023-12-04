@@ -146,13 +146,18 @@ services.AddStackExchangeRedisCache(options =>
 #endif
 
 
-
-var policyName = "AllowReactApp";
 services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", builder =>
     {
         builder.WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+    options.AddPolicy("AllowForumApp", builder =>
+    {
+        builder.WithOrigins("http://localhost:7069/")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -225,7 +230,8 @@ app.UseCookiePolicy();
 
 app.MapControllers();
 
-app.UseCors(policyName);
+app.UseCors("AllowReactApp");
+app.UseCors("AllowForumApp");
 
 app.Run();
 public partial class Program { }

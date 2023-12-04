@@ -6,6 +6,7 @@ namespace AuthorVerseServer.Interfaces
     public interface IForumMessage
     {
         Task SaveAsync();
+        Task<ForumMessage> GetForumMessageAsync(int messageId);
         Task<ICollection<ForumMessageDTO>> GetForumMessagesAsync(int bookId, int part);
         Task AddForumMessageAsync(ForumMessage message);
     }

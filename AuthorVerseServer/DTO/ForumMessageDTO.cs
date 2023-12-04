@@ -12,9 +12,15 @@
 
     public class SendForumMessageDTO
     {
-        public int AnswerId { get; set; }
+        public int? AnswerId { get; set; }
         public required string UserId { get; set; }
         public required int BookId { get; set; }
         public required string Text { get; set; }
+    }
+
+    public class ChangeTextDTO
+    {
+        public required int MessageId { get; set; }
+        public required string NewText { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
-    public class Note
+    public class Note 
     {
         [Key]
         public int NoteId { get; set; }

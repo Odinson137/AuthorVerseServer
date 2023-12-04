@@ -4,6 +4,7 @@ using StackExchange.Redis;
 using AuthorVerseForum.Services;
 using AuthorVerseForum.Data.Enums;
 using Newtonsoft.Json;
+using AuthorVerseForum.Models;
 
 namespace AuthorVerseForum.Hubs
 {
@@ -11,13 +12,14 @@ namespace AuthorVerseForum.Hubs
     public class ForumHub : Hub
     {
         private readonly IDatabase _redis;
-
         private readonly UncodingJwtoken _jwtoken;
+        private readonly HttpClient _client;
 
-        public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken)
+        public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken, HttpClient client)
         {
             _redis = redisConnection.GetDatabase();
             _jwtoken = jwtoken;
+            _client = client;
         }
 
         private string GetConnectionId()
@@ -31,10 +33,19 @@ namespace AuthorVerseForum.Hubs
                 return user.UserName;
             else
                 return $"{user.Name} {user.LastName}";
-
         }
 
-        public async Task SendMessage(string message, int answerMessageId)
+        public string GetServerUri(string key)
+        {
+            #if !DEBUG
+                string apiUrl = $"http://server/api/ForumMessage?key={key}";
+            #else
+                string apiUrl = $"http://localhost7069/api/ForumMessage?key={key}";
+            #endif
+            return apiUrl;
+        }
+
+        public async Task<(int, ConnecterDTO, UserVerify)> GetConnectionInfoAsync()
         {
             string? connectorJson = await _redis.StringGetAsync(GetConnectionId());
             Console.WriteLine($"Cinnector: {connectorJson}");
@@ -42,63 +53,138 @@ namespace AuthorVerseForum.Hubs
             if (string.IsNullOrEmpty(connectorJson))
             {
                 await Clients.Caller.SendAsync("ErrorMessage", 404, "User data is not exist");
-                return;
+                return (0, null, null);
             }
 
-            var connecter = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson);
+            ConnecterDTO? connecter = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson);
             if (connecter == null)
             {
                 await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
-                return;
+                return (0, null, null);
             }
 
             string? userJson = await _redis.StringGetAsync($"session:{connecter.UserId}");
             if (userJson == null)
             {
-                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
-                return;
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "User session lost");
+                return (0, null, null);
             }
 
-            var user = JsonConvert.DeserializeObject<UserVerify>(userJson);
+            UserVerify? user = JsonConvert.DeserializeObject<UserVerify>(userJson);
 
-            await Clients.Group($"group:{connecter.BookId}").SendAsync("ReceiveMessage", new MessageSendDTO
-            { 
+            if (user == null)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
+                return (0, null, null);
+            }
+
+            return (1, connecter, user);
+        }
+
+        public async Task SendMessage(string message, AnswerDTO? answerMessage = null)
+        {
+            var items = await GetConnectionInfoAsync();
+            if (items.Item1 == 0) return;
+
+            ConnecterDTO connecter = items.Item2;
+            UserVerify user = items.Item3;
+
+            SendForumMessageDTO sendMessage = new SendForumMessageDTO
+            {
                 BookId = connecter.BookId,
-                Text = message
-            }, new UserMessageDTO(user, connecter.UserId));
+                Text = message,
+                AnswerId = answerMessage == null ? null : answerMessage.MessageId,
+                UserId = connecter.UserId,
+            };
+
+            string key = Guid.NewGuid().ToString();
+            await _redis.StringSetAsync($"add_message:{key}", JsonConvert.SerializeObject(sendMessage), TimeSpan.FromSeconds(60));
+            
+            int messageId = await SendMessageToServerAsync(key);
+            if (messageId > 0)
+            {
+                await Clients.GroupExcept($"group:{connecter.BookId}", Context.ConnectionId).SendAsync("ReceiveMessage", 
+                    new MessageSendDTO
+                    {
+                        MessageId = messageId,
+                        BookId = connecter.BookId,
+                        Text = message
+                    }, new UserMessageDTO(user, connecter.UserId));
+
+                await Clients.Caller.SendAsync("ReturnMessageId", message);
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Message not sent");
+            }
+
+            await _redis.KeyDeleteAsync($"add_message:{key}");
+        }
+
+
+        private async Task<int> SendMessageToServerAsync(string key)
+        {
+            var response = await _client.PostAsync(GetServerUri(key), null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Сообщение успешно отправлено!");
+                var content = await response.Content.ReadAsStringAsync();
+                return int.Parse(content);
+            }
+            else
+            {
+                Console.WriteLine($"Ошибка: {response.Content}");
+                return 0;
+            }
+        }
+
+        private async Task<int> SendMessageToPutText(string key)
+        {
+            var response = await _client.PutAsync(GetServerUri(key), null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Сообщение успешно изменено!");
+                return 1;
+            }
+            else
+            {
+                Console.WriteLine($"Ошибка: {response.Content}");
+                return 0;
+            }
         }
 
         public async Task ChangeUserStatus(UserStatus status)
         {
-            string? connectorJson = await _redis.StringGetAsync(GetConnectionId());
-            if (string.IsNullOrEmpty(connectorJson))
-            {
-                await Clients.Caller.SendAsync("ErrorMessage", 404, "User data is not exist");
-                return;
-            }
+            var items = await GetConnectionInfoAsync();
+            if (items.Item1 == 0) return;
 
-            var connecter = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson);
-            if (connecter == null)
-            {
-                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
-                return;
-            }
+            ConnecterDTO connecter = items.Item2;
+            UserVerify user = items.Item3;
 
-            string? userJson = await _redis.StringGetAsync($"session:{connecter.UserId}");
-            if (userJson == null)
-            {
-                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
-                return;
-            }
+            await Clients.GroupExcept($"group:{connecter.BookId}", Context.ConnectionId)
+                .SendAsync("ChangeStatus", GetViewUserName(user), status);
+        }
 
-            var user = JsonConvert.DeserializeObject<UserVerify>(userJson);
-            if (user == null)
-            {
-                await Clients.Caller.SendAsync("ErrorMessage", 500, "Server Error");
-                return;
-            }
+        public async Task ChangeTextMessage(int messageId, string newMessageText)
+        {
+            var items = await GetConnectionInfoAsync();
+            if (items.Item1 == 0) return;
 
-            await Clients.Group($"group:{connecter.BookId}").SendAsync("ChangeUserStatus", GetViewUserName(user), status); // исправить недочёт отправки сообщений не всекй группе
+            ConnecterDTO connecter = items.Item2;
+
+            await Clients.GroupExcept($"group:{connecter.BookId}", Context.ConnectionId)
+                .SendAsync("ChangeText", messageId, newMessageText);
+
+            string key = new Guid().ToString();
+            await _redis.StringSetAsync($"put_message:{key}", 
+                JsonConvert.SerializeObject(new { MessageId = messageId, NewText = newMessageText }));
+
+            if (await SendMessageToPutText(key) == 0)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Error when saving data to the database");
+            }
         }
 
         public async Task AuthorizationConnection(string token, int bookId)

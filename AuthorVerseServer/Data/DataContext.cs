@@ -38,6 +38,32 @@ namespace AuthorVerseServer.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>(
+            entityBuilder =>
+            {
+                entityBuilder
+                    .ToTable("AspNetUsers")
+                    .SplitToTable(
+                        "AspNetDetailedInfoUsers",
+                        tableBuilder =>
+                        {
+                            tableBuilder.Property(user => user.Id).HasColumnName("Id");
+                            tableBuilder.Property(user => user.Method);
+                            tableBuilder.Property(user => user.EmailConfirmed);
+                            tableBuilder.Property(user => user.PasswordHash);
+                            tableBuilder.Property(user => user.SecurityStamp);
+                            tableBuilder.Property(user => user.ConcurrencyStamp);
+                            tableBuilder.Property(user => user.PhoneNumber);
+                            tableBuilder.Property(user => user.PhoneNumberConfirmed);
+                            tableBuilder.Property(user => user.TwoFactorEnabled);
+                            tableBuilder.Property(user => user.LockoutEnd);
+                            tableBuilder.Property(user => user.LockoutEnabled);
+                            tableBuilder.Property(user => user.AccessFailedCount);
+                        });
+            });
+
+
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
 
             modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
@@ -192,7 +218,8 @@ namespace AuthorVerseServer.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Book>()
-                .HasIndex(g => g.BookId);
+                .HasIndex(g => g.BookId)
+                .IsUnique();
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.Title);
             modelBuilder.Entity<Book>()
@@ -203,10 +230,13 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.AuthorId);
 
             modelBuilder.Entity<Genre>()
-                .HasIndex(g => g.GenreId);
+                .HasIndex(g => g.GenreId)
+                .IsUnique();
+
 
             modelBuilder.Entity<Tag>()
-                .HasIndex(g => g.TagId);
+                .HasIndex(g => g.TagId)
+                .IsUnique();
 
             modelBuilder.Entity<BookChapter>()
                 .HasIndex(g => g.BookChapterId);
@@ -240,7 +270,8 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.BookChapterId);
 
             modelBuilder.Entity<Comment>()
-                .HasIndex(g => g.CommentId);
+                .HasIndex(g => g.CommentId)
+                .IsUnique();
             modelBuilder.Entity<Comment>()
                 .HasIndex(g => g.CommentatorId);
             modelBuilder.Entity<Comment>()
@@ -256,12 +287,15 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.Status);
 
             modelBuilder.Entity<MicrosoftUser>()
-                .HasIndex(g => g.Id);
+                .HasIndex(g => g.Id)
+                .IsUnique();
             modelBuilder.Entity<MicrosoftUser>()
-                .HasIndex(g => g.AzureName);
+                .HasIndex(g => g.AzureName)
+                .IsUnique();
 
             modelBuilder.Entity<Note>()
-                .HasIndex(g => g.NoteId);
+                .HasIndex(g => g.NoteId)
+                .IsUnique();
             modelBuilder.Entity<Note>()
                 .HasIndex(g => g.UserId);
             modelBuilder.Entity<Note>()

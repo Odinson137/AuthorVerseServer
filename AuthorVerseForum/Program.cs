@@ -13,7 +13,7 @@ var services = builder.Services;
 
 services.AddScoped<UncodingJwtoken>();
 services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379,abortConnect=false"));
-//services.AddSingleton<IConnectionManager, ConnectionManager>(); // можно сделать Transient
+services.AddHttpClient();
 
 services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -51,7 +51,7 @@ namespace AuthorVerseServer.Controllers
                 BookId = sendMessage.BookId,
                 Text = sendMessage.Text,
                 UserId = sendMessage.UserId,
-                ParrentMessageId = null,           
+                ParrentMessageId = sendMessage.AnswerId,           
             };
             
             await _forum.AddForumMessageAsync(message);
@@ -61,34 +61,27 @@ namespace AuthorVerseServer.Controllers
             return Ok(message.MessageId);
         }
 
-        //[HttpPost]
-        //[ProducesResponseType(200)]
-        //[ProducesResponseType(404)]
-        //[ProducesResponseType(400)]
-        //public async Task<ActionResult<int>> PutMessage(string key)
-        //{
-        //    string? messageJson = await _redis.StringGetAsync($"put_message:{key}");
-        //    if (string.IsNullOrEmpty(messageJson)) return NotFound("Value is not found");
+        [HttpPut]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<int>> PutMessage(string key)
+        {
+            string? messageJson = await _redis.StringGetAsync($"put_message:{key}");
+            if (string.IsNullOrEmpty(messageJson)) return NotFound("Value is not found");
 
-        //    var sendMessage = JsonConvert.DeserializeObject<SendForumMessageDTO>(messageJson);
-        //    if (sendMessage == null) return BadRequest("Bad data");
+            var changeTextDTO = JsonConvert.DeserializeObject<ChangeTextDTO>(messageJson);
+            if (changeTextDTO == null) return BadRequest("Bad data");
 
-        //    var message = new ForumMessage
-        //    {
-        //        BookId = sendMessage.BookId,
-        //        Text = sendMessage.Text,
-        //        UserId = sendMessage.UserId,
-        //        ParrentMessageId = sendMessage.AnswerId,
-        //    };
+            var message = await _forum.GetForumMessageAsync(changeTextDTO.MessageId);
 
-        //    await _forum.AddForumMessageAsync(message);
+            message.Text = changeTextDTO.NewText;
 
-        //    await _forum.SaveAsync();
+            await _forum.SaveAsync();
+            return Ok();
+        }
 
-        //    return Ok(message.MessageId);
-        //}
-
-        //[HttpPost]
+        //[HttpDelete]
         //[ProducesResponseType(200)]
         //[ProducesResponseType(404)]
         //[ProducesResponseType(400)]

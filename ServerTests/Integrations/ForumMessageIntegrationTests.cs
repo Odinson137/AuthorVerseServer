@@ -44,7 +44,34 @@ public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<
     }
 
     [Fact]
-    public async Task AddMessage_CheckOkRequest_ReturnsOkResult()
+    public async Task AddMessage_AddToNullParrent_ReturnsOkResult()
+    {
+        // Arrange
+        string newGuid = Guid.NewGuid().ToString();
+        string key = $"add_message:{newGuid}";
+
+        SendForumMessageDTO sendMessage = new SendForumMessageDTO
+        {
+            BookId = 1,
+            Text = "Hello",
+            UserId = "admin",
+            AnswerId = null,
+        };
+
+        var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+        var redis = redisConnection.GetDatabase();
+        await redis.StringSetAsync(key, JsonConvert.SerializeObject(sendMessage), TimeSpan.FromSeconds(10));
+
+        var response = await _client.PostAsync($"/api/ForumMessage?key={newGuid}", null);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(int.TryParse(content, out int value));
+        Assert.True(value > 0);
+    }
+
+    [Fact]
+    public async Task AddMessage_AddWithParrent_ReturnsOkResult()
     {
         // Arrange
         Guid newGuid = Guid.NewGuid();
@@ -54,12 +81,13 @@ public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<
         {
             BookId = 1,
             Text = "Hello",
-            UserId = "admin"
+            UserId = "admin",
+            AnswerId = 1,
         };
 
         var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
         var redis = redisConnection.GetDatabase();
-        await redis.StringSetAsync(key, JsonConvert.SerializeObject(sendMessage));
+        await redis.StringSetAsync(key, JsonConvert.SerializeObject(sendMessage), TimeSpan.FromSeconds(10));
 
         var response = await _client.PostAsync($"/api/ForumMessage?key={newGuid}", null);
 
@@ -73,12 +101,22 @@ public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<
     public async Task PutMessage_CheckOkRequest_ReturnsOkResult()
     {
         // Arrange
-        string key = "3aedasdsad";
-        var response = await _client.PutAsync($"/api/ForumMessage?key={key}", null);
+        Guid newGuid = Guid.NewGuid();
+        string key = $"put_message:{newGuid}";
 
-        var content = await response.Content.ReadAsStringAsync();
+        var changeTextMessage = new ChangeTextDTO
+        {
+            MessageId = 1,
+            NewText = "Hello from new message text",
+        };
+
+        var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+        var redis = redisConnection.GetDatabase();
+        await redis.StringSetAsync(key, JsonConvert.SerializeObject(changeTextMessage), TimeSpan.FromSeconds(10));
+
+        var response = await _client.PutAsync($"/api/ForumMessage?key={newGuid}", null);
+
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.True(int.TryParse(content, out int value));
     }
 
 }

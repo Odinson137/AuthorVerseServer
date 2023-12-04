@@ -19,6 +19,14 @@ namespace AuthorVerseServer.Repository
             await _context.ForumMessages.AddAsync(message);
         }
 
+        public async Task<ForumMessage> GetForumMessageAsync(int messageId)
+        {
+            var message = await _context.ForumMessages
+                .Where(message => message.MessageId == messageId)
+                .FirstAsync();
+            return message;
+        }
+
         public async Task<ICollection<ForumMessageDTO>> GetForumMessagesAsync(int bookId, int part)
         {
             var messages = await _context.ForumMessages
@@ -32,7 +40,7 @@ namespace AuthorVerseServer.Repository
                     MessageId = x.MessageId,
                     Text = x.Text,
                     ParrentMessageId = x.ParrentMessageId,
-                    ViewName = string.IsNullOrEmpty(x.User.Name) ? x.User.UserName : $"{x.User.UserName} {x.User.LastName}",
+                    ViewName = string.IsNullOrEmpty(x.User.Name) ? x.User.UserName : $"{x.User.Name} {x.User.LastName}",
                     SendTime = x.SendTime,
                 }).ToArrayAsync();
             return messages;
