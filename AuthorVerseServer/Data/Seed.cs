@@ -313,6 +313,7 @@ namespace AuthorVerseServer.Data
                     admin.Notes.Add(note);
 
                     var comments = new List<Comment>();
+                    admin.Notes.Add(note);
                     for (int i = 0; i < random.Next(5, 20); i++)
                     {
                         comments.Add(new Comment()
