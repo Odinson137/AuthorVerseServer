@@ -30,6 +30,7 @@ namespace AuthorVerseServer.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
+        public DbSet<CommentBase> CommentBases { get; set; }
         public DbSet<Character> Characters { get; set; }
         public DbSet<MicrosoftUser> MicrosoftUsers { get; set; }
         public DbSet<BookQuote> BookQuotes { get; set; }
@@ -126,8 +127,8 @@ namespace AuthorVerseServer.Data
 
             modelBuilder.Entity<User>()
                 .HasMany(c => c.Comments)
-                .WithOne(c => c.Commentator)
-                .HasForeignKey(c => c.CommentatorId)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
                 .IsRequired(false);
 
             modelBuilder.Entity<BookChapter>()
@@ -161,7 +162,7 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<Comment>()
                 .HasMany(b => b.CommentRatings)
                 .WithOne()
-                .HasForeignKey(b => b.CommentId)
+                .HasForeignKey(b => b.BaseId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -195,7 +196,7 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<Note>()
                 .HasMany(c => c.Replies)
                 .WithOne(c => c.ReplyNote)
-                .HasForeignKey(c => c.ReplyToNoteId)
+                .HasForeignKey(c => c.ReplyToBaseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 
@@ -270,10 +271,10 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.BookChapterId);
 
             modelBuilder.Entity<Comment>()
-                .HasIndex(g => g.CommentId)
+                .HasIndex(g => g.BaseId)
                 .IsUnique();
             modelBuilder.Entity<Comment>()
-                .HasIndex(g => g.CommentatorId);
+                .HasIndex(g => g.UserId);
             modelBuilder.Entity<Comment>()
                 .HasIndex(g => g.BookId);
             modelBuilder.Entity<Comment>()
@@ -294,14 +295,14 @@ namespace AuthorVerseServer.Data
                 .IsUnique();
 
             modelBuilder.Entity<Note>()
-                .HasIndex(g => g.NoteId)
+                .HasIndex(g => g.BaseId)
                 .IsUnique();
             modelBuilder.Entity<Note>()
                 .HasIndex(g => g.UserId);
             modelBuilder.Entity<Note>()
                 .HasIndex(g => g.BookChapterid);
             modelBuilder.Entity<Note>()
-                .HasIndex(g => g.NoteCreatedDateTime);
+                .HasIndex(g => g.CreatedDateTime);
             modelBuilder.Entity<Note>()
                 .HasIndex(g => g.Permission);
 

@@ -9,7 +9,7 @@ using StackExchange.Redis;
 using System.Net;
 
 
-namespace ServerTests.Integrations;
+namespace ServerApiForumTests.Integrations;
 
 public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {

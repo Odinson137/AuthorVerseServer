@@ -62,6 +62,12 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<CommentPageDTO>> GetUserComments(
             CommentType commentType = CommentType.All, int page = 1, string searchComment = "") // показывать на одной странице по 10 комментов
         {
+            if (!Enum.IsDefined(typeof(CommentType), commentType))
+            {
+                return BadRequest("CommentType is not correct");
+            }
+
+
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
@@ -69,23 +75,17 @@ namespace AuthorVerseServer.Controllers
             if (--page < 0)
                 return BadRequest("Page is smaller than zero");
             
-           int commentsCount = page == 0 ? await _account.GetCommentsPagesCount(commentType, searchComment, userId) : 0;
+           //int commentsCount = page == 0 ? await _account.GetCommentsPagesCount(commentType, searchComment, userId) : 0;
 
-            var commentsFounded = await _account.GetUserCommentsAsync(commentType, page, searchComment, userId);
-
-            return Ok(new CommentPageDTO//comments List а не ICollection
-            {
-                PagesCount = commentsCount,
-                comments = commentsFounded
-            });
-/*            return Ok(new CommentPageDTO());
-*/        }
+            var commentPage = await _account.GetUserCommentsAsync(commentType, page, searchComment, userId);
+            return Ok(commentPage);
+        }
 
         [HttpGet("Friends")]
         public async Task<ActionResult<ICollection<FriendDTO>>> GetFriends()
         {
             // userId from token
-            return Ok(new List<FriendDTO>());
+            return NotFound(new List<FriendDTO>());
         }
 
         [HttpGet("UserBooks")]

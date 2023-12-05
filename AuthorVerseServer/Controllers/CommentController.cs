@@ -64,7 +64,7 @@ namespace AuthorVerseServer.Controllers
 
             Comment newComment = new Comment()
             {
-                Commentator = user,
+                User = user,
                 BookId = commentDTO.BookId,
                 Book = book,
                 Text = commentDTO.Text,
@@ -135,7 +135,7 @@ namespace AuthorVerseServer.Controllers
 
             Comment? comment = await _comment.GetCommentAsync(commentId);
             if (comment != null)
-                comment.CommentRatings.Add(new CommentRating { CommentId = commentId, Rating = Data.Enums.LikeRating.Like, UserCommentedId = userId });
+                comment.CommentRatings.Add(new CommentRating { BaseId = commentId, Rating = Data.Enums.LikeRating.Like, UserCommentedId = userId });
             else
                 return NotFound("Comment from this user to this book not found");
 
@@ -158,7 +158,7 @@ namespace AuthorVerseServer.Controllers
 
             Comment? comment = await _comment.GetCommentAsync(commentId);
             if (comment != null)
-                comment.CommentRatings.Add(new CommentRating { CommentId = commentId, Rating = Data.Enums.LikeRating.DisLike, UserCommentedId = userId });
+                comment.CommentRatings.Add(new CommentRating { BaseId = commentId, Rating = Data.Enums.LikeRating.DisLike, UserCommentedId = userId });
             else
                 return NotFound("Comment from this user to this book not found");
 

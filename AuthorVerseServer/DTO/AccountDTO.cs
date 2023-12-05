@@ -41,13 +41,13 @@ namespace AuthorVerseServer.DTO
     public class CommentPageDTO
     {
         public int PagesCount { get; set; }
-        public ICollection<CommentProfileDTO> comments = new List<CommentProfileDTO>();
+        public ICollection<CommentProfileDTO> Comments = new List<CommentProfileDTO>();
     }
 
 
     public class CommentProfileDTO
     {
-        public int CommentId { get; set; }
+        public int BaseId { get; set; }
         public string Text { get; set; } = null!;
         public int Rating { get; set; }
         public int Likes { get; set; } = 0;
@@ -56,7 +56,7 @@ namespace AuthorVerseServer.DTO
         public string BookTitle { get; set; } = null!;
         public int ChapterNumber { get; set; }
         public string? ChapterTitle { get; set; }
-        public DateOnly CommentCreatedDateTime { get; set; }
+        public DateOnly CreatedDateTime { get; set; }
     }
 
     public class FriendDTO

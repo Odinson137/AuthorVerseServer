@@ -18,7 +18,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task<Comment?> CheckUserComment(Book book, User user)
         {
-            return await _context.Comments.Where(x => x.Book == book && x.Commentator == user).FirstOrDefaultAsync();
+            return await _context.Comments.Where(x => x.Book == book && x.User == user).FirstOrDefaultAsync();
         }
 
         public async Task<Book?> GetBook(int bookId)
@@ -38,7 +38,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task<Comment?> GetCommentAsync(int commentId)
         {
-            return await _context.Comments.FirstOrDefaultAsync(x=> x.CommentId == commentId);
+            return await _context.Comments.FirstOrDefaultAsync(x=> x.BaseId == commentId);
         }
 
         public async Task<int> Save()

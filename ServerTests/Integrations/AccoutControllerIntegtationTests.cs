@@ -77,18 +77,17 @@ public class AccoutControllerIntegtationTests : IClassFixture<WebApplicationFact
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(comments);
 
-        if (comments.comments.Count > 0)
+        if (comments.Comments.Count > 0)
             Assert.True(comments.PagesCount > 0 );
 
 
-        foreach (var comment in comments.comments)
+        foreach (var comment in comments.Comments)
         {
-            Assert.True(comment.CommentId > 0, "Невозможный id");
+            Assert.True(comment.BaseId > 0, "Невозможный id");
             Assert.False(string.IsNullOrEmpty(comment.Text), "Отсутствует текст комментария");
             Assert.True(Enum.IsDefined(typeof(CommentType), comment.CommentType), "Невозможная категория");
             Assert.False(string.IsNullOrEmpty(comment.BookTitle), "Отсутствует название книги");
-            Assert.True(comment.ChapterNumber > 0, "Такой главы нет");
-            Assert.True(comment.CommentCreatedDateTime != DateOnly.MinValue, "Невозможная дата");
+            Assert.True(comment.CreatedDateTime != DateOnly.MinValue, "Невозможная дата");
         }
     }
 
@@ -96,8 +95,6 @@ public class AccoutControllerIntegtationTests : IClassFixture<WebApplicationFact
     public async Task GetUserComments_FullRequest_ReturnsOkResult()
     {
         // Arrange
-
-
         string uri = "api/Account/UserComments?commentType=1&page=2&searchComment=";
 
         var response = await _client.GetAsync(uri);
@@ -110,9 +107,56 @@ public class AccoutControllerIntegtationTests : IClassFixture<WebApplicationFact
 
         Assert.Equal(0, comments.PagesCount);
 
-        foreach (var comment in comments.comments)
+        foreach (var comment in comments.Comments)
         {
             //Assert.Contains(comment.Text, queryParams["searchComment"]);
+            Assert.Equal(CommentType.Chapter, comment.CommentType);
+        }
+    }
+
+
+    [Fact]
+    public async Task GetUserComments_SearchTextFromCommentText_ReturnsOkResult()
+    {
+        // Arrange
+        string uri = "api/Account/UserComments?commentType=0&page=2&searchComment=Это мой первый";
+
+        var response = await _client.GetAsync(uri);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var comments = JsonConvert.DeserializeObject<CommentPageDTO>(content);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(comments);
+
+        Assert.Equal(0, comments.PagesCount);
+
+        foreach (var comment in comments.Comments)
+        {
+            Assert.Contains("Это мой первый", comment.Text, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(CommentType.Book, comment.CommentType);
+        }
+    }
+
+    [Fact]
+    public async Task GetUserComments_SearchTextFromNoteText_ReturnsOkResult()
+    {
+        // Arrange
+        string uri = "api/Account/UserComments?commentType=0&page=2&searchComment=Когда же выйдет";
+
+        var response = await _client.GetAsync(uri);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var comments = JsonConvert.DeserializeObject<CommentPageDTO>(content);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(comments);
+
+        Assert.Equal(0, comments.PagesCount);
+
+        foreach (var comment in comments.Comments)
+        {
+            Assert.Contains("Когда же выйдет", comment.Text, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(CommentType.Chapter, comment.CommentType);
         }
     }

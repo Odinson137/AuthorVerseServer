@@ -15,7 +15,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task<ICollection<Note>> GetNoteAsync()
         {
-            return await _context.Notes.OrderBy(n => n.NoteId).ToListAsync();
+            return await _context.Notes.OrderBy(n => n.BaseId).ToListAsync();
         }
     }
 }
