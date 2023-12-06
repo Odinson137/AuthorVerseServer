@@ -119,4 +119,51 @@ public class ForumMessageIntegrationTests : IClassFixture<WebApplicationFactory<
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    private async Task<int> GetNewMessageIdAsync()
+    {
+        string newGuid = Guid.NewGuid().ToString();
+        string key = $"add_message:{newGuid}";
+
+        SendForumMessageDTO sendMessage = new SendForumMessageDTO
+        {
+            BookId = 1,
+            Text = "Hello",
+            UserId = "admin",
+            AnswerId = null,
+        };
+
+        var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+        var redis = redisConnection.GetDatabase();
+        await redis.StringSetAsync(key, JsonConvert.SerializeObject(sendMessage), TimeSpan.FromSeconds(10));
+
+        var response = await _client.PostAsync($"/api/ForumMessage?key={newGuid}", null);
+        var content = await response.Content.ReadAsStringAsync();
+        int.TryParse(content, out int value);
+        return value;
+    }
+
+    [Fact]
+    public async Task Delete_CheckOkRequest_ReturnsOkResult()
+    {
+        // Arrange
+        int messageId = await GetNewMessageIdAsync();
+
+        Guid newGuid = Guid.NewGuid();
+        string key = $"delete_message:{newGuid}";
+
+        var changeTextMessage = new DeleteMessageDTO
+        {
+            MessageId = messageId,
+            UserId = "admin",
+        };
+
+        var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+        var redis = redisConnection.GetDatabase();
+        await redis.StringSetAsync(key, JsonConvert.SerializeObject(changeTextMessage), TimeSpan.FromSeconds(10));
+
+        var response1 = await _client.DeleteAsync($"/api/ForumMessage?key={newGuid}");
+
+        Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
+    }
+
 }

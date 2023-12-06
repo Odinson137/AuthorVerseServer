@@ -19,6 +19,20 @@ namespace AuthorVerseServer.Repository
             await _context.ForumMessages.AddAsync(message);
         }
 
+        public async Task<bool> CheckUserMessageExistAsync(int messageId, string userId)
+        {
+            bool value = await _context.ForumMessages
+                .AnyAsync(message => message.UserId == userId && message.MessageId == messageId);
+            return value;
+        }
+
+        public async Task DeleteMessageAsync(int messageId)
+        {
+            await _context.ForumMessages
+                .Where(message => message.MessageId == messageId)
+                .ExecuteDeleteAsync();
+        }
+
         public async Task<ForumMessage> GetForumMessageAsync(int messageId)
         {
             var message = await _context.ForumMessages

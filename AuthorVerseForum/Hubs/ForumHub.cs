@@ -35,7 +35,7 @@ namespace AuthorVerseForum.Hubs
                 return $"{user.Name} {user.LastName}";
         }
 
-        public string GetServerUri(string key)
+        private string GetServerUri(string key)
         {
             #if !DEBUG
                 string apiUrl = $"http://server/api/ForumMessage?key={key}";
@@ -111,7 +111,7 @@ namespace AuthorVerseForum.Hubs
                         Text = message
                     }, new UserMessageDTO(user, connecter.UserId));
 
-                await Clients.Caller.SendAsync("ReturnMessageId", message);
+                await Clients.Caller.SendAsync("ReturnMessageId", messageId);
             }
             else
             {
@@ -120,7 +120,6 @@ namespace AuthorVerseForum.Hubs
 
             await _redis.KeyDeleteAsync($"add_message:{key}");
         }
-
 
         private async Task<int> SendMessageToServerAsync(string key)
         {
@@ -139,13 +138,29 @@ namespace AuthorVerseForum.Hubs
             }
         }
 
-        private async Task<int> SendMessageToPutText(string key)
+        private async Task<int> SendMessageToPutTextAsync(string key)
         {
             var response = await _client.PutAsync(GetServerUri(key), null);
 
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine("Сообщение успешно изменено!");
+                return 1;
+            }
+            else
+            {
+                Console.WriteLine($"Ошибка: {response.Content}");
+                return 0;
+            }
+        }
+
+        private async Task<int> SendMessageToDeleteAsync(string key)
+        {
+            var response = await _client.DeleteAsync(GetServerUri(key));
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Сообщение успешно удалено!");
                 return 1;
             }
             else
@@ -179,11 +194,33 @@ namespace AuthorVerseForum.Hubs
 
             string key = new Guid().ToString();
             await _redis.StringSetAsync($"put_message:{key}", 
-                JsonConvert.SerializeObject(new { MessageId = messageId, NewText = newMessageText }));
+                JsonConvert.SerializeObject(new { MessageId = messageId, NewText = newMessageText }), 
+                TimeSpan.FromSeconds(60));
 
-            if (await SendMessageToPutText(key) == 0)
+            if (await SendMessageToPutTextAsync(key) == 0)
             {
                 await Clients.Caller.SendAsync("ErrorMessage", 500, "Error when saving data to the database");
+            }
+        }
+
+        public async Task DeleteMessage(int messageId)
+        {
+            var items = await GetConnectionInfoAsync();
+            if (items.Item1 == 0) return;
+
+            ConnecterDTO connecter = items.Item2;
+
+            await Clients.GroupExcept($"group:{connecter.BookId}", Context.ConnectionId)
+                .SendAsync("DeleteMessage", messageId);
+
+            string key = new Guid().ToString();
+            await _redis.StringSetAsync($"delete_message:{key}",
+                JsonConvert.SerializeObject(new { MessageId = messageId, UserId = connecter.UserId }),
+                TimeSpan.FromSeconds(60));
+
+            if (await SendMessageToDeleteAsync(key) == 0)
+            {
+                await Clients.Caller.SendAsync("ErrorMessage", 500, "Error when deleting data to the database");
             }
         }
 

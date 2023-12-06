@@ -5,8 +5,6 @@ using Newtonsoft.Json;
 using System.Text;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.SignalR.Client;
-using System.IdentityModel.Tokens.Jwt;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ForumHubTests.Integrations
 {
@@ -14,8 +12,10 @@ namespace ForumHubTests.Integrations
     {
         private readonly HttpClient _client;
         private readonly IDatabase _redis;
+        private readonly WebApplicationFactory<Program> _factory;
         public ForumIntegrationTests(WebApplicationFactory<Program> factory)
         {
+            _factory = factory;
             var redisConnection = factory.Services.GetRequiredService<IConnectionMultiplexer>();
 
             _redis = redisConnection.GetDatabase();
@@ -66,8 +66,6 @@ namespace ForumHubTests.Integrations
         public async Task ForumHub_SussecfullyConnected_Ok()
         {
             // Arrange
-            string token = await GetTokenAsync();
-            int bookId = 1;
 
             // Act
             var connection = new HubConnectionBuilder()
@@ -78,7 +76,6 @@ namespace ForumHubTests.Integrations
             await connection.StartAsync();
 
             Assert.Equal(HubConnectionState.Connected, connection.State);
-            //await connection.InvokeAsync("Send", message);
         }
 
         [Fact]
@@ -159,6 +156,44 @@ namespace ForumHubTests.Integrations
 
             // Assert
             await connection.InvokeAsync("ChangeTextMessage", 1, message);
+
+            // Assert
+            Assert.True(connection.State == HubConnectionState.Connected);
+        }
+
+        private async Task<int> GetNewMessageIdAsync()
+        {
+            string newGuid = Guid.NewGuid().ToString();
+            string key = $"add_message:{newGuid}";
+
+            SendForumMessageDTO sendMessage = new SendForumMessageDTO
+            {
+                BookId = 1,
+                Text = "Hello",
+                UserId = "admin",
+                AnswerId = null,
+            };
+
+            var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
+            var redis = redisConnection.GetDatabase();
+            await redis.StringSetAsync(key, JsonConvert.SerializeObject(sendMessage), TimeSpan.FromSeconds(10));
+
+            var response = await _client.PostAsync($"/api/ForumMessage?key={newGuid}", null);
+            var content = await response.Content.ReadAsStringAsync();
+            int.TryParse(content, out int value);
+            return value;
+        }
+
+        [Fact]
+        public async Task DeleteUserMessage_ReturnOk_Ok()
+        {
+            // Arrange
+            var connection = await AuthorizeAsync();
+
+            int messageId = await GetNewMessageIdAsync();
+
+            // Assert
+            await connection.InvokeAsync("DeleteMessage", messageId);
 
             // Assert
             Assert.True(connection.State == HubConnectionState.Connected);

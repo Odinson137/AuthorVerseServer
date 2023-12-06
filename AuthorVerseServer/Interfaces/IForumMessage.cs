@@ -9,5 +9,7 @@ namespace AuthorVerseServer.Interfaces
         Task<ForumMessage> GetForumMessageAsync(int messageId);
         Task<ICollection<ForumMessageDTO>> GetForumMessagesAsync(int bookId, int part);
         Task AddForumMessageAsync(ForumMessage message);
+        Task<bool> CheckUserMessageExistAsync(int messageId, string userId);
+        Task DeleteMessageAsync(int messageId);
     }
 }

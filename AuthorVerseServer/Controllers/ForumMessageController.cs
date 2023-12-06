@@ -81,31 +81,26 @@ namespace AuthorVerseServer.Controllers
             return Ok();
         }
 
-        //[HttpDelete]
-        //[ProducesResponseType(200)]
-        //[ProducesResponseType(404)]
-        //[ProducesResponseType(400)]
-        //public async Task<ActionResult<int>> DeleteMessage(string key)
-        //{
-        //    string? messageJson = await _redis.StringGetAsync($"del_message:{key}");
-        //    if (string.IsNullOrEmpty(messageJson)) return NotFound("Value is not found");
-        //    string test = "asdasd";
-        //    var sendMessage = JsonConvert.DeserializeObject<SendForumMessageDTO>(test);
-        //    if (sendMessage == null) return BadRequest("Bad data");
+        [HttpDelete]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<int>> DeleteMessage(string key)
+        {
+            string? messageJson = await _redis.StringGetAsync($"delete_message:{key}");
+            if (string.IsNullOrEmpty(messageJson)) return NotFound("Value is not found");
 
-        //    var message = new ForumMessage
-        //    {
-        //        BookId = sendMessage.BookId,
-        //        Text = sendMessage.Text,
-        //        UserId = sendMessage.UserId,
-        //        ParrentMessageId = sendMessage.AnswerId,
-        //    };
+            var forumMessage = JsonConvert.DeserializeObject<DeleteMessageDTO>(messageJson);
+            if (forumMessage == null) return BadRequest("Bad data");
 
-        //    await _forum.AddForumMessageAsync(message);
+            if (!await _forum.CheckUserMessageExistAsync(forumMessage.MessageId, forumMessage.UserId))
+            {
+                return NotFound("Comment not found or you, are not the author");
+            }
 
-        //    await _forum.SaveAsync();
+            await _forum.DeleteMessageAsync(forumMessage.MessageId);
 
-        //    return Ok(message.MessageId);
-        //}
+            return Ok();
+        }
     }
 }
