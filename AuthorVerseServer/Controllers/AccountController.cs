@@ -67,7 +67,6 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("CommentType is not correct");
             }
 
-
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
@@ -84,8 +83,13 @@ namespace AuthorVerseServer.Controllers
         [HttpGet("Friends")]
         public async Task<ActionResult<ICollection<FriendDTO>>> GetFriends()
         {
-            // userId from token
-            return NotFound(new List<FriendDTO>());
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            var friends = await _account.GetUserFriendsAsync(userId);
+
+            return Ok(friends);
         }
 
         [HttpGet("UserBooks")]

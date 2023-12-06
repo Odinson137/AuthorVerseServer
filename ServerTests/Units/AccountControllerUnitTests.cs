@@ -265,7 +265,7 @@ public class AccountControllerUnitTests
         var result = await _accountController.GetFriends();
 
         // Assert
-        Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.IsType<OkObjectResult>(result.Result);
     }
 
     [Fact]

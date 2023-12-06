@@ -104,6 +104,26 @@ namespace AuthorVerseServer.Data
                     admin.InitiatorFriendships.Add(friendship);
                 }
 
+                var friend1 = new User
+                {
+                    UserName = $"Friend-banned-{344444444}",
+                    Description = "Живу ради админа, чтоб быть у него в бане",
+                    Name = "Friend",
+                    LastName = "White",
+                    LogoUrl = "hashtag.png",
+                    Method = RegistrationMethod.Email,
+                    Email = $"frined1322{3444444444444}@gmail.com",
+                };
+
+                Friendship friendship1 = new Friendship
+                {
+                    User1 = friend1,
+                    User2 = admin,
+                    Status = FriendshipStatus.Accepted,
+                };
+
+                admin.TargetFriendships.Add(friendship1);
+
                 await userManager.CreateAsync(admin, "Password@123");
 
                 string folderPath = @"./wwwroot/api/images/";

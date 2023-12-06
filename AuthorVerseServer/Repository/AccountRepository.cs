@@ -7,6 +7,7 @@ using Google.Apis.Util;
 using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.NetworkInformation;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AuthorVerseServer.Repository
@@ -222,9 +223,32 @@ namespace AuthorVerseServer.Repository
         }
 
 
-        public Task<ICollection<FriendDTO>> GetUserFriendsAsync(string userId)
+        public async Task<ICollection<FriendDTO>> GetUserFriendsAsync(string userId)
         {
-            throw new NotImplementedException();
+            var friends = await _context.Friendships
+                .Where(x => x.User1Id == userId)
+                .Select(user => new FriendDTO
+                {
+                    Id = user.User2.Id,
+                    UserName = user.User2.UserName,
+                    Status = user.Status,
+                    FriendShipTime = DateOnly.FromDateTime(user.FriendshipStart),
+                }).ToListAsync();
+
+            var friendB = await _context.Friendships
+                .Where(x => x.User2Id == userId)
+                .Where(user => user.Status == FriendshipStatus.Accepted)
+                .Select(user => new FriendDTO
+                {
+                    Id = user.User1.Id,
+                    UserName = user.User1.UserName,
+                    Status = user.Status,
+                    FriendShipTime = DateOnly.FromDateTime(user.FriendshipStart),
+                }).ToListAsync();
+
+            var friendC = friends.Union(friendB);
+
+            return friendC.ToList();
         }
 
         public async Task<ICollection<SelectedUserBookDTO>> GetUserSelectedBooksAsync(string userId)

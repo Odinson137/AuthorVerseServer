@@ -10,6 +10,7 @@ namespace AuthorVerseServer.Models
         public User User1 { get; set; } = null!;
         public string User2Id { get; set; }
         public User User2 { get; set; } = null!;
+        public DateTime FriendshipStart { get; set; } = DateTime.Now;
         public FriendshipStatus Status { get; set; } = FriendshipStatus.Pending;
     }
 }
