@@ -20,50 +20,22 @@ services.AddControllers();
 services.AddEndpointsApiExplorer();
 
 services.AddSignalR();
+services.AddSignalR();
 
-services.AddSwaggerGen();
 
-ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+services.AddLogging(builder =>
 {
     builder.AddConsole();
     builder.AddDebug();
 });
 
-//services.AddDbContext<DataContext>(options =>
-//{
-//    //#if !DEBUG
-//    //#else
-//    //    string str = $"Server=localhost;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True";
-//    //#endif
 
-//    string str = $"Server=db;Initial Catalog=AuthorVerseForumDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=50;MultipleActiveResultSets=True";
-//    options.UseSqlServer(str);
-//});
-
-//#if !DEBUG
-
-//services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379,abortConnect=false"));
-
-//services.AddStackExchangeRedisCache(options =>
-//{
-//    options.Configuration = "redis:6379,abortConnect=false";
-//    options.InstanceName = "RedisCache";
-//});
-
-
-//#else
-
-//services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379,abortConnect=false"));
 
 services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = "redis:6379,abortConnect=false";
     options.InstanceName = "RedisCache";
 });
-
-
-//#endif
-
 
 services.AddCors(options =>
 {
@@ -97,23 +69,6 @@ services.AddAuthentication(options =>
 
 
 var app = builder.Build();
-
-//#if !DEBUG
-
-//using (var scope = app.Services.CreateScope())
-//{
-//    var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-//    await Seed.SeedData(dataContext);
-//}
-
-//#endif
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 app.UseAuthentication();
 app.UseAuthorization();

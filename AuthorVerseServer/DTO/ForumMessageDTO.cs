@@ -1,4 +1,6 @@
-﻿namespace AuthorVerseServer.DTO
+﻿using AuthorVerseServer.Models;
+
+namespace AuthorVerseServer.DTO
 {
     public class ForumMessageDTO
     {

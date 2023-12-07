@@ -19,6 +19,18 @@ namespace AuthorVerseServer.Repository
             await _context.ForumMessages.AddAsync(message);
         }
 
+        public async Task<int> AddForumMessageProcedureAsync(SendForumMessageDTO message)
+        {
+            int messageId = await _context.AddForumMessageAsync(
+                bookId: message.BookId,
+                userId: message.UserId,
+                parentMessageId: message.AnswerId,
+                text: message.Text);
+
+            return messageId;
+        }
+
+
         public async Task<bool> CheckUserMessageExistAsync(int messageId, string userId)
         {
             bool value = await _context.ForumMessages
@@ -31,6 +43,15 @@ namespace AuthorVerseServer.Repository
             await _context.ForumMessages
                 .Where(message => message.MessageId == messageId)
                 .ExecuteDeleteAsync();
+        }
+
+
+        public async Task ChangeParentMessage(int messageId)
+        {
+            await _context.ForumMessages
+                .Where(message => message.ParrentMessageId == messageId)
+                .ExecuteUpdateAsync(setter => setter
+                    .SetProperty(b => b.ParrentMessageId, (int?)null));
         }
 
         public async Task<ForumMessage> GetForumMessageAsync(int messageId)

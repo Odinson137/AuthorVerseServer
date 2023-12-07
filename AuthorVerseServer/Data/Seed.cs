@@ -11,15 +11,15 @@ namespace AuthorVerseServer.Data
     {
         public static async Task SeedData(DataContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
         {
-            //var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            //if (pendingMigrations.Any())
-            //{
-            //    await context.Database.EnsureDeletedAsync();
-            //    await context.Database.MigrateAsync();
-            //}
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                await context.Database.MigrateAsync();
+            }
 
             if (!context.Books.Any() || !context.Friendships.Any())
             {
+
                 //await context.Database.EnsureDeletedAsync();
                 //await context.Database.EnsureCreatedAsync();
 

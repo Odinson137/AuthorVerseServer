@@ -46,19 +46,9 @@ namespace AuthorVerseServer.Controllers
             var sendMessage = JsonConvert.DeserializeObject<SendForumMessageDTO>(messageJson);
             if (sendMessage == null) return BadRequest("Bad data");
 
-            var message = new ForumMessage
-            {
-                BookId = sendMessage.BookId,
-                Text = sendMessage.Text,
-                UserId = sendMessage.UserId,
-                ParrentMessageId = sendMessage.AnswerId,           
-            };
-            
-            await _forum.AddForumMessageAsync(message);
+            int messageId = await _forum.AddForumMessageProcedureAsync(sendMessage);
 
-            await _forum.SaveAsync();
-
-            return Ok(message.MessageId);
+            return Ok(messageId);
         }
 
         [HttpPut]
@@ -95,10 +85,23 @@ namespace AuthorVerseServer.Controllers
 
             if (!await _forum.CheckUserMessageExistAsync(forumMessage.MessageId, forumMessage.UserId))
             {
-                return NotFound("Comment not found or you, are not the author");
+                return NotFound("Comment not found, or you are not the author");
             }
 
+            //if (message.Count > 0)
+            //{
+                //message.ForumMessage.User = null;
+                //message.ForumMessage.UserId = null;
+                //message.ForumMessage.Text = "unknown";
+                //await _forum.SaveAsync();
+
+            await _forum.ChangeParentMessage(forumMessage.MessageId);
             await _forum.DeleteMessageAsync(forumMessage.MessageId);
+            //}
+            //else
+            //{
+            //    await _forum.DeleteMessageAsync(forumMessage.MessageId);
+            //}
 
             return Ok();
         }

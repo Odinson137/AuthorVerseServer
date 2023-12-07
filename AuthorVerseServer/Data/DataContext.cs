@@ -1,8 +1,10 @@
 ﻿using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace AuthorVerseServer.Data
 {
@@ -317,6 +319,26 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.UserId);
             modelBuilder.Entity<UserSelectedBook>()
                 .HasIndex(g => g.BookId);
+        }
+
+        public virtual async Task<int> AddForumMessageAsync(int bookId, string userId, int? parentMessageId, string text)
+        {
+            var messageIdParameter = new SqlParameter("@MessageId", SqlDbType.Int)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            await Database.ExecuteSqlRawAsync(
+                "EXEC AddForumMessage " +
+                "@BookId, @UserId, @ParrentMessageId, @Text, @SendTime, @MessageId OUTPUT",
+                new SqlParameter("@BookId", bookId),
+                new SqlParameter("@UserId", userId),
+                new SqlParameter("@ParrentMessageId", parentMessageId ?? (object)DBNull.Value),
+                new SqlParameter("@Text", text),
+                new SqlParameter("@SendTime", DateTime.Now),
+                messageIdParameter);
+
+            return (int)messageIdParameter.Value;
         }
     }
 }

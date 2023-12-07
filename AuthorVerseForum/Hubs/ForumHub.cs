@@ -5,6 +5,7 @@ using AuthorVerseForum.Services;
 using AuthorVerseForum.Data.Enums;
 using Newtonsoft.Json;
 using AuthorVerseForum.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AuthorVerseForum.Hubs
 {
@@ -14,12 +15,14 @@ namespace AuthorVerseForum.Hubs
         private readonly IDatabase _redis;
         private readonly UncodingJwtoken _jwtoken;
         private readonly HttpClient _client;
+        private readonly ILogger<ForumHub> _logger;
 
-        public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken, HttpClient client)
+        public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken, HttpClient client, ILogger<ForumHub> logger)
         {
             _redis = redisConnection.GetDatabase();
             _jwtoken = jwtoken;
             _client = client;
+            _logger = logger;
         }
 
         private string GetConnectionId()
@@ -48,7 +51,7 @@ namespace AuthorVerseForum.Hubs
         public async Task<(int, ConnecterDTO, UserVerify)> GetConnectionInfoAsync()
         {
             string? connectorJson = await _redis.StringGetAsync(GetConnectionId());
-            Console.WriteLine($"Cinnector: {connectorJson}");
+            _logger.LogInformation($"Connector: {connectorJson}");
 
             if (string.IsNullOrEmpty(connectorJson))
             {
@@ -127,13 +130,13 @@ namespace AuthorVerseForum.Hubs
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine("Сообщение успешно отправлено!");
+                _logger.LogInformation("Сообщение успешно отправлено!");
                 var content = await response.Content.ReadAsStringAsync();
                 return int.Parse(content);
             }
             else
             {
-                Console.WriteLine($"Ошибка: {response.Content}");
+                _logger.LogError($"Ошибка: {response.Content}");
                 return 0;
             }
         }
@@ -144,12 +147,12 @@ namespace AuthorVerseForum.Hubs
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine("Сообщение успешно изменено!");
+                _logger.LogInformation("Сообщение успешно изменено!");
                 return 1;
             }
             else
             {
-                Console.WriteLine($"Ошибка: {response.Content}");
+                _logger.LogError($"Ошибка: {response.Content}");
                 return 0;
             }
         }
@@ -160,12 +163,12 @@ namespace AuthorVerseForum.Hubs
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine("Сообщение успешно удалено!");
+                _logger.LogInformation("Сообщение успешно удалено!");
                 return 1;
             }
             else
             {
-                Console.WriteLine($"Ошибка: {response.Content}");
+                _logger.LogError($"Ошибка: {response.Content}");
                 return 0;
             }
         }
@@ -226,27 +229,24 @@ namespace AuthorVerseForum.Hubs
 
         public async Task AuthorizationConnection(string token, int bookId)
         {
-            Console.WriteLine("Личные данные пользователя:");
-            Console.WriteLine(token);
-            Console.WriteLine(bookId);
-
-            Console.WriteLine("Расшифровка токена:");
-
+            _logger.LogWarning("Личные данные пользователя:");
+            _logger.LogInformation($"Token - {token}");
+            _logger.LogInformation($"Book id - {bookId}");
+            
             string userId = _jwtoken.GetUserId(token); 
-            Console.WriteLine(userId);
 
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token) || bookId <= 0)
             {
+                _logger.LogError("Недостаточно данных для подключения");
                 await DisconnectWithError("Недостаточно данных для подключения");
                 return;
             }
 
             var userJson = await _redis.StringGetAsync($"session:{userId}");
-            Console.Write("Сессия пользователя после авторизации: ");
-            Console.WriteLine(userJson);
 
             if (string.IsNullOrEmpty(userJson))
             {
+                _logger.LogError("Данные пользователя не найдены в сессии.");
                 await DisconnectWithError("Данные пользователя не найдены в сессии.");
                 return;
             }
@@ -263,19 +263,19 @@ namespace AuthorVerseForum.Hubs
             await _redis.StringSetAsync(connectionId, JsonConvert.SerializeObject(connecter));
 
             var count = await _redis.StringIncrementAsync($"forumCount:{bookId}");
-            Console.WriteLine("Count - " + count);
+            _logger.LogInformation("Count - " + count);
             await Clients.Group($"group:{bookId}").SendAsync("UserCountMessage", count);
         }
 
         public override async Task OnConnectedAsync()
         {
-            Console.WriteLine("Подключился новый пользователь!");
+            _logger.LogInformation("Подключился новый пользователь!");
             await base.OnConnectedAsync();
         }
 
         private async Task DisconnectWithError(string errorMessage)
         {
-            Console.WriteLine(errorMessage);
+            _logger.LogError(errorMessage);
             await base.OnDisconnectedAsync(new HubException(errorMessage));
         }
 
@@ -291,7 +291,7 @@ namespace AuthorVerseForum.Hubs
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group:{connector.BookId}");
             }
 
-            Console.WriteLine($"DicConnected");
+            _logger.LogWarning("DicConnected");
 
             await base.OnDisconnectedAsync(exception);
         }
