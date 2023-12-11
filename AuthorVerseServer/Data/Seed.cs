@@ -229,6 +229,39 @@ namespace AuthorVerseServer.Data
 
                 Random random = new Random();
 
+                var firstBook = new Book
+                {
+                    Title = "FirstBook",
+                    NormalizedTitle = "FirstBook".ToUpper(),
+                    Author = admin,
+                    Description = "первая книга для тестов",
+                    AgeRating = AgeRating.All,
+                    Permission = PublicationPermission.Approved,
+                    BookCover = files[0],
+                    Comments = new List<Comment>() 
+                    { 
+                        new Comment
+                        {
+                            Likes = 1,
+                            DisLikes = 0,
+                            Text = "Тестовый комментарий админа",
+                            User = admin,
+                            ReaderRating = 4,
+                            Permission = PublicationPermission.Approved,
+                            CommentRatings = new List<CommentRating>()
+                            {
+                                new CommentRating()
+                                {
+                                    Rating = LikeRating.Like,
+                                    UserCommentedId = admin.Id,
+                                }
+                            }
+                        },
+                    }
+                };
+
+                await context.Books.AddAsync(firstBook);
+
                 int numer = 0;
                 foreach (var book in bookDescriptions)
                 {
@@ -343,7 +376,9 @@ namespace AuthorVerseServer.Data
                         {
                             User = admin,
                             Text = "Это мой первый тестовый коммент, так что не судите строго. Я правда стараюсь, Ярик, пожалуйста, не делай со мной то, что ты делал со мной в прошлый раз. Пожалуйста",
-                            ReaderRating = random.Next(1, 6)
+                            ReaderRating = random.Next(1, 6),
+                            Likes = 1,
+                            DisLikes = 1,
                         });
                         comments.Add(new Comment()
                         {

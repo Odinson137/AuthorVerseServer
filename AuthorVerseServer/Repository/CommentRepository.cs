@@ -61,9 +61,9 @@ namespace AuthorVerseServer.Repository
                     ReaderRating = c.ReaderRating,
                     Likes = c.Likes,
                     DisLikes = c.DisLikes,
-                    IsRated = string.IsNullOrEmpty(userId) ? 
-                        c.CommentRatings.Where(r => r.CommentId == c.BaseId && r.UserCommentedId == userId)
-                        .Select(x => x.Rating).FirstOrDefault() : Data.Enums.LikeRating.NotRated,
+                    IsRated = string.IsNullOrEmpty(userId) ? Data.Enums.LikeRating.NotRated :
+                        c.CommentRatings.Where(r => r.UserCommentedId == userId)
+                        .Select(x => x.Rating).FirstOrDefault(),
                     CreatedDateTime = DateOnly.FromDateTime(c.CreatedDateTime),
                 });
 

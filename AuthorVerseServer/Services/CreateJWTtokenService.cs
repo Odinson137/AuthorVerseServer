@@ -93,7 +93,7 @@ namespace AuthorVerseServer.Services
 
         public virtual string? GetIdFromToken(ClaimsPrincipal user)
         {
-            string? userId = user.Identities.First().Claims.First().Value;
+            string? userId = user.Identities.FirstOrDefault()?.Claims.FirstOrDefault()?.Value;
             return userId;
         }
     }

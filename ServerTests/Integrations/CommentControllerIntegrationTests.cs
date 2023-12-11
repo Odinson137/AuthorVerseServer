@@ -35,11 +35,30 @@ public class CommentControllerIntegrationTests : IClassFixture<WebApplicationFac
         //var requestContent = new StringContent(JsonConvert.SerializeObject(bookDTO), Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _client.PostAsync("/api/Comment?bookId=1&page=1", new StringContent(""));
+        var response = await _client.GetAsync("/api/Comment?bookId=1&page=1");
         var content = await response.Content.ReadAsStringAsync();
-
+        var comments = JsonConvert.DeserializeObject<ICollection<CommentDTO>>(content);
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(comments);
+        Assert.True(comments.First().IsRated == 0);
+    }
+
+    [Fact]
+    public async Task GetBookComments_Authorize_ReturnsOkResult()
+    {
+        // Arrange
+        string jwtToken = _token.GenerateJwtToken("admin");
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+        // Act
+        var response = await _client.GetAsync("/api/Comment?bookId=1&page=1");
+        var content = await response.Content.ReadAsStringAsync();
+        var comments = JsonConvert.DeserializeObject<ICollection<CommentDTO>>(content);
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(comments);
+        Assert.True(comments.First().IsRated != 0);
     }
 
     [Fact]

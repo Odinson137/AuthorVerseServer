@@ -7,7 +7,7 @@ namespace AuthorVerseServer.Models
     {
         [Key]
         public int CommentRatingId { get; set; }
-        public required int CommentId { get; set; }
+        public int CommentId { get; set; }
         public required string UserCommentedId { get; set; }
         public required LikeRating Rating { get; set; }
     }
