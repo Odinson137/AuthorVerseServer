@@ -35,6 +35,16 @@ namespace AuthorVerseServer.Data
                     Email = "buryy132@gmail.com",
                 };
 
+                await userManager.CreateAsync(admin, "Password@123");
+
+                if (!await roleManager.RoleExistsAsync("Admin"))
+                {
+                    var role = new IdentityRole("Admin");
+                    await roleManager.CreateAsync(role);
+                }
+
+                await userManager.AddToRoleAsync(admin, "Admin");
+
                 for (int i = 0; i < 5; i++)
                 {
                     var friend = new User
@@ -124,7 +134,6 @@ namespace AuthorVerseServer.Data
 
                 admin.TargetFriendships.Add(friendship1);
 
-                await userManager.CreateAsync(admin, "Password@123");
 
                 string folderPath = @"./wwwroot/api/images/";
 
@@ -190,13 +199,7 @@ namespace AuthorVerseServer.Data
 
                 await context.AddRangeAsync(tags);
 
-                if (!await roleManager.RoleExistsAsync("Admin"))
-                {
-                    var role = new IdentityRole("Admin");
-                    await roleManager.CreateAsync(role);
-                }
 
-                await userManager.AddToRoleAsync(admin, "Admin");
 
                 Dictionary<string, string> bookDescriptions = new Dictionary<string, string>
                     {

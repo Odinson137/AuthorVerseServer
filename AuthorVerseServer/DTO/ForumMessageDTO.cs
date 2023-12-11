@@ -4,9 +4,13 @@ namespace AuthorVerseServer.DTO
 {
     public class ForumMessageDTO
     {
+        public ForumMessageDTO(string? name, string? lastName, string userName)
+        {
+            ViewName = string.IsNullOrEmpty(name) ? userName : $"{name} {lastName}";
+        }
         public required int MessageId { get; set; }
         public required int? ParrentMessageId { get; set; }
-        public required string ViewName { get; set; }
+        public string ViewName { get; private set; }
         public required string Text { get; set; }
         public required DateTime SendTime { get; set; }
     }

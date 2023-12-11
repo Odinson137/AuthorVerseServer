@@ -286,7 +286,7 @@ public class BooksControllerIntegrationTests : IClassFixture<WebApplicationFacto
 
         // Assert
         var content = await response.Content.ReadAsStringAsync();
-        var books = JsonConvert.DeserializeObject<ICollection<AuthorMinimalBook>>(content);
+        var books = JsonConvert.DeserializeObject<ICollection<MinimalBook>>(content);
 
         Assert.NotNull(books);
         Assert.True(books.Any());
@@ -299,4 +299,63 @@ public class BooksControllerIntegrationTests : IClassFixture<WebApplicationFacto
         }
     }
 
+    [Fact]
+    public async Task GetSimilarBooks_GoodData_ReturnsOkResult()
+    {
+        // Arrange
+        int bookId = 1;
+        // Act
+        var response = await _client.GetAsync($"/api/Book/SimilarBooks?bookId={bookId}");
+
+        // Assert
+        var content = await response.Content.ReadAsStringAsync();
+        var books = JsonConvert.DeserializeObject<ICollection<MinimalBook>>(content);
+
+        Assert.NotNull(books);
+        Assert.True(books.Any());
+        Assert.True(books.Count() > 0);
+
+        foreach (var b in books)
+        {
+            Assert.NotEmpty(b.Title);
+            Assert.True(b.BookId > 0);
+        }
+    }
+
+    public async Task<DetailBookDTO> GetBook(int bookId)
+    {
+        var responseBook = await _client.GetAsync($"/api/Book/{bookId}");
+        var contentBook = await responseBook.Content.ReadAsStringAsync();
+        var book = JsonConvert.DeserializeObject<DetailBookDTO>(contentBook);
+        return book;
+    }
+
+    [Fact]
+    public async Task GetSimilarBooks_OkSimilar_ReturnsOkResult()
+    {
+        // Arrange
+        int bookId = 1;
+        var book = await GetBook(bookId);
+        var bookGenres = book.Genres.Select(x => x.GenreId);
+        var bookTags = book.Tags.Select(x => x.TagId);
+
+        // Act
+        var response = await _client.GetAsync($"/api/Book/SimilarBooks?bookId={bookId}");
+
+        // Assert
+        var content = await response.Content.ReadAsStringAsync();
+        var books = JsonConvert.DeserializeObject<ICollection<MinimalBook>>(content);
+
+        foreach (var similarBook in books)
+        {
+            var checkBook = await GetBook(similarBook.BookId);
+            var checkGenresBook = checkBook.Genres.Select(x => x.GenreId);
+            bool hasCommonGenre = checkGenresBook.Any(similarGenre => bookGenres.Contains(similarGenre));
+            Assert.True(hasCommonGenre, $"No common genre found between the original book and similar book {similarBook.BookId}");
+
+            var checkTagsBook = checkBook.Tags.Select(x => x.TagId);
+            bool hasCommonTag = checkTagsBook.Any(similarTag => bookTags.Contains(similarTag));
+            Assert.True(hasCommonTag, $"No common tag found between the original book and similar book {similarBook.BookId}");
+        }
+    }
 }

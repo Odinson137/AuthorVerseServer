@@ -3,6 +3,8 @@ using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using System;
 
 namespace AuthorVerseServer.Repository
 {
@@ -12,11 +14,6 @@ namespace AuthorVerseServer.Repository
         public ForumMessageRepository(DataContext context)
         {
             _context = context;
-        }
-
-        public async Task AddForumMessageAsync(ForumMessage message)
-        {
-            await _context.ForumMessages.AddAsync(message);
         }
 
         public async Task<int> AddForumMessageProcedureAsync(SendForumMessageDTO message)
@@ -70,12 +67,11 @@ namespace AuthorVerseServer.Repository
                 .Where(x => x.BookId == bookId)
                 .Skip(part * 30)
                 .Take(30)
-                .Select(x => new ForumMessageDTO()
+                .Select(x => new ForumMessageDTO(x.User.Name, x.User.LastName, x.User.UserName)
                 {
                     MessageId = x.MessageId,
                     Text = x.Text,
                     ParrentMessageId = x.ParrentMessageId,
-                    ViewName = string.IsNullOrEmpty(x.User.Name) ? x.User.UserName : $"{x.User.Name} {x.User.LastName}",
                     SendTime = x.SendTime,
                 }).ToArrayAsync();
             return messages;
@@ -84,6 +80,26 @@ namespace AuthorVerseServer.Repository
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public IDbContextTransaction StartTransaction()
+        {
+            return _context.Database.BeginTransaction();
+        }
+
+        public async Task<ICollection<ForumMessageDTO>> GetToParentMessagesAsync(int bookId, int lastMessageId, int parentMessageId)
+        {
+            var messages = _context.ForumMessages
+                    .Where(message => message.MessageId > lastMessageId && message.MessageId <= parentMessageId)
+                    .Select(message => new ForumMessageDTO(message.User.Name, message.User.LastName, message.User.UserName)
+                    { 
+                        MessageId = message.MessageId,
+                        Text = message.Text,
+                        ParrentMessageId = message.ParrentMessageId,
+                        SendTime = message.SendTime,
+                    });
+
+            return await messages.ToListAsync();
         }
     }
 }

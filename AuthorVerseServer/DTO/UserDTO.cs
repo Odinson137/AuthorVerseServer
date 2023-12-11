@@ -10,13 +10,24 @@ namespace AuthorVerseServer.DTO
         public string UserName { get; set; } = null!;
     }
 
+    public class UserViewDTO
+    {
+        public UserViewDTO(string? name, string? lastName, string userName)
+        {
+            ViewName = string.IsNullOrEmpty(name) ? userName : $"{name} {lastName}";
+        }
+        public required string Id { get; set; }
+        public string ViewName { get; private set; }
+        public string? LogoUrl { get; set; }
+    }
+
     public class UserLoginDTO
     {
         [Required(ErrorMessage = "Username is required")]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)(?!.*\s).{8,}$",
             ErrorMessage = "Password must have at least 1 lowercase letter, 1 uppercase letter, 1 digit, 1 special character, and be at least 8 characters long.")]
-        public string Password { get; set; }
+        public required string Password { get; set; }
     }
 
     public class UserRegistrationDTO

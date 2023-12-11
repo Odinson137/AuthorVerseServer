@@ -10,6 +10,5 @@ namespace AuthorVerseServer.Models
         public Book Book { get; set; } = null!;
         [Range(1, 5)]
         public int ReaderRating { get; set; }
-        public ICollection<CommentRating> CommentRatings { get; set; } = new List<CommentRating>();
     }
 }

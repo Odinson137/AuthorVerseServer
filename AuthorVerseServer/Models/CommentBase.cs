@@ -12,7 +12,8 @@ namespace AuthorVerseServer.Models
         public string Text { get; set; } = null!;
         public int Likes { get; set; } = 0;
         public int DisLikes { get; set; } = 0;
+        public ICollection<CommentRating> CommentRatings { get; set; } = new List<CommentRating>();
         public DateTime CreatedDateTime { get; set; } = DateTime.Now;
-        public PublicationPermission Permission { get; set; } = PublicationPermission.PendingApproval;
+        public PublicationPermission Permission { get; set; } = PublicationPermission.Approved;
     }
 }

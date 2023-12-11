@@ -12,12 +12,12 @@ namespace AuthorVerseServer.Controllers
     public class GenreController : ControllerBase
     {
         private readonly IGenre _genre;
-        private readonly IDistributedCache _cache;
+        private readonly IDistributedCache _redis;
 
         public GenreController(IGenre genre, IDistributedCache cache) 
         {
             _genre = genre;
-            _cache = cache;
+            _redis = cache;
         }
 
         [HttpGet]
@@ -25,13 +25,13 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<GenreDTO>>> GetGenre()
         {
-            var genres = await _cache.GetStringAsync("genres");
+            var genres = await _redis.GetStringAsync("genres");
 
             if (genres == null)
             {
                 var genresDb = await _genre.GetGenreAsync();
 
-                await _cache.SetStringAsync("genres", JsonConvert.SerializeObject(genresDb), new DistributedCacheEntryOptions
+                await _redis.SetStringAsync("genres", JsonConvert.SerializeObject(genresDb), new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 });
@@ -51,7 +51,7 @@ namespace AuthorVerseServer.Controllers
             await _genre.AddGenre(name);
             await _genre.Save();
 
-            _cache.Remove("genres");
+            _redis.Remove("genres");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

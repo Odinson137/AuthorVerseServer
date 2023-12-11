@@ -30,6 +30,7 @@ namespace AuthorVerseServer.Data
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<CommentRating> CommentRatings { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
         public DbSet<CommentBase> CommentBases { get; set; }
@@ -164,7 +165,7 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<Comment>()
                 .HasMany(b => b.CommentRatings)
                 .WithOne()
-                .HasForeignKey(b => b.BaseId)
+                .HasForeignKey(b => b.CommentId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -220,9 +221,8 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(m => m.ParrentMessageId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Book>()
-                .HasIndex(g => g.BookId)
-                .IsUnique();
+
+
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.Title);
             modelBuilder.Entity<Book>()
@@ -232,17 +232,6 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.AuthorId);
 
-            modelBuilder.Entity<Genre>()
-                .HasIndex(g => g.GenreId)
-                .IsUnique();
-
-
-            modelBuilder.Entity<Tag>()
-                .HasIndex(g => g.TagId)
-                .IsUnique();
-
-            modelBuilder.Entity<BookChapter>()
-                .HasIndex(g => g.BookChapterId);
             modelBuilder.Entity<BookChapter>()
                 .HasIndex(g => g.BookId);
             modelBuilder.Entity<BookChapter>()
@@ -259,28 +248,27 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.GenreId);
 
             modelBuilder.Entity<ChapterSection>()
-                .HasIndex(g => g.SectionId);
-            modelBuilder.Entity<ChapterSection>()
                 .HasIndex(g => g.BookChapterId);
             modelBuilder.Entity<ChapterSection>()
                 .HasIndex(g => g.Number);
 
             modelBuilder.Entity<Character>()
-                .HasIndex(g => g.CharacterId);
-            modelBuilder.Entity<Character>()
                 .HasIndex(g => g.BookId);
             modelBuilder.Entity<Character>()
                 .HasIndex(g => g.BookChapterId);
 
+
             modelBuilder.Entity<Comment>()
-                .HasIndex(g => g.BaseId)
-                .IsUnique();
-            modelBuilder.Entity<Comment>()
+                .HasIndex(g => g.UserId);            
+            modelBuilder.Entity<Note>()
                 .HasIndex(g => g.UserId);
-            modelBuilder.Entity<Comment>()
-                .HasIndex(g => g.BookId);
-            modelBuilder.Entity<Comment>()
+            modelBuilder.Entity<CommentBase>()
                 .HasIndex(g => g.Permission);
+            modelBuilder.Entity<Comment>()
+                .HasIndex(g => g.BookId);            
+            modelBuilder.Entity<Note>()
+                .HasIndex(g => g.BookChapterid);
+
 
             modelBuilder.Entity<Friendship>()
                 .HasIndex(g => g.User1Id);
@@ -290,31 +278,12 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.Status);
 
             modelBuilder.Entity<MicrosoftUser>()
-                .HasIndex(g => g.Id)
-                .IsUnique();
-            modelBuilder.Entity<MicrosoftUser>()
                 .HasIndex(g => g.AzureName)
                 .IsUnique();
 
-            modelBuilder.Entity<Note>()
-                .HasIndex(g => g.BaseId)
-                .IsUnique();
-            modelBuilder.Entity<Note>()
-                .HasIndex(g => g.UserId);
-            modelBuilder.Entity<Note>()
-                .HasIndex(g => g.BookChapterid);
-            modelBuilder.Entity<Note>()
-                .HasIndex(g => g.CreatedDateTime);
-            modelBuilder.Entity<Note>()
-                .HasIndex(g => g.Permission);
-
-            modelBuilder.Entity<SectionChoice>()
-                .HasIndex(g => g.SectionChoiceId);
             modelBuilder.Entity<SectionChoice>()
                 .HasIndex(g => g.ChapterSectionId);
 
-            modelBuilder.Entity<UserSelectedBook>()
-                .HasIndex(g => g.UserBookId);
             modelBuilder.Entity<UserSelectedBook>()
                 .HasIndex(g => g.UserId);
             modelBuilder.Entity<UserSelectedBook>()

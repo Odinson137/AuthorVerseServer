@@ -1,17 +1,10 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
-using System.Collections.ObjectModel;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -30,13 +23,20 @@ namespace AuthorVerseServer.Controllers
             _jWTtokenService = jWTtokenService;
         }
 
-
+        // can be Authorize
         [HttpGet]
         [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<ICollection<Comment>>> GetBookComments(int bookId)
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ICollection<Comment>>> GetBookComments(int bookId, int page = 1)
         {
-            var comments = await _comment.GetCommentsByBookAsync(bookId);
+            if (--page < 0)
+            {
+                return BadRequest("Bad page");
+            }
+
+            string? userId = _jWTtokenService.GetIdFromToken(this.User);
+
+            var comments = await _comment.GetCommentsByBookAsync(bookId, page, userId);
             return Ok(comments);
         }
 
@@ -55,19 +55,19 @@ namespace AuthorVerseServer.Controllers
             if(user == null)
                 return NotFound("User not found");
 
-            Book? book = await _comment.GetBook(commentDTO.BookId);
-            if (book == null)
+            int bookId = await _comment.ChechExistBookAsync(commentDTO.BookId);
+            if (bookId == 0)
                 return NotFound("Book not found");
 
-            if (await _comment.CheckUserComment(book, user) != null)
+            if (await _comment.CheckExistCommentAsync(bookId, user.Id) == true)
                 return BadRequest("This user alredy made a comment");
 
             Comment newComment = new Comment()
             {
-                User = user,
+                UserId = userId,
                 BookId = commentDTO.BookId,
-                Book = book,
                 Text = commentDTO.Text,
+                ReaderRating = commentDTO.Rating,
             };
 
             await _comment.AddComment(newComment);
@@ -86,11 +86,11 @@ namespace AuthorVerseServer.Controllers
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
 
-            Comment? comment = await _comment.GetCommentAsync(commentId);
-            if (comment == null)
+            var isExist = await _comment.CheckExistCommentAsync(commentId, userId);
+            if (isExist == false)
                 return NotFound("Comment not found");
 
-            await _comment.DeleteComment(comment);
+            await _comment.DeleteComment(commentId);
             if (await _comment.Save() == 0)
                 return BadRequest("Problem with saving");
 
@@ -118,52 +118,6 @@ namespace AuthorVerseServer.Controllers
             {
                 return BadRequest("There are problems with save");
             }
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost("UpRating")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<string>> ChangeUpRating(int commentId)
-        {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
-
-            Comment? comment = await _comment.GetCommentAsync(commentId);
-            if (comment != null)
-                comment.CommentRatings.Add(new CommentRating { BaseId = commentId, Rating = Data.Enums.LikeRating.Like, UserCommentedId = userId });
-            else
-                return NotFound("Comment from this user to this book not found");
-
-            if (await _comment.Save() == 0)
-                return BadRequest("Problem with saving");
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost("DownRating")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<string>> ChangeDownRating(int commentId)
-        {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
-
-            Comment? comment = await _comment.GetCommentAsync(commentId);
-            if (comment != null)
-                comment.CommentRatings.Add(new CommentRating { BaseId = commentId, Rating = Data.Enums.LikeRating.DisLike, UserCommentedId = userId });
-            else
-                return NotFound("Comment from this user to this book not found");
-
-            if (await _comment.Save() == 0)
-                return BadRequest("Problem with saving");
 
             return Ok();
         }

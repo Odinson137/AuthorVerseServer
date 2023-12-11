@@ -24,7 +24,7 @@ namespace AuthorVerseServer.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(notes);//Ок нужен чтобы работал код
+            return Ok(notes);
         }
     }
 }

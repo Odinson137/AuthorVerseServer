@@ -33,6 +33,7 @@ services.AddScoped<IUser, UserRepository>();
 services.AddScoped<ITag, TagRepository>();
 services.AddScoped<IQuote, QuoteRepository>();
 services.AddScoped<IForumMessage, ForumMessageRepository>();
+services.AddScoped<ICommentRating, CommentRatingRepository>();
 
 services.AddScoped<ILoadImage, LoadImageService>();
 services.AddTransient<MailService>();

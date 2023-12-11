@@ -16,12 +16,12 @@ namespace AuthorVerseServer.Controllers
     public class QuoteController : ControllerBase
     {
         private readonly IQuote _quote;
-        private readonly IDatabase _cache;
+        private readonly IDatabase _redis;
         private readonly CreateJWTtokenService _jWTtokenService;
         public QuoteController(IQuote quote, IConnectionMultiplexer redisConnection, CreateJWTtokenService jWTtokenService)
         {
             _quote = quote;
-            _cache = redisConnection.GetDatabase();
+            _redis = redisConnection.GetDatabase();
             _jWTtokenService = jWTtokenService;
         }
 
@@ -34,12 +34,12 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("Zero count");
 
             string key = $"quotes{bookId}-{page}";
-            string? quotesJson = await _cache.StringGetAsync(key);
+            string? quotesJson = await _redis.StringGetAsync(key);
 
             if (string.IsNullOrEmpty(quotesJson))
             {
                 var quotes = await _quote.GetBookQuotesAsync(bookId, page);
-                await _cache.StringSetAsync(key, JsonConvert.SerializeObject(quotes), TimeSpan.FromMinutes(15));
+                await _redis.StringSetAsync(key, JsonConvert.SerializeObject(quotes), TimeSpan.FromMinutes(15));
                 return Ok(quotes);
             }
 

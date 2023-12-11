@@ -213,12 +213,12 @@ namespace AuthorVerseServer.Repository
             return await books.ToListAsync();
         }
 
-        public async Task<ICollection<AuthorMinimalBook>> GetAuthorBooksAsync(string userId)
+        public async Task<ICollection<MinimalBook>> GetAuthorBooksAsync(string userId)
         {
             var books = await _context.Books
                 .AsNoTracking()
                 .Where(book => book.AuthorId == userId)
-                .Select(book => new AuthorMinimalBook() {
+                .Select(book => new MinimalBook() {
                     BookId = book.BookId,
                     Title = book.Title,
                     BookCoverUrl = book.BookCover,
@@ -226,5 +226,47 @@ namespace AuthorVerseServer.Repository
                 .ToListAsync();
             return books;
         }
+
+
+        public async Task<ICollection<MinimalBook>> GetSimilarBooksAsync(int bookId, GenreTagDTO currentBook)
+        {
+            var request = _context.Books
+                .AsNoTracking()
+                .Where(book => book.BookId != bookId)
+                .Where(book => book.Genres.Any(g => currentBook.Genres.Contains(g.GenreId)))
+                .Where(book => book.Tags.Any(t => currentBook.Tags.Contains(t.TagId)))
+                .OrderByDescending(book =>
+                    book.Genres.Count(g => currentBook.Genres.Contains(g.GenreId)) +
+                    book.Tags.Count(t => currentBook.Tags.Contains(t.TagId)))
+                .Take(10)
+                .Select(book => new MinimalBook
+                {
+                    BookId = book.BookId,
+                    BookCoverUrl = book.BookCover,
+                    Title = book.Title
+                });
+
+            return await request.ToListAsync();
+        }
+
+
+        public async Task<bool> ExistBookAsync(int bookId)
+        {
+            return await _context.Books.AnyAsync(book => book.BookId == bookId);
+        }
+
+        public async Task<GenreTagDTO?> GetBookGenresTagsAsync(int bookId)
+        {
+            return await _context.Books
+                .AsNoTracking()
+                .Where(book => book.BookId == bookId)
+                .Select(book => new GenreTagDTO
+                {
+                    Genres = book.Genres.Select(genre => genre.GenreId).ToList(),
+                    Tags = book.Tags.Select(tag => tag.TagId).ToList(),
+                }).FirstOrDefaultAsync();
+        }
+
+
     }
 }

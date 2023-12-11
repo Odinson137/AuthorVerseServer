@@ -7,6 +7,7 @@ using System.Text;
 using AuthorVerseServer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Azure.Core;
 
 namespace Server.Tests.Integrations;
 
@@ -23,6 +24,24 @@ public class CommentControllerIntegrationTests : IClassFixture<WebApplicationFac
         _token = new CreateJWTtokenService(configuration);
     }
 
+
+    [Fact]
+    public async Task GetBookComments_NotAuthorize_ReturnsOkResult()
+    {
+        // Arrange
+        //string jwtToken = _token.GenerateJwtToken("admin");
+        //_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+        //var requestContent = new StringContent(JsonConvert.SerializeObject(bookDTO), Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await _client.PostAsync("/api/Comment?bookId=1&page=1", new StringContent(""));
+        var content = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
     [Fact]
     public async Task CreateComment_CheckModelStateWork_ReturnsBadResult()
     {
@@ -37,7 +56,7 @@ public class CommentControllerIntegrationTests : IClassFixture<WebApplicationFac
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
         var requestContent = new StringContent(JsonConvert.SerializeObject(bookDTO), Encoding.UTF8, "application/json");
-
+        
         // Act
         var response = await _client.PostAsync("/api/Comment/Create", requestContent);
 

@@ -15,14 +15,14 @@ namespace AuthorVerseServer.Controllers
     public class BookController : ControllerBase
     {
         private readonly IBook _book;
-        private readonly IDatabase _cache;
+        private readonly IDatabase _redis;
         private readonly ILoadImage _loadImage;
         private readonly CreateJWTtokenService _jWTtokenService;
 
         public BookController(IBook book, IConnectionMultiplexer redisConnection, ILoadImage loadImage, CreateJWTtokenService jWTtokenService)
         {
             _book = book;
-            _cache = redisConnection.GetDatabase();
+            _redis = redisConnection.GetDatabase();
             _loadImage = loadImage;
             _jWTtokenService = jWTtokenService;
         }
@@ -31,14 +31,14 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<int>> GetBooksCount()
         {
-            if (int.TryParse(await _cache.StringGetAsync("booksCount"), out var cachedValue))
+            if (int.TryParse(await _redis.StringGetAsync("booksCount"), out var cachedValue))
             {
                 return Ok(cachedValue);
             }
 
             int countDb = await _book.GetCountBooks();
 
-            await _cache.StringSetAsync("booksCount", countDb, TimeSpan.FromHours(1));
+            await _redis.StringSetAsync("booksCount", countDb, TimeSpan.FromHours(1));
             return Ok(countDb);
         }
 
@@ -46,13 +46,13 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetPopularBooks()
         {
-            var booksCache = await _cache.StringGetAsync("popularMainBooks");
+            var booksCache = await _redis.StringGetAsync("popularMainBooks");
 
             ICollection<PopularBook>? books;
             if (string.IsNullOrEmpty(booksCache))
             {
                 books = await _book.GetPopularBooks();
-                await _cache.StringSetAsync(
+                await _redis.StringSetAsync(
                     "popularMainBooks", 
                     JsonConvert.SerializeObject(books), 
                     TimeSpan.FromHours(1));
@@ -68,13 +68,13 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<PopularBook>>> GetLastBooks()
         {
-            var booksCache = await _cache.StringGetAsync("lastMainBooks");
+            var booksCache = await _redis.StringGetAsync("lastMainBooks");
 
             ICollection<PopularBook>? books;
             if (string.IsNullOrEmpty(booksCache))
             {
                 books = await _book.GetLastBooks();
-                await _cache.StringSetAsync(
+                await _redis.StringSetAsync(
                     "lastMainBooks", 
                     JsonConvert.SerializeObject(books), 
                     TimeSpan.FromHours(1));
@@ -187,13 +187,13 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<ICollection<MainPopularBook>>> GetMainPopularBooks()
         {
-            var booksCache = await _cache.StringGetAsync("mainPopularBooks");
+            var booksCache = await _redis.StringGetAsync("mainPopularBooks");
 
             ICollection<MainPopularBook>? books;
             if (string.IsNullOrEmpty(booksCache))
             {
                 books = await _book.GetMainPopularBook();
-                await _cache.StringSetAsync(
+                await _redis.StringSetAsync(
                     "mainPopularBooks", 
                     JsonConvert.SerializeObject(books), 
                     TimeSpan.FromHours(1));
@@ -209,7 +209,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("{bookId}")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<ActionResult<DetailBookDTO>> GetBook(int bookId)
         {
             var book = await _book.GetBookById(bookId);
@@ -225,9 +225,24 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("AuthorBooks")]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<ICollection<AuthorMinimalBook>>> GetAuthorBooks(string authorId)
+        public async Task<ActionResult<ICollection<MinimalBook>>> GetAuthorBooks(string authorId)
         {
             var books = await _book.GetAuthorBooksAsync(authorId);
+            return Ok(books);
+        }
+
+        [HttpGet("SimilarBooks")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<ICollection<MinimalBook>>> GetSimilarBookd(int bookId)
+        {
+            var book = await _book.GetBookGenresTagsAsync(bookId);
+            if (book == null)
+            {
+                return NotFound("Book not found");
+            }
+
+            var books = await _book.GetSimilarBooksAsync(bookId, book);
             return Ok(books);
         }
     }

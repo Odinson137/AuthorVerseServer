@@ -1,8 +1,4 @@
-﻿using AuthorVerseServer.Data.Enums;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-
-namespace AuthorVerseServer.Models
+﻿namespace AuthorVerseServer.Models
 {
     public class Note : CommentBase
     {

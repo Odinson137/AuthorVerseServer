@@ -16,14 +16,9 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<Comment?> CheckUserComment(Book book, User user)
+        public async Task<int> ChechExistBookAsync(int bookId)
         {
-            return await _context.Comments.Where(x => x.Book == book && x.User == user).FirstOrDefaultAsync();
-        }
-
-        public async Task<Book?> GetBook(int bookId)
-        {
-            return await _context.Books.FirstOrDefaultAsync(x => x.BookId == bookId);
+            return await _context.Books.Where(x => x.BookId == bookId).Select(x => x.BookId).FirstOrDefaultAsync();
         }
 
         public async Task AddComment(Comment newComment)
@@ -31,9 +26,9 @@ namespace AuthorVerseServer.Repository
             await _context.Comments.AddAsync(newComment);
         }
 
-        public async Task DeleteComment(Comment commentToRemove)
+        public async Task DeleteComment(int commentId)
         {
-            _context.Comments.Remove(commentToRemove);
+            await _context.Comments.Where(c => c.BaseId == commentId).ExecuteDeleteAsync();
         }
 
         public async Task<Comment?> GetCommentAsync(int commentId)
@@ -46,9 +41,38 @@ namespace AuthorVerseServer.Repository
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<Comment>> GetCommentsByBookAsync(int bookId)
+        public async Task<ICollection<CommentDTO>> GetCommentsByBookAsync(int bookId, int page, string? userId)
         {
-            return await _context.Comments.AsNoTracking().Where(c => c.BookId == bookId).ToListAsync();
+            var comments = _context.Comments
+                .AsNoTracking()
+                .OrderByDescending(c => c.BaseId)
+                .Where(c => c.BookId == bookId)
+                .Skip(page * 5)
+                .Take(5)
+                .Select(c => new CommentDTO
+                {
+                    BaseId = c.BaseId,
+                    User = new UserViewDTO(c.User.Name, c.User.LastName, c.User.UserName)
+                    {
+                        Id = c.UserId,
+                        LogoUrl = c.User.LogoUrl
+                    },
+                    Text = c.Text,
+                    ReaderRating = c.ReaderRating,
+                    Likes = c.Likes,
+                    DisLikes = c.DisLikes,
+                    IsRated = string.IsNullOrEmpty(userId) ? 
+                        c.CommentRatings.Where(r => r.CommentId == c.BaseId && r.UserCommentedId == userId)
+                        .Select(x => x.Rating).FirstOrDefault() : Data.Enums.LikeRating.NotRated,
+                    CreatedDateTime = DateOnly.FromDateTime(c.CreatedDateTime),
+                });
+
+            return await comments.ToListAsync();
+        }
+
+        public async Task<bool> CheckExistCommentAsync(int commentId, string userId)
+        {
+            return await _context.Comments.Where(x => x.BaseId == commentId & x.UserId == userId).AnyAsync();
         }
     }
 }

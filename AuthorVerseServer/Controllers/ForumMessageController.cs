@@ -33,6 +33,15 @@ namespace AuthorVerseServer.Controllers
             return Ok(messages);
         }
 
+        [HttpGet("GetToParent")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<ICollection<ForumMessageDTO>>> GetToParentMessages(int bookId, int lastMessageId, int parentMessageId)
+        {
+            var messages = await _forum.GetToParentMessagesAsync(bookId, lastMessageId, parentMessageId);
+            return Ok(messages);
+        }
+
 
         [HttpPost]
         [ProducesResponseType(200)]
@@ -88,20 +97,11 @@ namespace AuthorVerseServer.Controllers
                 return NotFound("Comment not found, or you are not the author");
             }
 
-            //if (message.Count > 0)
-            //{
-                //message.ForumMessage.User = null;
-                //message.ForumMessage.UserId = null;
-                //message.ForumMessage.Text = "unknown";
-                //await _forum.SaveAsync();
-
-            await _forum.ChangeParentMessage(forumMessage.MessageId);
-            await _forum.DeleteMessageAsync(forumMessage.MessageId);
-            //}
-            //else
-            //{
-            //    await _forum.DeleteMessageAsync(forumMessage.MessageId);
-            //}
+            using (var transaction = _forum.StartTransaction())
+            {
+                await _forum.ChangeParentMessage(forumMessage.MessageId);
+                await _forum.DeleteMessageAsync(forumMessage.MessageId);
+            }
 
             return Ok();
         }

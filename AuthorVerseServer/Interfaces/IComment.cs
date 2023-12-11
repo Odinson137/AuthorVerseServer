@@ -4,12 +4,12 @@ using AuthorVerseServer.Models;
 
 public interface IComment
 {
-    Task<ICollection<Comment>> GetCommentsByBookAsync(int bookId);
+    Task<ICollection<CommentDTO>> GetCommentsByBookAsync(int bookId, int page, string? userId);
     Task<Comment?> GetCommentAsync(int commentId);
-    Task<Book?> GetBook(int bookId);
-    Task<Comment?> CheckUserComment(Book book, User user);
+    Task<bool> CheckExistCommentAsync(int commentId, string userId);
+    Task<int> ChechExistBookAsync(int bookId);
     Task AddComment(Comment newComment);
-    Task DeleteComment(Comment commentToRemove);
+    Task DeleteComment(int commentId);
     Task<int> Save();
 }
 

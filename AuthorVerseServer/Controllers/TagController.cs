@@ -11,12 +11,12 @@ namespace AuthorVerseServer.Controllers
     public class TagController : ControllerBase
     {
         private readonly ITag _tag;
-        private readonly IDistributedCache _cache;
+        private readonly IDistributedCache _redis;
 
         public TagController(ITag tag, IDistributedCache cache)
         {
             _tag = tag;
-            _cache = cache;
+            _redis = cache;
         }
 
         [HttpGet]
@@ -24,13 +24,13 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<TagDTO>>> GetTag()
         {
-            var tags = await _cache.GetStringAsync("tags");
+            var tags = await _redis.GetStringAsync("tags");
 
             if (tags == null)
             {
                 var tagsDb = await _tag.GetTagAsync();
 
-                await _cache.SetStringAsync("tags", JsonConvert.SerializeObject(tagsDb), new DistributedCacheEntryOptions
+                await _redis.SetStringAsync("tags", JsonConvert.SerializeObject(tagsDb), new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 });
@@ -50,7 +50,7 @@ namespace AuthorVerseServer.Controllers
             await _tag.AddTag(name);
             await _tag.Save();
 
-            _cache.Remove("tags");
+            _redis.Remove("tags");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

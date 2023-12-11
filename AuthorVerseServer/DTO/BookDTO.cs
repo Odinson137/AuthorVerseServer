@@ -65,6 +65,12 @@ namespace AuthorVerseServer.DTO
         public string? BookCoverUrl { get; set; }
     }
 
+    public class GenreTagDTO
+    {
+        public ICollection<int> Genres { get; set; } = null!;
+        public ICollection<int> Tags { get; set; } = null!;
+    }
+
     public class MainPopularBook
     {
         public int BookId { get; set; }
@@ -80,7 +86,7 @@ namespace AuthorVerseServer.DTO
         public DateTime PublicationData { get; set; }
     }
 
-    public class AuthorMinimalBook
+    public class MinimalBook
     {
         public int BookId { get; set; }
         public string Title { get; set; } = null!;
