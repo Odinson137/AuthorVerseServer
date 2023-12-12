@@ -10,7 +10,7 @@ namespace AuthorVerseServer.DTO
         }
         public required int MessageId { get; set; }
         public required int? ParrentMessageId { get; set; }
-        public string ViewName { get; private set; }
+        public string ViewName { get; set; }
         public required string Text { get; set; }
         public required DateTime SendTime { get; set; }
     }

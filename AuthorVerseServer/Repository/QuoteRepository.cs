@@ -22,31 +22,31 @@ namespace AuthorVerseServer.Repository
 
         public async Task DeleteBookQuoteAsync(int deleteQuoteId)
         {
-            await _context.BookQuotes.Where(quote => quote.BookQuotesId == deleteQuoteId).ExecuteDeleteAsync();
+            await _context.BookQuotes.Where(quote => quote.BaseId == deleteQuoteId).ExecuteDeleteAsync();
         }
 
         public async Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page)
         {
             var quotes = await _context.BookQuotes
                 .AsNoTracking()
-                .OrderByDescending(book => book.Likes)
+                .OrderByDescending(book => book.BaseId)
                 .Where(quote => quote.BookId == bookId)
                 .Skip(5 * page)
                 .Take(5)
                 .Select(quote => new QuoteDTO
                 {
-                    QuoteId = quote.BookQuotesId,
+                    QuoteId = quote.BaseId,
                     Text = quote.Text,
-                    Quoter = new UserDTO
+                    User = new UserDTO
                     {
-                        Id = quote.QuoterId,
-                        UserName = quote.Quoter.UserName
+                        Id = quote.UserId,
+                        UserName = quote.User.UserName
                     },
-                    LikeCount = quote.QuoteRatings.Count(x => x.Rating == Data.Enums.LikeRating.Like),
-                    DisLikesCount = quote.QuoteRatings.Count(x => x.Rating == Data.Enums.LikeRating.DisLike),
+                    LikeCount = quote.CommentRatings.Count(x => x.LikeRating == Data.Enums.LikeRating.Like),
+                    DisLikesCount = quote.CommentRatings.Count(x => x.LikeRating == Data.Enums.LikeRating.DisLike),
                     //LikeCount = quote.Likes,
                     //DisLikesCount = quote.DisLikes,
-                    QuoteCreatedDateTime = DateOnly.FromDateTime(quote.QuoteCreatedDateTime)
+                    QuoteCreatedDateTime = DateOnly.FromDateTime(quote.CreatedDateTime)
                 }).ToListAsync();
 
             return quotes;

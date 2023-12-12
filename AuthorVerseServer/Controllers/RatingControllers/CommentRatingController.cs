@@ -15,7 +15,5 @@ namespace AuthorVerseServer.Controllers.BaseRating
         {
 
         }
-
-
     }
 }

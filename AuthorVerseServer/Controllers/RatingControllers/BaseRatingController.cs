@@ -47,7 +47,7 @@ namespace AuthorVerseServer.Controllers.BaseRating
             }
             else if (rating == Data.Enums.LikeRating.DisLike)
             {
-                await _rating.ChangeRatingAsync(commentId, Data.Enums.LikeRating.Like);
+                await _rating.ChangeRatingAsync(commentId, entityType, Data.Enums.LikeRating.Like);
                 //_rating.ChangeCountRating(commentId, -1, 1);
             }
             else
@@ -85,7 +85,7 @@ namespace AuthorVerseServer.Controllers.BaseRating
             }
             else if (rating == Data.Enums.LikeRating.Like)
             {
-                await _rating.ChangeRatingAsync(commentId, Data.Enums.LikeRating.DisLike);
+                await _rating.ChangeRatingAsync(commentId, entityType, Data.Enums.LikeRating.DisLike);
                 //_rating.ChangeCountRating(commentId, 1, -1);
             }
             else

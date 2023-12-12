@@ -32,7 +32,7 @@ public class QuoteControllerIntegrationTests : IClassFixture<WebApplicationFacto
     public async Task GetBookQuotes_GetFullPageOfQuotes_ReturnsOkResult()
     {
         // Arrange
-        int bookId = 1;
+        int bookId = 2;
 
         var redisConnection = _factory.Services.GetRequiredService<IConnectionMultiplexer>();
         var redisDatabase = redisConnection.GetDatabase();
@@ -52,7 +52,7 @@ public class QuoteControllerIntegrationTests : IClassFixture<WebApplicationFacto
         foreach (var book in quotes)
         {
             Assert.False(string.IsNullOrEmpty(book.Text));
-            Assert.False(string.IsNullOrEmpty(book.Quoter.Id));
+            Assert.False(string.IsNullOrEmpty(book.User.Id));
             Assert.True(book.QuoteCreatedDateTime != DateOnly.MinValue, "Error date");
         }
     }

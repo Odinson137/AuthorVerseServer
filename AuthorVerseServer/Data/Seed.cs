@@ -242,8 +242,8 @@ namespace AuthorVerseServer.Data
                     { 
                         new Comment
                         {
-                            Likes = 1,
-                            DisLikes = 0,
+                            //Likes = 1,
+                            //DisLikes = 0,
                             Text = "Тестовый комментарий админа",
                             User = admin,
                             ReaderRating = 4,
@@ -258,8 +258,21 @@ namespace AuthorVerseServer.Data
                                 }
                             }
                         },
-                    }
+                    },
                 };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var genre = genres[random.Next(0, 16)];
+                    firstBook.Genres.Add(genre);
+                }
+
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var tag = tags[random.Next(0, 9)];
+                    firstBook.Tags.Add(tag);
+                }
 
                 await context.Books.AddAsync(firstBook);
 
@@ -378,8 +391,8 @@ namespace AuthorVerseServer.Data
                             User = admin,
                             Text = "Это мой первый тестовый коммент, так что не судите строго. Я правда стараюсь, Ярик, пожалуйста, не делай со мной то, что ты делал со мной в прошлый раз. Пожалуйста",
                             ReaderRating = random.Next(1, 6),
-                            Likes = 1,
-                            DisLikes = 1,
+                            //Likes = 1,
+                            //DisLikes = 1,
                         });
                         comments.Add(new Comment()
                         {
@@ -428,32 +441,32 @@ namespace AuthorVerseServer.Data
                         BookQuotes = new List<BookQuote> { 
                             new BookQuote
                             {
-                                Quoter = admin,
+                                User = admin,
                                 Text = "Огонь не тот, кто ярко пляшет, а тот, кто всё уничтожает"
                             },
                             new BookQuote
                             {
-                                Quoter = admin,
+                                User = admin,
                                 Text = "Я не дорожу вашим мнением, оно вращается в туалете семенем"
                             },
                             new BookQuote
                             {
-                                Quoter = admin,
+                                User = admin,
                                 Text = "Огонь не тот, кто ярко пляшет, а тот, кто всё уничтожает"
                             },
                             new BookQuote
                             {
-                                Quoter = admin,
+                                User = admin,
                                 Text = "Я не дорожу вашим мнением, оно вращается в туалете семенем"
                             },
                             new BookQuote
                             {
-                                Quoter = admin,
+                                User = admin,
                                 Text = "Огонь не тот, кто ярко пляшет, а тот, кто всё уничтожает"
                             },
                             new BookQuote
                             {
-                                Quoter = admin,
+                                User = admin,
                                 Text = "Я не дорожу вашим мнением, оно вращается в туалете семенем"
                             },
                         }

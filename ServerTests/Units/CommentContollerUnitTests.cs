@@ -140,7 +140,7 @@ public class CommentContollerUnitTests
 
         mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<int>()));
 
-        mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
+        mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
 
         // Act
         var result = await controller.DeleteComment(1);

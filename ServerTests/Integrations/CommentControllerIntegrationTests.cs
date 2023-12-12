@@ -93,6 +93,7 @@ public class CommentControllerIntegrationTests : IClassFixture<WebApplicationFac
         {
             BookId = random.Next(1, 1000),
             Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием, длинна которого должна быть ",
+            Rating = 4,
         };
 
         // Act
@@ -103,7 +104,7 @@ public class CommentControllerIntegrationTests : IClassFixture<WebApplicationFac
 
         // Act
         var response = await _client.PostAsync("/api/Comment/Create", requestContent);
-
+        var context = await response.Content.ReadAsStringAsync();
         // Assert
         response.EnsureSuccessStatusCode();
     }

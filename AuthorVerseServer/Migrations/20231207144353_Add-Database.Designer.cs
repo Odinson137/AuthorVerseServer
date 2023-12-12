@@ -141,11 +141,11 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookQuote", b =>
                 {
-                    b.Property<int>("BookQuotesId")
+                    b.Property<int>("BaseId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookQuotesId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BaseId"));
 
                     b.Property<int>("BookId")
                         .HasColumnType("int");
@@ -159,7 +159,7 @@ namespace AuthorVerseServer.Migrations
                     b.Property<int>("Permission")
                         .HasColumnType("int");
 
-                    b.Property<string>("QuoterId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Text")
@@ -167,11 +167,11 @@ namespace AuthorVerseServer.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.HasKey("BookQuotesId");
+                    b.HasKey("BaseId");
 
                     b.HasIndex("BookId");
 
-                    b.HasIndex("QuoterId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("BookQuotes");
                 });
@@ -442,7 +442,7 @@ namespace AuthorVerseServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuoteRatingId"));
 
-                    b.Property<int?>("BookQuotesId")
+                    b.Property<int?>("BaseId")
                         .HasColumnType("int");
 
                     b.Property<int>("QuoteId")
@@ -457,7 +457,7 @@ namespace AuthorVerseServer.Migrations
 
                     b.HasKey("QuoteRatingId");
 
-                    b.HasIndex("BookQuotesId");
+                    b.HasIndex("BaseId");
 
                     b.ToTable("QuoteRating");
                 });
@@ -875,13 +875,13 @@ namespace AuthorVerseServer.Migrations
                         .WithMany("BookQuotes")
                         .HasForeignKey("BookId");
 
-                    b.HasOne("AuthorVerseServer.Models.User", "Quoter")
+                    b.HasOne("AuthorVerseServer.Models.User", "User")
                         .WithMany("BookQuotes")
-                        .HasForeignKey("QuoterId");
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Book");
 
-                    b.Navigation("Quoter");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookTag", b =>
@@ -991,8 +991,8 @@ namespace AuthorVerseServer.Migrations
             modelBuilder.Entity("AuthorVerseServer.Models.QuoteRating", b =>
                 {
                     b.HasOne("AuthorVerseServer.Models.BookQuote", null)
-                        .WithMany("QuoteRatings")
-                        .HasForeignKey("BookQuotesId");
+                        .WithMany("CommentRatings")
+                        .HasForeignKey("BaseId");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.SectionChoice", b =>
@@ -1149,7 +1149,7 @@ namespace AuthorVerseServer.Migrations
 
             modelBuilder.Entity("AuthorVerseServer.Models.BookQuote", b =>
                 {
-                    b.Navigation("QuoteRatings");
+                    b.Navigation("CommentRatings");
                 });
 
             modelBuilder.Entity("AuthorVerseServer.Models.ChapterSection", b =>

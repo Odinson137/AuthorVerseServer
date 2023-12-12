@@ -67,6 +67,10 @@ namespace AuthorVerseServer.Data
                         });
             });
 
+            //modelBuilder.Entity<BookQuote>().ToTable("BookQuotes");
+            //modelBuilder.Entity<Note>().ToTable("Notes");
+            //modelBuilder.Entity<Comment>().ToTable("Comments");
+            modelBuilder.Entity<CommentBase>().UseTphMappingStrategy();
 
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
 
