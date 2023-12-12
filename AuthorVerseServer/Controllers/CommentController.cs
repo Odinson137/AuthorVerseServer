@@ -27,7 +27,7 @@ namespace AuthorVerseServer.Controllers
         [HttpGet]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<Comment>>> GetBookComments(int bookId, int page = 1)
+        public async Task<ActionResult<ICollection<CommentDTO>>> GetBookWithAuthorComments(int bookId, int page = 1)
         {
             if (--page < 0)
             {
@@ -52,7 +52,7 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("Token user is not correct");
 
             User? user = await _userManager.FindByIdAsync(userId);
-            if(user == null)
+            if (user == null)
                 return NotFound("User not found");
 
             int bookId = await _comment.ChechExistBookAsync(commentDTO.BookId);

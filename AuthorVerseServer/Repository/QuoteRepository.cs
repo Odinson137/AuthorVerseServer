@@ -42,8 +42,10 @@ namespace AuthorVerseServer.Repository
                         Id = quote.QuoterId,
                         UserName = quote.Quoter.UserName
                     },
-                    LikeCount = quote.Likes,
-                    DisLikesCount = quote.DisLikes,
+                    LikeCount = quote.QuoteRatings.Count(x => x.Rating == Data.Enums.LikeRating.Like),
+                    DisLikesCount = quote.QuoteRatings.Count(x => x.Rating == Data.Enums.LikeRating.DisLike),
+                    //LikeCount = quote.Likes,
+                    //DisLikesCount = quote.DisLikes,
                     QuoteCreatedDateTime = DateOnly.FromDateTime(quote.QuoteCreatedDateTime)
                 }).ToListAsync();
 

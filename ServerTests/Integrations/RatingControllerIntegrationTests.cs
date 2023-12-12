@@ -10,10 +10,10 @@ using System.Net.Http.Json;
 
 namespace ServerTests.Integrations
 {
-    public class CommentRatingControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+    public class RatingControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
-        public CommentRatingControllerIntegrationTests(WebApplicationFactory<Program> factory)
+        public RatingControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
             _client = factory.CreateClient();
 

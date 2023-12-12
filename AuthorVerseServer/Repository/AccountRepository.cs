@@ -84,46 +84,6 @@ namespace AuthorVerseServer.Repository
                 });
         }
 
-        private IQueryable<CommentProfileDTO> GetQueryForSearchComments(string searchComment)
-        {
-            return _context.CommentBases
-                .GroupJoin(
-                    _context.Notes,
-                    commentBase => commentBase.BaseId,
-                    note => note.BaseId,
-                    (commentBase, noteGroup) => new { commentBase, noteGroup }
-                )
-                .SelectMany(
-                    combined => combined.noteGroup.DefaultIfEmpty(),
-                    (combined, note) => new { combined.commentBase, note }
-                )
-                .GroupJoin(
-                    _context.Comments,
-                    combined => combined.commentBase.BaseId,
-                    comment => comment.BaseId,
-                    (combined, commentGroup) => new { combined.commentBase, combined.note, commentGroup }
-                )
-                .SelectMany(
-                    combined => combined.commentGroup.DefaultIfEmpty(),
-                    (combined, comment) => new { combined.commentBase, combined.note, comment }
-                )
-                .Where(x => x.commentBase.Text.Contains(searchComment))
-                .OrderByDescending(x => x.commentBase.CreatedDateTime)
-                .Select(dto => new CommentProfileDTO
-                {
-                    BaseId = dto.commentBase.BaseId,
-                    Text = dto.commentBase.Text,
-                    Rating = dto.comment != null ? dto.comment.ReaderRating : 0,
-                    Likes = dto.commentBase.Likes,
-                    DisLikes = dto.commentBase.DisLikes,
-                    CommentType = dto.note != null ? CommentType.Chapter : CommentType.Book,
-                    BookTitle = dto.comment != null ? dto.comment.Book.Title : dto.note.BookChapter.Book.Title,
-                    ChapterNumber = dto.note != null ? dto.note.BookChapter.BookChapterNumber : 0,
-                    ChapterTitle = dto.note != null ? dto.note.BookChapter.Title : "",
-                    CreatedDateTime = DateOnly.FromDateTime(dto.commentBase.CreatedDateTime)
-                });
-        }
-
         private IQueryable<CommentProfileDTO> GetQueryForDefaultComments()
         {
             return _context.CommentBases

@@ -248,12 +248,13 @@ namespace AuthorVerseServer.Data
                             User = admin,
                             ReaderRating = 4,
                             Permission = PublicationPermission.Approved,
-                            CommentRatings = new List<CommentRating>()
+                            CommentRatings = new List<Rating>()
                             {
-                                new CommentRating()
+                                new Rating()
                                 {
-                                    Rating = LikeRating.Like,
+                                    LikeRating = LikeRating.Like,
                                     UserCommentedId = admin.Id,
+                                    Discriminator = RatingEntityType.Comment,
                                 }
                             }
                         },

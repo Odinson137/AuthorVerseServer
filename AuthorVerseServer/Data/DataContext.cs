@@ -30,7 +30,7 @@ namespace AuthorVerseServer.Data
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Tag> Tags { get; set; }
-        public DbSet<CommentRating> CommentRatings { get; set; }
+        public DbSet<Rating> CommentRatings { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Note> Notes { get; set; }
         public DbSet<CommentBase> CommentBases { get; set; }
@@ -178,8 +178,8 @@ namespace AuthorVerseServer.Data
 
             modelBuilder.Entity<User>()
                 .HasMany(c => c.BookQuotes)
-                .WithOne(c => c.Quoter)
-                .HasForeignKey(c => c.QuoterId)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
                 .IsRequired(false);
 
             modelBuilder.Entity<BookChapter>()

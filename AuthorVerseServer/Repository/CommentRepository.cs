@@ -2,9 +2,7 @@
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace AuthorVerseServer.Repository
 {
@@ -59,11 +57,13 @@ namespace AuthorVerseServer.Repository
                     },
                     Text = c.Text,
                     ReaderRating = c.ReaderRating,
-                    Likes = c.Likes,
-                    DisLikes = c.DisLikes,
+                    Likes = c.CommentRatings.Count(x => x.LikeRating == Data.Enums.LikeRating.Like),
+                    DisLikes = c.CommentRatings.Count(x => x.LikeRating == Data.Enums.LikeRating.DisLike),
+                    //Likes = c.Likes,
+                    //DisLikes = c.DisLikes,
                     IsRated = string.IsNullOrEmpty(userId) ? Data.Enums.LikeRating.NotRated :
                         c.CommentRatings.Where(r => r.UserCommentedId == userId)
-                        .Select(x => x.Rating).FirstOrDefault(),
+                        .Select(x => x.LikeRating).FirstOrDefault(),
                     CreatedDateTime = DateOnly.FromDateTime(c.CreatedDateTime),
                 });
 

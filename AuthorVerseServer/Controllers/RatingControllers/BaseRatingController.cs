@@ -1,30 +1,27 @@
 ﻿using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pipelines.Sockets.Unofficial.Arenas;
-using System.ComponentModel.Design;
-using System.Xml.Linq;
 
-namespace AuthorVerseServer.Controllers
+namespace AuthorVerseServer.Controllers.BaseRating
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CommentRatingController : ControllerBase
+    public abstract class BaseRatingController : ControllerBase
     {
         private readonly ICommentRating _rating;
         private readonly CreateJWTtokenService _jWTtokenService;
-        public CommentRatingController(ICommentRating rating, CreateJWTtokenService jWTtokenService)
+        private readonly Data.Enums.RatingEntityType entityType;
+        public BaseRatingController(ICommentRating rating, 
+            CreateJWTtokenService jWTtokenService, 
+            Data.Enums.RatingEntityType entityType)
         {
             _rating = rating;
             _jWTtokenService = jWTtokenService;
+            this.entityType = entityType;
         }
 
         [HttpPost("Up")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> ChangeUpRating(int commentId)
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -35,22 +32,23 @@ namespace AuthorVerseServer.Controllers
 
             if (rating == Data.Enums.LikeRating.NotRated)
             {
-                var commentRating = new CommentRating
+                var commentRating = new Rating
                 {
                     CommentId = commentId,
-                    Rating = Data.Enums.LikeRating.Like,
-                    UserCommentedId = userId
+                    LikeRating = Data.Enums.LikeRating.Like,
+                    UserCommentedId = userId,
+                    Discriminator = entityType,
                 };
                 await _rating.AddRatingAsync(commentRating);
 
                 await _rating.SaveAsync();
 
-                _rating.ChangeCountRating(commentId, 0, 1);
+                //_rating.ChangeCountRating(commentId, 0, 1);
             }
             else if (rating == Data.Enums.LikeRating.DisLike)
             {
                 await _rating.ChangeRatingAsync(commentId, Data.Enums.LikeRating.Like);
-                _rating.ChangeCountRating(commentId, -1, 1);
+                //_rating.ChangeCountRating(commentId, -1, 1);
             }
             else
             {
@@ -62,7 +60,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpPost("Down")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<string>> ChangeDownRating(int commentId)
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -74,20 +72,21 @@ namespace AuthorVerseServer.Controllers
             if (rating == Data.Enums.LikeRating.NotRated)
             {
                 await _rating.AddRatingAsync(
-                    new CommentRating
+                    new Rating
                     {
                         CommentId = commentId,
-                        Rating = Data.Enums.LikeRating.DisLike,
-                        UserCommentedId = userId
+                        LikeRating = Data.Enums.LikeRating.DisLike,
+                        UserCommentedId = userId,
+                        Discriminator = entityType,
                     });
 
                 await _rating.SaveAsync();
-                _rating.ChangeCountRating(commentId, 1, 0);
+                //_rating.ChangeCountRating(commentId, 1, 0);
             }
             else if (rating == Data.Enums.LikeRating.Like)
             {
                 await _rating.ChangeRatingAsync(commentId, Data.Enums.LikeRating.DisLike);
-                _rating.ChangeCountRating(commentId, 1, -1);
+                //_rating.ChangeCountRating(commentId, 1, -1);
             }
             else
             {
@@ -99,7 +98,7 @@ namespace AuthorVerseServer.Controllers
 
         [HttpDelete("Delete")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<string>> DeleteRating(int commentId)
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
@@ -113,19 +112,18 @@ namespace AuthorVerseServer.Controllers
                 return NotFound("Comment not found");
             }
 
-            await _rating.DeleteRatingAsync(commentId);
-            Change(commentId, rating);
-
+            await _rating.DeleteRatingAsync(commentId, entityType);
+            //Change(commentId, rating);
 
             return Ok();
         }
 
-        private void Change(int commentId, Data.Enums.LikeRating rating)
-        {
-            if (rating == Data.Enums.LikeRating.Like)
-                _rating.ChangeCountRating(commentId, 0, -1);
-            else if (rating == Data.Enums.LikeRating.DisLike)
-                _rating.ChangeCountRating(commentId, -1, 0);
-        }
+        //private void Change(int commentId, Data.Enums.LikeRating rating)
+        //{
+        //    if (rating == Data.Enums.LikeRating.Like)
+        //        _rating.ChangeCountRating(commentId, entityType, 0, -1);
+        //    else if (rating == Data.Enums.LikeRating.DisLike)
+        //        _rating.ChangeCountRating(commentId, entityType, -1, 0);
+        //}
     }
 }

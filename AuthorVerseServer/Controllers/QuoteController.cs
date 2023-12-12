@@ -61,13 +61,13 @@ namespace AuthorVerseServer.Controllers
             {
                 Text = text,
                 BookId = bookId,
-                QuoterId = userId,
+                UserId = userId,
             };
 
             await _quote.AddBookQuoteAsync(quote);
             await _quote.SaveAsync();
 
-            return Ok(quote.BookQuotesId);
+            return Ok(quote.BaseId);
         }
 
         [Authorize]
