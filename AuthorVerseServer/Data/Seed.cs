@@ -274,7 +274,34 @@ namespace AuthorVerseServer.Data
                     firstBook.Tags.Add(tag);
                 }
 
+                firstBook.BookChapters = new List<BookChapter>()
+                {
+                    new BookChapter
+                    {
+                        Characters = new List<Character>
+                        {
+                            new Character
+                            {
+                                Book = firstBook,
+                                Description = "Тут такой борзый пацанчик",
+                            }
+                        },
+                        BookChapterNumber = 1,
+                        Title = "Перерождение",
+                        Description = "ЧТо я вижу, что я знаю"
+                    }
+                };
+
+                var selectedBook = new UserSelectedBook()
+                {
+                    BookState = BookState.Reading,
+                    Book = firstBook,
+                    User = admin,
+                    LastBookChapterNumber = firstBook.BookChapters.First().BookChapterNumber,
+                };
+
                 await context.Books.AddAsync(firstBook);
+                await context.UserSelectedBooks.AddAsync(selectedBook);
 
                 int numer = 0;
                 foreach (var book in bookDescriptions)

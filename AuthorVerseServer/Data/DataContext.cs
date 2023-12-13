@@ -159,6 +159,13 @@ namespace AuthorVerseServer.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //modelBuilder.Entity<UserSelectedBook>()
+            //    .HasOne(b => b.LastBookChapter)
+            //    .WithOne()
+            //    .HasForeignKey(b => b.)
+            //    .IsRequired(false)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.Characters)
                 .WithOne(b => b.Book)
@@ -225,7 +232,7 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(m => m.ParrentMessageId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-
+            //modelBuilder.Entity<Use>
 
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.Title);
