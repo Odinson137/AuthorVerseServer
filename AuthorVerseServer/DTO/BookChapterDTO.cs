@@ -26,4 +26,13 @@
         public string? Description { get; set; }
         public ICollection<CharacterDTO>? Characters { get; set; }
     }
+
+    public class NotifyChapter
+    {
+        public required int BookId { get; set; }
+        public required string BookTitle { get; set; }
+        public required int ChapterNumber { get; set; }
+        public string? ChapterTitle { get; set; }
+        public string? Url { get; set; }
+    }
 }

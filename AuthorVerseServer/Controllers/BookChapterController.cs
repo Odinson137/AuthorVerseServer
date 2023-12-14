@@ -14,11 +14,13 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IBookChapter _bookChapter;
         private readonly CreateJWTtokenService _tokenService;
+        private readonly MailService _mailService;
 
-        public BookChapterController(IBookChapter bookChapter, CreateJWTtokenService tokenService)
+        public BookChapterController(IBookChapter bookChapter, CreateJWTtokenService tokenService, MailService mailService)
         {
             _bookChapter = bookChapter;
             _tokenService = tokenService;
+            _mailService = mailService;
         }
 
         // can be authprize
@@ -93,6 +95,7 @@ namespace AuthorVerseServer.Controllers
             await _bookChapter.PublicateChapterAsync(chapterId);
 
             // система уведомлений пользователям о новой вышедшей главе
+            await _mailService.SendNotifyEmail(chapterId);
 
             return Ok();
         }

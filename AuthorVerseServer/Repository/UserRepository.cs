@@ -1,13 +1,7 @@
 ﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
-using Google.Apis.Auth;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace AuthorVerseServer.Repository
 {
@@ -31,9 +25,15 @@ namespace AuthorVerseServer.Repository
             return await _context.MicrosoftUsers.Include(x => x.User).FirstOrDefaultAsync(x => x.AzureName == azureName);
         }
 
-        public async Task<ICollection<User>> GetUserAsync()
+        public async Task<ICollection<string>> GetUserEmailAsync(int bookId)
         {
-            return await _context.Users.OrderBy(u => u.Id).ToListAsync();
+            var emails = _context.Books
+                .Where(b => b.BookId == bookId)
+                // возможно исключить автора сие творения из выборки
+                .Where(b => b.Author.EmailConfirmed == true)
+                .Select(b => b.Author.Email!);
+
+            return await emails.ToListAsync();
         }
 
         public async Task Save()

@@ -14,6 +14,7 @@ public interface IBookChapter
     Task<DetaildAuthorChapterDTO?> GetAuthorDetaildChapterAsync(int chapter, string userId);
     Task AddNewChapterAsync(BookChapter chapter);
     Task DeleteChapterAsync(int chapterId);
+    Task<NotifyChapter> GetNotifyChapterAsync(int chapterId);
     Task SaveAsync();
 }
 

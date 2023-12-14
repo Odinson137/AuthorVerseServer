@@ -43,7 +43,7 @@ namespace AuthorVerseForum.Hubs
             #if !DEBUG
                 string apiUrl = $"http://server/api/ForumMessage?key={key}";
             #else
-                string apiUrl = $"http://localhost7069/api/ForumMessage?key={key}";
+                string apiUrl = $"http://localhost:7069/api/ForumMessage?key={key}";
             #endif
             return apiUrl;
         }
@@ -284,9 +284,9 @@ namespace AuthorVerseForum.Hubs
             var connectorJson = await _redis.StringGetAsync(GetConnectionId());
             if (!string.IsNullOrEmpty(connectorJson))
             {
-                var connector = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson);
+                var connector = JsonConvert.DeserializeObject<ConnecterDTO>(connectorJson!);
                 await _redis.KeyDeleteAsync(GetConnectionId());
-                var count = await _redis.StringDecrementAsync($"forumCount:{connector.BookId}");
+                var count = await _redis.StringDecrementAsync($"forumCount:{connector!.BookId}");
                 await Clients.All.SendAsync("UserCountMessage", count);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group:{connector.BookId}");
             }

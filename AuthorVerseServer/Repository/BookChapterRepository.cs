@@ -124,6 +124,22 @@ namespace AuthorVerseServer.Repository
                 .Where(c => c.Book.AuthorId == userId)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<NotifyChapter> GetNotifyChapterAsync(int chapterId)
+        {
+            var chapter = _context.BookChapters
+                .Where(c => c.BookChapterId == chapterId)
+                .Select(c => new NotifyChapter
+                {
+                    BookId = c.BookId,
+                    BookTitle = c.Book.Title,
+                    ChapterNumber = c.BookChapterNumber,
+                    ChapterTitle = c.Title,
+                    Url = c.Book.BookCover,
+                });
+
+            return await chapter.FirstAsync();
+        }
     }
 }
 

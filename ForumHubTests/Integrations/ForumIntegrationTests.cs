@@ -36,7 +36,6 @@ namespace ForumHubTests.Integrations
 
             // Act
             var response = await _client.PostAsync("/api/User/Login", requestContent);
-
             var token = await response.Content.ReadAsStringAsync();
 
             // Assert

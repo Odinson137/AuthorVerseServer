@@ -66,19 +66,11 @@ namespace ServerTests.Integrations
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
             // Act
-            var response = await _client.PostAsync("/api/BookChapter/AuthorChapters?chapterId=1&bookId=1", null);
+            var response = await _client.PostAsync("/api/BookChapter/Publicate?chapterId=1&", null);
             var content = await response.Content.ReadAsStringAsync();
 
-            var chapters = JsonConvert.DeserializeObject<ICollection<ShortAuthorChapterDTO>>(content);
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotEmpty(chapters);
-
-            foreach (var chapter in chapters)
-            {
-                Assert.True(chapter.Number != 0);
-                Assert.True(chapter.BookChapterId != 0);
-            }
         }
 
         [Fact]

@@ -32,7 +32,8 @@ namespace AuthorVerseServer.Data
                     LastName = "Brown",
                     LogoUrl = "hashtag.png",
                     Method = RegistrationMethod.Email,
-                    Email = "buryy132@gmail.com",
+                    Email = "buryy137@gmail.com",
+                    EmailConfirmed = true,
                 };
 
                 await userManager.CreateAsync(admin, "Password@123");
