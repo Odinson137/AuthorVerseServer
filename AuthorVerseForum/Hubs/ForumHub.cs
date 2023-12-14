@@ -4,8 +4,6 @@ using StackExchange.Redis;
 using AuthorVerseForum.Services;
 using AuthorVerseForum.Data.Enums;
 using Newtonsoft.Json;
-using AuthorVerseForum.Models;
-using Microsoft.Extensions.Logging;
 
 namespace AuthorVerseForum.Hubs
 {
@@ -41,9 +39,9 @@ namespace AuthorVerseForum.Hubs
         private string GetServerUri(string key)
         {
             #if !DEBUG
-                string apiUrl = $"http://server/api/ForumMessage?key={key}";
+                string apiUrl = $"http://server:8080/api/ForumMessage?key={key}";
             #else
-                string apiUrl = $"http://localhost7069/api/ForumMessage?key={key}";
+                string apiUrl = $"http://localhost:7069/api/ForumMessage?key={key}";
             #endif
             return apiUrl;
         }
