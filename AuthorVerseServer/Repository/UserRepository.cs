@@ -27,11 +27,11 @@ namespace AuthorVerseServer.Repository
 
         public async Task<ICollection<string>> GetUserEmailAsync(int bookId)
         {
-            var emails = _context.Books
+            var emails = _context.UserSelectedBooks
                 .Where(b => b.BookId == bookId)
                 // возможно исключить автора сие творения из выборки
-                .Where(b => b.Author.EmailConfirmed == true)
-                .Select(b => b.Author.Email!);
+                .Where(b => b.User.EmailConfirmed == true)
+                .Select(b => b.User.Email!);
 
             return await emails.ToListAsync();
         }

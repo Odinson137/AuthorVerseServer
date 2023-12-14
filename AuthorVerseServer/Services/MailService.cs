@@ -72,7 +72,16 @@ namespace AuthorVerseServer.Services
 
             string imageUrl;
             if (!string.IsNullOrEmpty(chapter.Url))
-                imageUrl = $"<img src={"http://localhost:7069/api/images/" + chapter.Url}></img>";
+            {
+                byte[] imageData;
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    imageData = await httpClient.GetByteArrayAsync($"http://localhost:7069/api/images/{chapter.Url}");
+                }
+                string imageDataUri = $"data:image/png;base64,{Convert.ToBase64String(imageData)}";
+                imageUrl = $"<img src='{imageDataUri}' alt='Chapter Image'></img>";
+
+            }
             else
                 imageUrl = string.Empty;
             

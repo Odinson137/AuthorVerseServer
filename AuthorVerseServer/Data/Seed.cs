@@ -294,7 +294,25 @@ namespace AuthorVerseServer.Data
                     LastBookChapterNumber = firstBook.BookChapters.First().BookChapterNumber,
                 };
 
+                User kol = new User
+                {
+                    Id = "kolic",
+                    UserName = "Kolic",
+                    NormalizedUserName = "Kolic".ToUpper(),
+                    Email = "ppockorn@gmail.com",
+                    NormalizedEmail = "ppockorn@gmail.com".ToUpper(),
+                    EmailConfirmed = true,
+                };
 
+                await context.Users.AddAsync(kol);
+
+                var selectedBook1 = new UserSelectedBook()
+                {
+                    BookState = BookState.Reading,
+                    Book = firstBook,
+                    User = kol,
+                    LastBookChapterNumber = firstBook.BookChapters.First().BookChapterNumber,
+                };
 
                 var characterTest = new Character
                 {
@@ -307,10 +325,7 @@ namespace AuthorVerseServer.Data
                 await context.Characters.AddAsync(characterTest);
 
                 await context.Books.AddAsync(firstBook);
-                await context.UserSelectedBooks.AddAsync(selectedBook);
-
-
-
+                await context.UserSelectedBooks.AddRangeAsync(selectedBook, selectedBook1);
 
                 int numer = 0;
                 foreach (var book in bookDescriptions)
@@ -328,8 +343,6 @@ namespace AuthorVerseServer.Data
                         Permission = PublicationPermission.Approved,
                         BookCover = files[numer++]
                     };
-
-  
 
                     for (int i = 0; i < 3; i++)
                     {
