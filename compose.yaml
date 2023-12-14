@@ -37,7 +37,7 @@ services:
       target: final
       dockerfile: AuthorVerseServer/Dockerfile
     ports:
-      - 7069:80
+      - 7069:8080
     depends_on:
         db:
             condition: service_healthy
@@ -56,7 +56,7 @@ services:
       target: final
       dockerfile: AuthorVerseForum/Dockerfile
     ports:
-      - 7070:80
+      - 7070:8080
     environment:
       - ASPNETCORE_ENVIRONMENT=development
     networks:
