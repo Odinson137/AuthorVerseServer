@@ -11,6 +11,7 @@ namespace AuthorVerseServer.Models
         public int BookChapterNumber { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
+        public string? ActionPlace { get; set; }
         public ICollection<Character> Characters { get; set; } = new List<Character>();
         public int BookId { get; set; }
         public Book Book { get; set; } = null!;

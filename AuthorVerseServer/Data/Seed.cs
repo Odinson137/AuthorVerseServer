@@ -274,23 +274,16 @@ namespace AuthorVerseServer.Data
                     firstBook.Tags.Add(tag);
                 }
 
-                firstBook.BookChapters = new List<BookChapter>()
+                var chapterTest = new BookChapter
                 {
-                    new BookChapter
-                    {
-                        Characters = new List<Character>
-                        {
-                            new Character
-                            {
-                                Book = firstBook,
-                                Description = "Тут такой борзый пацанчик",
-                            }
-                        },
-                        BookChapterNumber = 1,
-                        Title = "Перерождение",
-                        Description = "ЧТо я вижу, что я знаю"
-                    }
+                    Book = firstBook,
+                    Characters = new List<Character>(),
+                    BookChapterNumber = 1,
+                    Title = "Перерождение",
+                    Description = "ЧТо я вижу, что я знаю"
                 };
+
+                await context.BookChapters.AddAsync(chapterTest);
 
                 var selectedBook = new UserSelectedBook()
                 {
@@ -300,8 +293,23 @@ namespace AuthorVerseServer.Data
                     LastBookChapterNumber = firstBook.BookChapters.First().BookChapterNumber,
                 };
 
+
+
+                var characterTest = new Character
+                {
+                    Book = firstBook,
+                    BookChapter = chapterTest,
+                    Description = "Тут такой борзый пацанчик",
+                    Name = "Анджелина",
+                };
+
+                await context.Characters.AddAsync(characterTest);
+
                 await context.Books.AddAsync(firstBook);
                 await context.UserSelectedBooks.AddAsync(selectedBook);
+
+
+
 
                 int numer = 0;
                 foreach (var book in bookDescriptions)
@@ -334,8 +342,11 @@ namespace AuthorVerseServer.Data
                         Book.Tags.Add(tag);
                     }
 
-                    var chapters = new List<BookChapter>() { new BookChapter()
+                    var chapters = new List<BookChapter>() 
+                    { 
+                        new BookChapter()
                         {
+                            Title = "Топовая уникальная глава",
                             BookChapterNumber = 1,
                             ChapterSections = new List<ChapterSection>()
                                 {
@@ -347,6 +358,7 @@ namespace AuthorVerseServer.Data
                                 }
                         }, new BookChapter()
                         {
+                            Title = "Топовая уникальная глава",
                             BookChapterNumber = 2,
                             ChapterSections = new List<ChapterSection>()
                                 {
@@ -358,6 +370,7 @@ namespace AuthorVerseServer.Data
                                 }
                         }, new BookChapter()
                         {
+                            Title = "Топовая уникальная глава",
                             BookChapterNumber = 3,
                             ChapterSections = new List<ChapterSection>()
                                 {
@@ -514,6 +527,8 @@ namespace AuthorVerseServer.Data
 
                     BookChapter chapter = new BookChapter()
                     {
+                        Title = "Топовая уникальная глава",
+                        BookChapterNumber = 1,
                         ChapterSections = new List<ChapterSection>()
                         {
                             new ChapterSection()
@@ -526,6 +541,8 @@ namespace AuthorVerseServer.Data
 
                     BookChapter chapter2 = new BookChapter()
                     {
+                        Title = "Топовая уникальная глава",
+                        BookChapterNumber = 1,
                         ChapterSections = new List<ChapterSection>()
                                 {
                                     new ChapterSection()
@@ -538,6 +555,8 @@ namespace AuthorVerseServer.Data
 
                     BookChapter chapter3 = new BookChapter()
                     {
+                        Title = "Топовая уникальная глава",
+                        BookChapterNumber = 1,
                         ChapterSections = new List<ChapterSection>()
                                 {
                                     new ChapterSection()

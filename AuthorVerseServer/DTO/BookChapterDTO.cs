@@ -14,11 +14,11 @@
 
     public class ShortAuthorChapterDTO
     {
-        public int BookChapterId { get; set; }
-        public string? Number { get; set; }
-        public int Title { get; set; }
-        public string? Place { get; set; }
-        public int CharacterCount { get; set; }  
+        public required int BookChapterId { get; set; }
+        public required int Number { get; set; }
+        public required string? Title { get; set; }
+        public required string? Place { get; set; }
+        public required int CharacterCount { get; set; }  
     }
 
     public class DetaildAuthorChapterDTO

@@ -24,14 +24,40 @@ namespace AuthorVerseServer.Repository
             await _context.BookChapters.Where(c => c.BookChapterId == chapterId).ExecuteDeleteAsync();
         }
 
-        public Task<ICollection<ShortAuthorChapterDTO>> GetAuthorChaptersAsync(int bookId)
+        public async Task<ICollection<ShortAuthorChapterDTO>> GetAuthorChaptersAsync(int bookId, string userId)
         {
-            throw new NotImplementedException();
+            var chapters = _context.BookChapters
+                .Where(c => c.BookId == bookId)
+                .Where(c => c.Book.AuthorId == userId)
+                .Select(c => new ShortAuthorChapterDTO
+                {
+                    BookChapterId = c.BookChapterId,
+                    Title = c.Title,
+                    Number = c.BookChapterNumber,
+                    Place = c.ActionPlace,
+                    CharacterCount = c.Characters.Count(),
+                });
+
+            return await chapters.ToListAsync();
         }
 
-        public Task<DetaildAuthorChapterDTO> GetAuthorDetaildChapterAsync(int chapter)
+        public async Task<DetaildAuthorChapterDTO?> GetAuthorDetaildChapterAsync(int chapterId, string userId)
         {
-            throw new NotImplementedException();
+            var chapter = await _context.BookChapters
+                .Where(c => c.BookChapterId == chapterId)
+                .Where(c => c.Book.AuthorId == userId)
+                .Select(c => new DetaildAuthorChapterDTO()
+                {
+                    Characters = c.Characters.Select(character => new CharacterDTO
+                    {
+                        CharacterId = character.CharacterId,
+                        Name = character.Name,
+                    }).ToList(),
+                    Description = c.Description,
+                })
+                .FirstOrDefaultAsync();
+
+            return chapter;
         }
 
         public async Task<int> GetUserReadingNumberAsync(int bookId, string userId)
@@ -89,6 +115,14 @@ namespace AuthorVerseServer.Repository
             await _context.BookChapters
                 .Where(c => c.BookChapterId == chapterId)
                 .ExecuteUpdateAsync(setter => setter.SetProperty(x => x.PublicationType, Data.Enums.PublicationType.Publicated));
+        }
+
+        public async Task<BookChapter?> GetBookChapterAsync(int commentId, string userId)
+        {
+            return await _context.BookChapters
+                .Where(c => c.BookChapterId == commentId)
+                .Where(c => c.Book.AuthorId == userId)
+                .FirstOrDefaultAsync();
         }
     }
 }

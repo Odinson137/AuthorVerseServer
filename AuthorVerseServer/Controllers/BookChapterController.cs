@@ -82,7 +82,7 @@ namespace AuthorVerseServer.Controllers
         [HttpPost("Publicate")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<int>> PublicateChapter(int chapterId)
+        public async Task<ActionResult> PublicateChapter(int chapterId)
         {
             string? userId = _tokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
@@ -93,6 +93,80 @@ namespace AuthorVerseServer.Controllers
             await _bookChapter.PublicateChapterAsync(chapterId);
 
             // система уведомлений пользователям о новой вышедшей главе
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("AuthorChapters")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<ICollection<ShortAuthorChapterDTO>>> GetAuthorChaptersAsync(int bookId)
+        {
+            string? userId = _tokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("Token failed");
+            }
+
+            var chapters = await _bookChapter.GetAuthorChaptersAsync(bookId, userId);
+
+            return Ok(chapters);
+        }
+
+        [Authorize]
+        [HttpPost("DetailChapter")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<ICollection<DetaildAuthorChapterDTO>>> GetAuthorDetaildChapterAsync(int bookId)
+        {
+            string? userId = _tokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("Token failed");
+            }
+
+            var chapter = await _bookChapter.GetAuthorDetaildChapterAsync(bookId, userId);
+
+            if (chapter == null)
+            {
+                return NotFound("Chapter is not found");
+            }
+
+            return Ok(chapter);
+        }
+
+        [Authorize]
+        [HttpPut]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> UpdateChapter(int chapterId, string? place = null, string? description = null)
+        {
+            string? userId = _tokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("Token failed");
+            }
+
+            var chapter = await _bookChapter.GetBookChapterAsync(chapterId, userId);
+
+            if (chapter == null)
+            {
+                return NotFound("Chapter is not found");
+            }
+
+            if (!string.IsNullOrEmpty(place))
+            {
+                chapter.ActionPlace = place;
+            }
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                chapter.Description = description;
+            }
+
+            await _bookChapter.SaveAsync();
 
             return Ok();
         }
