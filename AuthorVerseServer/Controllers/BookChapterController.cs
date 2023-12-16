@@ -60,17 +60,17 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("Token failed");
             }
 
-            var lastNumber = await _bookChapter.GetChapterNumberAsync(lastChapterId, userId);
-            if (lastNumber == null)
+            ChapterInfo? chapterInfo = await _bookChapter.GetChapterNumberAsync(lastChapterId, userId);
+            if (chapterInfo == null)
             {
                 return NotFound("Chapter not found");
             }
 
             var chapter = new BookChapter()
             {
-                BookId = lastNumber.Value.Item2,
+                BookId = chapterInfo.BookId,
                 Title = title,
-                BookChapterNumber = lastNumber.Value.Item1 + 1,
+                BookChapterNumber = chapterInfo.ChapterNumber + 1,
             };
 
             await _bookChapter.AddNewChapterAsync(chapter);
@@ -170,6 +170,34 @@ namespace AuthorVerseServer.Controllers
             }
 
             await _bookChapter.SaveAsync();
+
+            return Ok();
+        }
+
+
+        [Authorize]
+        [HttpDelete]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> DeleteChapter(int chapterId)
+        {
+            string? userId = _tokenService.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("Token failed");
+            }
+
+            if (await _bookChapter.IsAuthorAsync(chapterId, userId) == false)
+            {
+                return NotFound("Chapter is not found");
+            }
+
+            if (await _bookChapter.AnyChildExistAsync(chapterId) == true)
+            {
+                return BadRequest("This chapter is not last");
+            }
+
+            await _bookChapter.DeleteChapterAsync(chapterId);
 
             return Ok();
         }

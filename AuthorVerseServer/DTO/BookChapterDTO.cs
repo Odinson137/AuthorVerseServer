@@ -35,4 +35,10 @@
         public string? ChapterTitle { get; set; }
         public string? Url { get; set; }
     }
+
+    public class ChapterInfo
+    {
+        public required int BookId { get; set; }
+        public required int ChapterNumber { get; set; }
+    }
 }

@@ -5,10 +5,11 @@ namespace AuthorVerseServer.Interfaces;
 public interface IBookChapter
 {
     Task<BookChapter?> GetBookChapterAsync(int commentId, string userId);
+    Task<bool> AnyChildExistAsync(int commentId);
     Task<ICollection<BookChapterDTO>> GetBookReadingChaptersAsync(int bookId);
     Task<int> GetUserReadingNumberAsync(int bookId, string userId);
-    Task<bool> IsAuthorAsync(int bookId, string userId);
-    Task<(int, int)?> GetChapterNumberAsync(int chapterId, string userId);
+    Task<bool> IsAuthorAsync(int chapterId, string userId);
+    Task<ChapterInfo?> GetChapterNumberAsync(int chapterId, string userId);
     Task PublicateChapterAsync(int chapterId);
     Task<ICollection<ShortAuthorChapterDTO>> GetAuthorChaptersAsync(int bookId, string userId);
     Task<DetaildAuthorChapterDTO?> GetAuthorDetaildChapterAsync(int chapter, string userId);

@@ -131,7 +131,6 @@ namespace AuthorVerseServer.Controllers
             {
                 AuthorId = userId,
                 Title = bookDTO.Title,
-                NormalizedTitle = bookDTO.Title.ToUpper(),
                 Description = bookDTO.Description,
                 AgeRating = bookDTO.AgeRating,
             };

@@ -3,6 +3,7 @@ using AuthorVerseServer.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {
@@ -11,7 +12,8 @@ namespace AuthorVerseServer.Models
         [Key]
         public int BookId { get; set; }
         [MaxLength(200)]
-        public string Title { get; set; } = null!;
+        public required string Title { get; set; }
+        [MaxLength(200)]
         public string NormalizedTitle { get; set; } = null!;
         [MaxLength(1000)]
         public string Description { get; set; } = null!;

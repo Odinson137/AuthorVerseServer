@@ -67,6 +67,14 @@ namespace AuthorVerseServer.Data
                         });
             });
 
+            modelBuilder.Entity<Book>()
+                .Property(b => b.NormalizedTitle)
+                .HasComputedColumnSql("UPPER(Title)");
+
+            modelBuilder.Entity<Character>()
+                 .Property(b => b.NormalizedName)
+                 .HasComputedColumnSql("UPPER(Name)");
+
             //modelBuilder.Entity<BookQuote>().ToTable("BookQuotes");
             //modelBuilder.Entity<Note>().ToTable("Notes");
             //modelBuilder.Entity<Comment>().ToTable("Comments");
@@ -74,7 +82,7 @@ namespace AuthorVerseServer.Data
 
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
 
-            modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
+            //modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
 
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.Genres)
@@ -125,80 +133,96 @@ namespace AuthorVerseServer.Data
                         j.ToTable("BookTag");
                     });
 
+            modelBuilder.Entity<BookChapter>()
+                .HasMany(b => b.Characters)
+                .WithMany(c => c.BookChapters)
+                .UsingEntity(j => j.ToTable("CharacterChapters"));
 
             modelBuilder.Entity<Book>()
                 .HasMany(c => c.Comments)
                 .WithOne(c => c.Book)
                 .HasForeignKey(c => c.BookId)
-                .IsRequired(false);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<User>()
                 .HasMany(c => c.Comments)
                 .WithOne(c => c.User)
                 .HasForeignKey(c => c.UserId)
-                .IsRequired(false);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<BookChapter>()
                 .HasMany(c => c.Notes)
                 .WithOne()
                 .HasForeignKey(c => c.BookChapterid)
-                .IsRequired(false);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            
+
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserSelectedBooks)
                 .WithOne(u => u.User)
                 .HasForeignKey(c => c.UserId)
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.UserSelectedBooks)
                 .WithOne(b => b.Book)
                 .HasForeignKey(b => b.BookId)
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.Characters)
                 .WithOne(b => b.Book)
                 .HasForeignKey(b => b.BookId)
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.ClientCascade);
+
+            //modelBuilder.Entity<BookChapter>()
+            //    .HasMany(c => c.Characters)
+            //    .WithOne(c => c.BookChapter)
+            //    .HasForeignKey(c => c.BookChapterId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+
 
             modelBuilder.Entity<Comment>()
                 .HasMany(b => b.CommentRatings)
                 .WithOne()
                 .HasForeignKey(b => b.CommentId)
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
 
             modelBuilder.Entity<Book>()
                 .HasMany(c => c.BookQuotes)
                 .WithOne(c => c.Book)
                 .HasForeignKey(c => c.BookId)
-                .IsRequired(false);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<User>()
                 .HasMany(c => c.BookQuotes)
                 .WithOne(c => c.User)
                 .HasForeignKey(c => c.UserId)
-                .IsRequired(false);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<BookChapter>()
                 .HasMany(c => c.Notes)
                 .WithOne(c => c.BookChapter)
                 .HasForeignKey(c => c.BookChapterid)
                 .IsRequired(true)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<User>()
                 .HasMany(c => c.Notes)
                 .WithOne(c => c.User)
                 .HasForeignKey(c => c.UserId)
                 .IsRequired(true)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             modelBuilder.Entity<Note>()
                 .HasMany(c => c.Replies)
@@ -225,14 +249,11 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(m => m.ParrentMessageId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<BookChapter>()
-                .HasMany(c => c.Characters)
-                .WithOne(c => c.BookChapter)
-                .HasForeignKey(c => c.BookChapterId)
-                .OnDelete(DeleteBehavior.Cascade);
+
+
 
             modelBuilder.Entity<Book>()
-                .HasIndex(g => g.Title);
+                .HasIndex(g => g.NormalizedTitle);
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.PublicationData);
             modelBuilder.Entity<Book>()
@@ -263,7 +284,9 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<Character>()
                 .HasIndex(g => g.BookId);
             modelBuilder.Entity<Character>()
-                .HasIndex(g => g.BookChapterId);
+                .HasIndex(g => g.NormalizedName);
+            //modelBuilder.Entity<Character>()
+            //    .HasIndex(g => g.BookChapterId);
 
 
             modelBuilder.Entity<Comment>()

@@ -132,5 +132,40 @@ namespace ServerTests.Integrations
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task AddNewChapter_Ok_ReturnsOkResult()
+        {
+            // Arrange
+            string jwtToken = _token.GenerateJwtToken("admin");
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+            // Act
+            var response = await _client.PostAsync("/api/BookChapter?title=newTest&lastChapterId=2", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.True(int.TryParse(content, out int chapterId));
+            Assert.True(chapterId > 0);
+
+            var deleteResponse = await _client.DeleteAsync($"/api/BookChapter?chapterId={content}");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteChapter_NotLastChapter_ReturnsBadRequest()
+        {
+            // Arrange
+            string jwtToken = _token.GenerateJwtToken("admin");
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+            // Act
+            var response = await _client.DeleteAsync($"/api/BookChapter?chapterId={1}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
     }
 }

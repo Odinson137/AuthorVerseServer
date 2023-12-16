@@ -233,7 +233,6 @@ namespace AuthorVerseServer.Data
                 var firstBook = new Book
                 {
                     Title = "FirstBook",
-                    NormalizedTitle = "FirstBook".ToUpper(),
                     Author = admin,
                     Description = "первая книга для тестов",
                     AgeRating = AgeRating.All,
@@ -284,7 +283,42 @@ namespace AuthorVerseServer.Data
                     Description = "ЧТо я вижу, что я знаю"
                 };
 
-                await context.BookChapters.AddAsync(chapterTest);
+                var character1 = new Character()
+                {
+                    Name = "Борин",
+                    Book = firstBook,
+                    Description = "хохохох",
+                    BookChapters = new List<BookChapter>() { chapterTest },
+                };
+
+                var character2 = new Character()
+                {
+                    Name = "Марес",
+                    Book = firstBook,
+                    Description = "хихихиххи",
+                    BookChapters = new List<BookChapter>() { chapterTest },
+                };
+
+                var chapterTest2 = new BookChapter
+                {
+                    Book = firstBook,
+                    Characters = new List<Character>(),
+                    BookChapterNumber = 2,
+                    Title = "Перерождение",
+                    Description = "ЧТо я вижу, что я знаю"
+                };
+
+                var character3 = new Character
+                {
+                    Book = firstBook,
+                    Description = "Тут такой борзый пацанчик",
+                    Name = "Анджелина",
+                    BookChapters = new List<BookChapter>() { chapterTest, chapterTest2 },
+                };
+
+                await context.Characters.AddRangeAsync(character1, character2, character3);
+
+                await context.BookChapters.AddRangeAsync(chapterTest, chapterTest2);
 
                 var selectedBook = new UserSelectedBook()
                 {
@@ -314,16 +348,6 @@ namespace AuthorVerseServer.Data
                     LastBookChapterNumber = firstBook.BookChapters.First().BookChapterNumber,
                 };
 
-                var characterTest = new Character
-                {
-                    Book = firstBook,
-                    BookChapter = chapterTest,
-                    Description = "Тут такой борзый пацанчик",
-                    Name = "Анджелина",
-                };
-
-                await context.Characters.AddAsync(characterTest);
-
                 await context.Books.AddAsync(firstBook);
                 await context.UserSelectedBooks.AddRangeAsync(selectedBook, selectedBook1);
 
@@ -333,7 +357,6 @@ namespace AuthorVerseServer.Data
                     Book Book = new Book()
                     {
                         Title = book.Key,
-                        NormalizedTitle = (book.Key).ToUpper(),
                         Author = new User { UserName = $"CCharpProger_{numer}", 
                             Name = usersName[numer],
                             LastName = usersLastName[numer]
@@ -486,7 +509,6 @@ namespace AuthorVerseServer.Data
                     var Book = new Book()
                     {
                         Title = book.Key,
-                        NormalizedTitle = (book.Key).ToUpper(),
                         Author = admin,
                         Description = book.Value,
                         AgeRating = AgeRating.All,
@@ -651,7 +673,6 @@ namespace AuthorVerseServer.Data
                         var Book = new Book()
                         {
                             Title = book.Key + b.ToString(),
-                            NormalizedTitle = (book.Key + b.ToString()).ToUpper(),
                             Author = user,
                             Description = book.Value + b.ToString(),
                             AgeRating = AgeRating.All,
@@ -781,7 +802,6 @@ namespace AuthorVerseServer.Data
                         var Book = new Book()
                         {
                             Title = book.Key + b.ToString(),
-                            NormalizedTitle = (book.Key + b.ToString()).ToUpper(),
                             Author = user,
                             Description = book.Value + b.ToString(),
                             AgeRating = AgeRating.All,

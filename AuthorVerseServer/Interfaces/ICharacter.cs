@@ -1,8 +1,15 @@
-﻿namespace AuthorVerseServer.Interfaces;
+﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Models;
+using Google.Apis.Http;
+
+namespace AuthorVerseServer.Interfaces;
 
 public interface ICharacter
 {
-    Task<ICollection<Character>> GetCharacterAsync();
+    //Task<bool> IsAuthorAsync(string userId);
+    //Task<ICollection<BookCharacterDTO>> GetBookCharactersAsync(int chapterId);
+    //Task AddCharacterToChapterAsync(int characterId);
+    //Task AddCharacterAsync(string title);
+    //Task SaveAsync(Character character);
 }
 
