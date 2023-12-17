@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.Contracts;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
@@ -18,6 +15,7 @@ namespace AuthorVerseServer.Models
         public ICollection<BookChapter> BookChapters { get; set; } = new List<BookChapter>();
         //public int BookChapterId { get; set; }
         //public BookChapter BookChapter { get; set; } = null!;
+        [MaxLength(200)]
         public string? Description { get; set; }
         public string? CharacterImageUrl { get; set; }
     }

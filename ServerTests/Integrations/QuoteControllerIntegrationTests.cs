@@ -108,9 +108,8 @@ public class QuoteControllerIntegrationTests : IClassFixture<WebApplicationFacto
     {
         // Arrange
         int bookId = 1;
-        string text = "Эта цитата должна потом удалить";
-        StringContent requestContent = new StringContent("", Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", requestContent);
+        string text = "Эта цитата должна потом удалиться";
+        var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", null);
 
         // Assert
         var content = await response.Content.ReadAsStringAsync();
@@ -124,8 +123,7 @@ public class QuoteControllerIntegrationTests : IClassFixture<WebApplicationFacto
         // Arrange
         int bookId = 1;
         string text = "Эта цитата должна потом удалить";
-        StringContent requestContent = new StringContent("", Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", requestContent);
+        var response = await _client.PostAsync($"/api/Quote?bookId={bookId}&text={text}", null);
 
         // Assert
         var content = await response.Content.ReadAsStringAsync();

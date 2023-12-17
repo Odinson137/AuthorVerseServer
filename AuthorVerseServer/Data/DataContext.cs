@@ -38,6 +38,7 @@ namespace AuthorVerseServer.Data
         public DbSet<MicrosoftUser> MicrosoftUsers { get; set; }
         public DbSet<BookQuote> BookQuotes { get; set; }
         public DbSet<ForumMessage> ForumMessages { get; set; }
+        public DbSet<CharacterChapter> CharacterChapters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -99,9 +100,26 @@ namespace AuthorVerseServer.Data
                     j =>
                     {
                         j.HasKey(t => new { t.BookId, t.GenreId });
-                        j.ToTable("BookGenre"); 
+                        j.ToTable("BookGenres"); 
                     });
 
+            modelBuilder.Entity<BookChapter>()
+                .HasMany(c => c.Characters)
+                .WithMany(c => c.BookChapters)
+                .UsingEntity<CharacterChapter>(
+                    j => j
+                        .HasOne(b => b.Character)
+                        .WithMany()
+                        .HasForeignKey(b => b.CharacterId),
+                    j => j
+                        .HasOne(b => b.Chapter)
+                        .WithMany()
+                        .HasForeignKey(b => b.ChapterId),
+                    j =>
+                    {
+                        j.HasKey(t => new { t.CharacterId, t.ChapterId });
+                        j.ToTable("CharacterChapters");
+                    });
 
             modelBuilder.Entity<Friendship>()
                 .HasOne(fs => fs.User1)

@@ -128,25 +128,6 @@ public class CommentContollerUnitTests
         Assert.IsType<NotFoundObjectResult>(result.Result);
     }
 
-    [Fact]
-    public async Task DeleteComment_CommentNotDeleted_ShouldReturnBadRequest()
-    {
-        // Arrange
-
-        mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-
-        //var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
-
-        mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<int>()));
-
-        mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
-
-        // Act
-        var result = await controller.DeleteComment(1);
-        // Assert
-        Assert.IsType<BadRequestObjectResult>(result.Result);
-    }
 
     [Fact]
     public async Task DeleteComment_Ok_ShouldReturnOkResult()
@@ -158,8 +139,7 @@ public class CommentContollerUnitTests
         mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
         mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<int>()));
-
-        mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
+        mockCommentRepository.Setup(com => com.CheckExistCommentAsync(It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(true);
 
         // Act
         var result = await controller.DeleteComment(1);

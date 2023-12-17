@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -72,6 +73,8 @@ services.AddControllers(options =>
             args.ErrorContext.Handled = true;
         };
     });
+
+
 
 services.AddEndpointsApiExplorer();
 
@@ -214,6 +217,28 @@ using (var scope = app.Services.CreateScope())
 }
 
 //#endif
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        var error = context.Features.Get<IExceptionHandlerFeature>();
+        if (error != null)
+        {
+            var errorMessage = new
+            {
+                message = "Internal Server Error",
+                error = error.Error.Message,
+                stackTrace = error.Error.StackTrace
+            };
+
+            await context.Response.WriteAsync(JsonConvert.SerializeObject(errorMessage));
+        }
+    });
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

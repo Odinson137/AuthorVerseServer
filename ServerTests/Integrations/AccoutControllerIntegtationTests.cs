@@ -257,14 +257,13 @@ public class AccoutControllerIntegtationTests : IClassFixture<WebApplicationFact
         {
             Name = "Yuri",
             LastName = "Metanit",
+            Password = "Password@123",
             CheckPassword = "Password@123",
             Description = "Люблю жизнь, она моя, она нагнула меня, но я не отчаиваюсь, живу",
-            Password = "Password@123",
         };
 
-        var uri = "api/Account/ProfileChange";
-
-        var response = await _client.PutAsJsonAsync(uri, userProfile);
+        var response = await _client.PutAsJsonAsync("api/Account/ProfileChange", userProfile);
+        var content = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }

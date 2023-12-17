@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
-namespace ServerTests.Integrations
+namespace Server.Tests.Integrations
 {
     public class RatingControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {

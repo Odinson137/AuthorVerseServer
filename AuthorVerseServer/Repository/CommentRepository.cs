@@ -70,9 +70,9 @@ namespace AuthorVerseServer.Repository
             return await comments.ToListAsync();
         }
 
-        public async Task<bool> CheckExistCommentAsync(int commentId, string userId)
+        public async Task<bool> CheckExistCommentAsync(int bookId, string userId)
         {
-            return await _context.Comments.Where(x => x.BaseId == commentId & x.UserId == userId).AnyAsync();
+            return await _context.Comments.Where(x => x.BookId == bookId & x.UserId == userId).AnyAsync();
         }
     }
 }

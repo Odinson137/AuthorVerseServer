@@ -72,8 +72,8 @@ namespace AuthorVerseServer.DTO
         public string? Name { get; set; }
         public string? LastName { get; set; }
         public string? Description { get; set; }
-        public string Password { get; set; } = null!;
-        public string CheckPassword { get; set; } = null!;
+        public string? Password { get; set; }
+        public string? CheckPassword { get; set; }
         public IFormFile? Logo { get; set; }
     }
 }

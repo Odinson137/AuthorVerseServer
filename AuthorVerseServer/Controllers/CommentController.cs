@@ -59,7 +59,7 @@ namespace AuthorVerseServer.Controllers
             if (bookId == 0)
                 return NotFound("Book not found");
 
-            if (await _comment.CheckExistCommentAsync(bookId, user.Id) == true)
+            if (await _comment.CheckExistCommentAsync(bookId, userId) == true)
                 return BadRequest("This user alredy made a comment");
 
             Comment newComment = new Comment()
@@ -68,6 +68,7 @@ namespace AuthorVerseServer.Controllers
                 BookId = commentDTO.BookId,
                 Text = commentDTO.Text,
                 ReaderRating = commentDTO.Rating,
+                //Discriminator = "Comment"
             };
 
             await _comment.AddComment(newComment);
@@ -91,8 +92,7 @@ namespace AuthorVerseServer.Controllers
                 return NotFound("Comment not found");
 
             await _comment.DeleteComment(commentId);
-            if (await _comment.Save() == 0)
-                return BadRequest("Problem with saving");
+            await _comment.Save();
 
             return Ok();
         }

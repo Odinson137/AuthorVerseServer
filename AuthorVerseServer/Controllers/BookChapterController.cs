@@ -81,7 +81,7 @@ namespace AuthorVerseServer.Controllers
 
 
         [Authorize]
-        [HttpPost("Publicate")]
+        [HttpPost("Publicate/{chapterId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         public async Task<ActionResult> PublicateChapter(int chapterId)

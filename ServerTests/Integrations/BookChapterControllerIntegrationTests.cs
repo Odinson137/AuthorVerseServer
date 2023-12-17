@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
 
-namespace ServerTests.Integrations
+namespace Server.Tests.Integrations
 {
     public class BookChapterControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
@@ -58,6 +58,7 @@ namespace ServerTests.Integrations
             Assert.True(pageChapters.LastReadingNumber != 0);
         }
 
+        // должен быть включен сервер
         [Fact]
         public async Task PublicateChapter_Ok_ReturnsOkResult()
         {
@@ -66,7 +67,7 @@ namespace ServerTests.Integrations
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
             // Act
-            var response = await _client.PostAsync("/api/BookChapter/Publicate?chapterId=1&", null);
+            var response = await _client.PostAsync("/api/BookChapter/Publicate/1", null);
             var content = await response.Content.ReadAsStringAsync();
 
             // Assert

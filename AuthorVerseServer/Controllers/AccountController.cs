@@ -123,7 +123,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
         [ProducesResponseType(404, Type = typeof(ErrorMessageDTO))]
-        public async Task<ActionResult> ChangeUserProfile(EditProfileDTO profile)
+        public async Task<ActionResult> ChangeUserProfile([FromBody] EditProfileDTO profile)
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
