@@ -15,7 +15,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task<ICollection<SectionChoice>> GetSectionChoiceAsync()
         {
-            return await _context.SectionChoices.OrderBy(sc => sc.SectionChoiceId).ToListAsync();
+            return await _context.SectionChoices.ToListAsync();
         }
     }
 }

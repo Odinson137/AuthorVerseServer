@@ -1,5 +1,4 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
@@ -23,7 +22,7 @@ namespace AuthorVerseServer.Controllers
             _mailService = mailService;
         }
 
-        // can be authprize
+        // can be authorize
         [HttpGet("Read")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
@@ -173,7 +172,6 @@ namespace AuthorVerseServer.Controllers
 
             return Ok();
         }
-
 
         [Authorize]
         [HttpDelete]

@@ -23,9 +23,14 @@ namespace AuthorVerseServer.DTO
         public DateOnly PublicationData { get; set; }
     }
 
+    public class ShoptBookDTO
+    {
+        public required string Title { get; set; }
+        public required string AuthorName { get; set; }
+    }
+
     public class DetailBookDTO
     {
-        public int BookId { get; set; }
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
         public UserDTO Author { get; set; } = null!;

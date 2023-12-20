@@ -7,8 +7,8 @@ namespace AuthorVerseServer.Models
 {
     public class User : IdentityUser
     {
-        public string? Name { get; set; }
         public override string UserName { get; set; } = null!;
+        public string? Name { get; set; }
         public string? LastName { get; set; }
         public string? LogoUrl { get; set; }
         public string? Description { get; set; }

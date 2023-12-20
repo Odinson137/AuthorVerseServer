@@ -81,7 +81,7 @@ namespace AuthorVerseServer.Controllers
             }
             else
             {
-                books = JsonConvert.DeserializeObject<ICollection<PopularBook>>(booksCache);
+                books = JsonConvert.DeserializeObject<ICollection<PopularBook>>(booksCache!);
             }
 
             return Ok(books);
@@ -206,10 +206,25 @@ namespace AuthorVerseServer.Controllers
         }
 
 
-        [HttpGet("{bookId}")]
+        [HttpGet("Short/{bookId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<DetailBookDTO>> GetBook(int bookId)
+        public async Task<ActionResult<ShoptBookDTO>> GetShortBook(int bookId)
+        {
+            var book = await _book.GetShortBookById(bookId);
+
+            if (book == null)
+            {
+                return NotFound("This book not found");
+            }
+
+            return book;
+        }
+
+        [HttpGet("Detail/{bookId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<DetailBookDTO>> GetDetailBook(int bookId)
         {
             var book = await _book.GetBookById(bookId);
 

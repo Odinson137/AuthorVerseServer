@@ -15,6 +15,7 @@ public interface IBook
     Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId, string searchText);
     Task<ICollection<MainPopularBook>> GetMainPopularBook();
     Task<DetailBookDTO?> GetBookById(int bookId);
+    Task<ShoptBookDTO?> GetShortBookById(int bookId);
     Task<bool> ExistBookAsync(int bookId);
     Task<GenreTagDTO?> GetBookGenresTagsAsync(int bookId);
     Task AddBook(Book book);

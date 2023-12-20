@@ -1,4 +1,5 @@
 ﻿using AuthorVerseServer.Models;
+using AuthorVerseServer.Models.ContentModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,9 @@ namespace AuthorVerseServer.Data
         public DbSet<BookQuote> BookQuotes { get; set; }
         public DbSet<ForumMessage> ForumMessages { get; set; }
         public DbSet<CharacterChapter> CharacterChapters { get; set; }
+        public DbSet<ChoiceContent> ChoiceContents { get; set; }
+        public DbSet<TextContent> TextContents { get; set; }
+        public DbSet<AudioContent> AudioContents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -76,10 +80,12 @@ namespace AuthorVerseServer.Data
                  .Property(b => b.NormalizedName)
                  .HasComputedColumnSql("UPPER(Name)");
 
-            //modelBuilder.Entity<BookQuote>().ToTable("BookQuotes");
-            //modelBuilder.Entity<Note>().ToTable("Notes");
-            //modelBuilder.Entity<Comment>().ToTable("Comments");
             modelBuilder.Entity<CommentBase>().UseTphMappingStrategy();
+
+            modelBuilder.Entity<ContentBase>().UseTpcMappingStrategy();
+            //modelBuilder.Entity<TextContent>().ToTable("TextContents");
+            //modelBuilder.Entity<ChoiceContent>().ToTable("ChoiceContents");
+            //modelBuilder.Entity<AudioContent>().ToTable("AudioContents");
 
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
 
@@ -267,7 +273,23 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(m => m.ParrentMessageId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<ChapterSection>()
+                .HasOne(m => m.ContentBase)
+                .WithOne(m => m.Chapter)
+                .HasForeignKey<ChapterSection>(m => m.ContentId)
+                .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<ChoiceContent>()
+                .HasMany(m => m.SectionChoices)
+                .WithOne()
+                .HasForeignKey(m => m.ContentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SectionChoice>()
+                .HasOne(m => m.TargetSection)
+                .WithOne()
+                .HasForeignKey<SectionChoice>(m => m.TargetSectionId)
+                .OnDelete(DeleteBehavior.NoAction);
 
 
             modelBuilder.Entity<Book>()
@@ -330,8 +352,8 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.AzureName)
                 .IsUnique();
 
-            modelBuilder.Entity<SectionChoice>()
-                .HasIndex(g => g.ChapterSectionId);
+            //modelBuilder.Entity<SectionChoice>()
+            //    .HasIndex(g => g.ChapterSectionId);
 
             modelBuilder.Entity<UserSelectedBook>()
                 .HasIndex(g => g.UserId);

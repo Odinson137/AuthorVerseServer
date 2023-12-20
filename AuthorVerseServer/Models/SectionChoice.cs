@@ -1,15 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthorVerseServer.Models
 {
     public class SectionChoice
     {
         [Key]
-        public int SectionChoiceId { get; set; }
-        public int ChapterSectionId { get; set; }
-        public ChapterSection ChapterSection { get; set; } = null!;
+        public int ChoiceId { get; set; }
+        public int ChoiceFlow { get; set; }
+        public required string ChoiceText { get; set; }
+        public int ContentId { get; set; }
         public int TargetSectionId { get; set; } // отправку на нужную главу в соответствии с выбором пользователя
-        public int ChoiceText { get; set; }
+        public ChapterSection TargetSection { get; set; }
     }
 }

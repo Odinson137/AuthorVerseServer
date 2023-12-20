@@ -47,4 +47,8 @@
     <None Include="wwwroot\api\userImages\java-script.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\api\audio\" />
+  </ItemGroup>
+
 </Project>

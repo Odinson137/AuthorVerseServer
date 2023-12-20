@@ -123,6 +123,21 @@ namespace AuthorVerseServer.Repository
             return await booksDTO.ToListAsync();
         }
 
+        public async Task<ShoptBookDTO?> GetShortBookById(int bookId)
+        {
+            var book = await _context.Books
+                .AsNoTracking()
+                .Where(book => book.Permission == Data.Enums.PublicationPermission.Approved)
+                .Where(book => book.BookId == bookId)
+                .Select(book => new ShoptBookDTO()
+                {
+                    Title = book.Title,
+                    AuthorName = book.Author.UserName,
+                }).FirstOrDefaultAsync();
+
+            return book;
+        }
+
         public async Task<DetailBookDTO?> GetBookById(int bookId)
         {
             var book = await _context.Books
@@ -131,20 +146,18 @@ namespace AuthorVerseServer.Repository
                     book.BookId == bookId)
                 .Select(book => new DetailBookDTO()
                 {
-                    BookId = book.BookId,
                     Title = book.Title,
                     Description = book.Description,
                     Author = new UserDTO() { Id = book.Author.Id, UserName = book.Author.UserName },
                     Genres = book.Genres.Select(genre => new GenreDTO() { GenreId = genre.GenreId, Name = genre.Name }).ToList(),
                     Tags = book.Genres.Select(tag => new TagDTO() { TagId = tag.GenreId, Name = tag.Name }).ToList(),
-                    //ImageUrls = book.BookChapters
-                    //        .SelectMany(c => c.ChapterSections.Where(x => !string.IsNullOrEmpty(x.ImageUrl)).Select(x => x.ImageUrl))
-                    //        .ToList(),
+
                     Rating = book.Rating,
                     CountRating = book.CountRating,
                     Choices = book.BookChapters
                             .SelectMany(x => x.ChapterSections
-                            .Where(x => x.SectionChoices != null && x.SectionChoices.Count >= 2))
+                            //.Where(x => x.SectionChoices != null && x.SectionChoices.Count >= 2)
+                            )
                             .Count(),
                     PublicationData = DateOnly.FromDateTime(book.PublicationData),
                     ChapterCount = book.BookChapters.Count(),
@@ -199,11 +212,13 @@ namespace AuthorVerseServer.Repository
                     Rating = book.Comments.Any() ? book.Comments.Average(x => x.ReaderRating) : 0,
                     Endings = book.BookChapters
                             .SelectMany(x => x.ChapterSections
-                            .Where(x => x.NextSectionId == 0))
+                            //.Where(x => x.NextSectionId == 0)
+                            )
                             .Count(),
                     Choices = book.BookChapters
                             .SelectMany(x => x.ChapterSections
-                            .Where(x => x.SectionChoices != null && x.SectionChoices.Count >= 2))
+                            //.Where(x => x.SectionChoices != null && x.SectionChoices.Count >= 2)
+                            )
                             .Count(),
                     BookCoverUrl = book.BookCover,
                     PublicationData = book.PublicationData,

@@ -1,6 +1,7 @@
 ﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Services;
+using Azure;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace Server.Tests.Integrations;
 
@@ -322,9 +324,73 @@ public class BooksControllerIntegrationTests : IClassFixture<WebApplicationFacto
         }
     }
 
+    [Fact]
+    public async Task GetShortBook_Ok_ReturnResult()
+    {
+        // Arrange
+        int bookId = 1;
+
+        // Act
+        var responseBook = await _client.GetAsync($"/api/Book/Short/{bookId}");
+        var contentBook = await responseBook.Content.ReadAsStringAsync();
+        var book = JsonConvert.DeserializeObject<ShoptBookDTO>(contentBook);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, responseBook.StatusCode);
+        Assert.NotNull(book);
+        Assert.False(string.IsNullOrEmpty(book.Title));
+        Assert.False(string.IsNullOrEmpty(book.AuthorName));
+    }
+
+    [Fact]
+    public async Task GetShortBook_NotFound_ReturnNotFound()
+    {
+        // Arrange
+        int bookId = -1;
+
+        // Act
+        var responseBook = await _client.GetAsync($"/api/Book/Short/{bookId}");
+        var contentBook = await responseBook.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, responseBook.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetDetailBook_Ok_ReturnResult()
+    {
+        // Arrange
+        int bookId = 1;
+
+        // Act
+        var responseBook = await _client.GetAsync($"/api/Book/Detail/{bookId}");
+        var contentBook = await responseBook.Content.ReadAsStringAsync();
+        var book = JsonConvert.DeserializeObject<DetailBookDTO>(contentBook);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, responseBook.StatusCode);
+        Assert.NotNull(book);
+        Assert.NotNull(book.Author);
+        Assert.False(string.IsNullOrEmpty(book.Title));
+    }
+
+    [Fact]
+    public async Task GetDetailBook_NotFound_ReturnNotFound()
+    {
+        // Arrange
+        int bookId = -1;
+
+        // Act
+        var responseBook = await _client.GetAsync($"/api/Book/Short/{bookId}");
+        var contentBook = await responseBook.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, responseBook.StatusCode);
+    }
+
     public async Task<DetailBookDTO> GetBook(int bookId)
     {
-        var responseBook = await _client.GetAsync($"/api/Book/{bookId}");
+        var responseBook = await _client.GetAsync($"/api/Book/Detail/{bookId}");
         var contentBook = await responseBook.Content.ReadAsStringAsync();
         var book = JsonConvert.DeserializeObject<DetailBookDTO>(contentBook);
         return book;

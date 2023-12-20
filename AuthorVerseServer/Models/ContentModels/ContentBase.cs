@@ -1,0 +1,11 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AuthorVerseServer.Models.ContentModels
+{
+    public class ContentBase
+    {
+        [Key]
+        public int ContentId { get; set; }
+        public ChapterSection Chapter { get; set; }
+    }
+}
