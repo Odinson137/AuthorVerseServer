@@ -1,11 +1,12 @@
-﻿namespace AuthorVerseServer.Data.Enums
+﻿using AuthorVerseServer.Models.ContentModels;
+
+namespace AuthorVerseServer.Data.Enums
 {
     public enum ContentType
     {
-        Choice,
         Text,
         Audio,
         Video,
-
+        Image,
     }
 }

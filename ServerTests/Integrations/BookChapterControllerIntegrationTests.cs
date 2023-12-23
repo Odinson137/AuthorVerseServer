@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
 
-namespace Server.Tests.Integrations
+namespace ServerTests.Integrations
 {
     public class BookChapterControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {

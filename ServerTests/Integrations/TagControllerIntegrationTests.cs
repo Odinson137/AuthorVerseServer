@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
 
-namespace Server.Tests.Integrations;
+namespace ServerTests.Integrations;
 
 public class TagControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {

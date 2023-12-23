@@ -49,6 +49,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\api\audio\" />
+    <Folder Include="wwwroot\api\videos\" />
   </ItemGroup>
 
 </Project>

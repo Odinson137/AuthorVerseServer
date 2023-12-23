@@ -26,7 +26,7 @@ services.AddScoped<IComment, CommentRepository>();
 services.AddScoped<IBookChapter, BookChapterRepository>();
 services.AddScoped<IGenre, GenreRepository>();
 services.AddScoped<IAccount, AccountRepository>();
-services.AddScoped<ISectionChoice, SectionChoiceRepository>();
+services.AddScoped<IChapterSection, ChapterSectionRepository>();
 services.AddScoped<IBook, BookRepository>();
 services.AddScoped<ICharacter, CharacterRepository>();
 services.AddScoped<INote, NoteRepository>();
@@ -228,11 +228,13 @@ app.UseExceptionHandler(errorApp =>
         var error = context.Features.Get<IExceptionHandlerFeature>();
         if (error != null)
         {
+            //context.Response.StatusCode = error.Error.St;
+            var stackTrace = error.Error.StackTrace; // for debug
+            
             var errorMessage = new
             {
                 message = "Internal Server Error",
                 error = error.Error.Message,
-                stackTrace = error.Error.StackTrace
             };
 
             await context.Response.WriteAsync(JsonConvert.SerializeObject(errorMessage));

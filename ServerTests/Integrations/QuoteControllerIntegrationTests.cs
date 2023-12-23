@@ -8,7 +8,7 @@ using StackExchange.Redis;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace Server.Tests.Integrations;
+namespace ServerTests.Integrations;
 
 
 public class QuoteControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>

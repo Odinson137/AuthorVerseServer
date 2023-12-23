@@ -40,9 +40,10 @@ namespace AuthorVerseServer.Data
         public DbSet<BookQuote> BookQuotes { get; set; }
         public DbSet<ForumMessage> ForumMessages { get; set; }
         public DbSet<CharacterChapter> CharacterChapters { get; set; }
-        public DbSet<ChoiceContent> ChoiceContents { get; set; }
         public DbSet<TextContent> TextContents { get; set; }
         public DbSet<AudioContent> AudioContents { get; set; }
+        public DbSet<ImageContent> ImageContents { get; set; }
+        public DbSet<VideoContent> VideoContents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,13 +84,10 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<CommentBase>().UseTphMappingStrategy();
 
             modelBuilder.Entity<ContentBase>().UseTpcMappingStrategy();
-            //modelBuilder.Entity<TextContent>().ToTable("TextContents");
-            //modelBuilder.Entity<ChoiceContent>().ToTable("ChoiceContents");
-            //modelBuilder.Entity<AudioContent>().ToTable("AudioContents");
+
+            //modelBuilder.Ignore<ContentBase>();
 
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
-
-            //modelBuilder.Entity<BookChapter>().Ignore(u => u.Characters);
 
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.Genres)
@@ -275,20 +273,20 @@ namespace AuthorVerseServer.Data
 
             modelBuilder.Entity<ChapterSection>()
                 .HasOne(m => m.ContentBase)
-                .WithOne(m => m.Chapter)
+                .WithOne(m => m.ChapterSection)
                 .HasForeignKey<ChapterSection>(m => m.ContentId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ChoiceContent>()
-                .HasMany(m => m.SectionChoices)
-                .WithOne()
-                .HasForeignKey(m => m.ContentId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ChapterSection>()
+                .HasMany(c => c.SectionChoices)
+                .WithOne(c => c.ChapterSection)
+                .HasForeignKey(m => m.ChapterSectionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SectionChoice>()
                 .HasOne(m => m.TargetSection)
-                .WithOne()
-                .HasForeignKey<SectionChoice>(m => m.TargetSectionId)
+                .WithMany()
+                .HasForeignKey(m => m.TargetSectionId)
                 .OnDelete(DeleteBehavior.NoAction);
 
 
@@ -320,6 +318,13 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.BookChapterId);
             modelBuilder.Entity<ChapterSection>()
                 .HasIndex(g => g.Number);
+            modelBuilder.Entity<ChapterSection>()
+                .HasIndex(g => g.ChoiceFlow);
+
+            modelBuilder.Entity<SectionChoice>()
+                .HasIndex(g => g.ChapterSectionId);
+            modelBuilder.Entity<SectionChoice>()
+                .HasIndex(g => g.TargetSectionId);
 
             modelBuilder.Entity<Character>()
                 .HasIndex(g => g.BookId);

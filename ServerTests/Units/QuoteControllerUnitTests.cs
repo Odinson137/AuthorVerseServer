@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using StackExchange.Redis;
 
-namespace Server.Tests.Units;
+namespace ServerTests.Units;
 
 public class QuoteControllerUnitTests
 {

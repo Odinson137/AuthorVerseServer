@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
-namespace Server.Tests.Integrations;
+namespace ServerTests.Integrations;
 public class AccoutControllerIntegtationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private CreateJWTtokenService _token;

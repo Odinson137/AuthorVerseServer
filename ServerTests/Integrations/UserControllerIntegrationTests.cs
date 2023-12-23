@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Http.Json;
 
 
-namespace Server.Tests.Integrations;
+namespace ServerTests.Integrations;
 
 public class UserControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {

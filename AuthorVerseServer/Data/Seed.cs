@@ -282,6 +282,8 @@ namespace AuthorVerseServer.Data
                     BookChapter = chapter1,
                     ContentType = ContentType.Text,
                     Number = 1,
+                    ChoiceFlow = 1,
+
                     ContentBase = new TextContent()
                     {
                         Text = "Среди сотен тысяч звёздных систем, скрывающих в себе тайны далеких миров, начинается наше удивительное путешествие. Это история о смелых искателях приключений, готовых исследовать неведомые просторы космоса. Они столкнутся с загадочными цивилизациями, раскроют давно забытые тайны, и, возможно, найдут ответы на самые глубокие вопросы о природе вселенной.\r\n\r\nЭта книга приглашает вас отправиться в захватывающее космическое приключение, полное опасностей и открытий. Вас ждут неизведанные планеты, космические бури и встречи с разумными существами, о которых вы и не могли мечтать. Готовы ли вы покорить звёзды и найти свой след в бескрайних просторах галактики?\r\n\r\nОткройте первую страницу и погрузитесь в этот фантастический мир, где каждая глава — это новое открытие, а каждая строчка — шаг в неизведанные горизонты. Готовьтесь к невероятным приключениям и встречам, которые оставят вас в состоянии постоянного восхищения. Дерзайте, исследователи космоса, потому что неведомые миры ждут вас!",
@@ -295,6 +297,8 @@ namespace AuthorVerseServer.Data
                     BookChapter = chapter1,
                     ContentType = ContentType.Text,
                     Number = 2,
+                    ChoiceFlow = 1,
+
                     ContentBase = new TextContent()
                     {
                         Text = "Вы выбрали бежать наружу. Под открытым небом вас ждут новые приключения и неизведанные опасности.",
@@ -306,11 +310,13 @@ namespace AuthorVerseServer.Data
                 var section3 = new ChapterSection()
                 {
                     BookChapter = chapter1,
-                    ContentType = ContentType.Text,
+                    ContentType = ContentType.Audio,
                     Number = 3,
+                    ChoiceFlow = 1,
+
                     ContentBase = new AudioContent()
                     {
-                        AudioFileUrl = "MiyaGi & Andy Panda - Буревестник.mp3",
+                        Url = "MiyaGi & Andy Panda - Буревестник.mp3",
                     }
                 };
 
@@ -318,35 +324,37 @@ namespace AuthorVerseServer.Data
 
                 var choiceSection1 = new SectionChoice()
                 {
-                    ChoiceFlow = 1,
                     ChoiceText = "Run outside",
 
                     TargetSection = new ChapterSection()
                     {
-                        Number = 4,
+                        Number = 5,
+                        ChoiceFlow = 1,
                         BookChapter = chapter1,
-                        ContentType = ContentType.Text,
-                        ContentBase = new TextContent
+                        ContentType = ContentType.Image,
+                        ContentBase = new ImageContent
                         {
-                            Text = "Вы выбрали бежать наружу. Под открытым небом вас ждут новые приключения и неизведанные опасности."
+                            Url = "javascript-it-юмор-geek-5682739.jpeg",
                         }
+                    }
+                };
+
+                var returnChoiceSection = new ChapterSection()
+                {
+                    Number = 5,
+                    ChoiceFlow = 2,
+                    BookChapter = chapter1,
+                    ContentType = ContentType.Text,
+                    ContentBase = new TextContent
+                    {
+                        Text = "Вы выбрали бежать вперед."
                     }
                 };
 
                 var choiceSection2 = new SectionChoice()
                 {
-                    ChoiceFlow = 2,
                     ChoiceText = "Run forward",
-                    TargetSection = new ChapterSection()
-                    {
-                        Number = 4,
-
-                        ContentType = ContentType.Text,
-                        ContentBase = new TextContent
-                        {
-                            Text = "Вы выбрали бежать вперед."
-                        }
-                    }
+                    TargetSection = returnChoiceSection,
                 };
 
                 var section4 = new ChapterSection()
@@ -354,17 +362,143 @@ namespace AuthorVerseServer.Data
                     BookChapter = chapter1,
                     ContentType = ContentType.Text,
                     Number = 4,
-                    ContentBase = new ChoiceContent()
+                    ChoiceFlow = 1,
+
+                    ContentBase = new TextContent()
                     {
-                        SectionChoices = new List<SectionChoice>()
+                        Text = "Здесь должен быть переход",
+                    },
+                    SectionChoices = new List<SectionChoice>()
+                    {
+                        choiceSection1, choiceSection2,
+                    },
+                };
+
+                chapter1.ChapterSections.Add(section4);
+
+                var section5 = new ChapterSection()
+                {
+                    BookChapter = chapter1,
+                    ContentType = ContentType.Text,
+                    Number = 6,
+                    ChoiceFlow = 1,
+
+                    ContentBase = new TextContent()
+                    {
+                        Text = "Привет, это продолжение первого потока без разделения",
+                    },
+                };
+
+                chapter1.ChapterSections.Add(section5);
+
+                var choiceSection3 = new SectionChoice()
+                {
+                    ChoiceText = "Идти направо",
+
+                    TargetSection = new ChapterSection()
+                    {
+                        Number = 8,
+                        ChoiceFlow = 1,
+                        BookChapter = chapter1,
+                        ContentType = ContentType.Text,
+                        ContentBase = new TextContent
                         {
-                            choiceSection1,
-                            choiceSection2,
+                            Text = "Вы выбрали не на лево, а на право)"
                         }
                     }
                 };
 
-                chapter1.ChapterSections.Add(section4);
+                var choiceSection4 = new SectionChoice()
+                {
+                    ChoiceText = "Идти налево",
+                    TargetSection = new ChapterSection()
+                    {
+                        Number = 8,
+                        ChoiceFlow = 3,
+                        BookChapter = chapter1,
+                        ContentType = ContentType.Text,
+                        ContentBase = new TextContent
+                        {
+                            Text = "Вы выбрали на лево, а не на право)"
+                        }
+                    }
+                };
+
+                var section6 = new ChapterSection()
+                {
+                    BookChapter = chapter1,
+                    ContentType = ContentType.Text,
+                    Number = 7,
+                    ChoiceFlow = 1,
+
+                    ContentBase = new TextContent()
+                    {
+                        Text = "Привет, это продолжение и 7 часть. Во мне есть пути идти направо либо налево написанные с ошибками)",
+                    },
+                    SectionChoices = new List<SectionChoice>()
+                    {
+                        choiceSection3, choiceSection4,
+                    },
+                };
+
+                chapter1.ChapterSections.Add(section6);
+
+                var section7 = new ChapterSection()
+                {
+                    BookChapter = chapter1,
+                    ContentType = ContentType.Text,
+                    Number = 9,
+                    ChoiceFlow = 1,
+
+                    ContentBase = new TextContent()
+                    {
+                        Text = "Сюда ты только что перешёл. И это просто текст. В следующем будет возврат во вторую ветвь",
+                    },
+                };
+
+                chapter1.ChapterSections.Add(section7);
+
+                var choiceSection5 = new SectionChoice()
+                {
+                    ChoiceText = "Вернуться к самому началу. по факту это будет единственный путь. Так тоже можно, кто мешает",
+                    TargetSection = returnChoiceSection,
+                };
+
+                var section8 = new ChapterSection()
+                {
+                    BookChapter = chapter1,
+                    ContentType = ContentType.Text,
+                    Number = 10,
+                    ChoiceFlow = 1,
+
+                    ContentBase = new TextContent()
+                    {
+                        Text = "А и из этой части ты должен будешь перекидываться во второй поток, который был ещё в самом начале либо всё",
+                    },
+                    SectionChoices = new List<SectionChoice>()
+                    {
+                        choiceSection5,
+                    },
+                };
+
+                chapter1.ChapterSections.Add(section8);
+
+                var section9 = new ChapterSection()
+                {
+                    BookChapter = chapter1,
+                    ContentType = ContentType.Text,
+                    Number = 6,
+                    ChoiceFlow = 2,
+
+                    ContentBase = new TextContent()
+                    {
+                        Text = "Конец этой мини истории",
+                    },
+                };
+
+                chapter1.ChapterSections.Add(section9);
+
+
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -543,7 +677,7 @@ namespace AuthorVerseServer.Data
 
                     var comments = new List<Comment>();
                     admin.Notes.Add(note);
-                    for (int i = 0; i < random.Next(5, 20); i++)
+                    for (int i = 0; i < random.Next(5, 10); i++)
                     {
                         comments.Add(new Comment()
                         {
@@ -781,7 +915,7 @@ namespace AuthorVerseServer.Data
                         Book.BookChapters = new List<BookChapter>() { chapter, chapter2, chapter3 };
 
                         var comments = new List<Comment>();
-                        for (int i = 0; i < random.Next(5, 20); i++)
+                        for (int i = 0; i < random.Next(5, 10); i++)
                         {
                             comments.Add(new Comment()
                             {
@@ -814,7 +948,7 @@ namespace AuthorVerseServer.Data
 
                 n = 0;
 
-                for (int b = 0; b < 50; b++)
+                for (int b = 0; b < 40; b++)
                 {
                     User user = new User()
                     {

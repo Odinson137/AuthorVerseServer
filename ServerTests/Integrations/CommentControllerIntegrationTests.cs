@@ -11,7 +11,7 @@ using Azure.Core;
 using System.Net.Http.Json;
 using AuthorVerseServer.Data.Enums;
 
-namespace Server.Tests.Integrations;
+namespace ServerTests.Integrations;
 
 public class CommentControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {

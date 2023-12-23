@@ -12,7 +12,7 @@ using System.Net.Http.Json;
 using System.Text;
 using static Google.Apis.Requests.BatchRequest;
 
-namespace Server.Tests.Integrations;
+namespace ServerTests.Integrations;
 
 public class BooksControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {

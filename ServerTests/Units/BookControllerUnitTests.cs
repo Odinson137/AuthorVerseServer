@@ -12,7 +12,7 @@ using Moq;
 using StackExchange.Redis;
 using System.Security.Claims;
 
-namespace Server.Tests.Units;
+namespace ServerTests.Units;
 
 public class BookControllerUnitTests
 {

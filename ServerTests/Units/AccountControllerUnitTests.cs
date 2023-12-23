@@ -12,7 +12,7 @@ using Moq;
 using System.Security.Claims;
 using Xunit;
 
-namespace Server.Tests.Units;
+namespace ServerTests.Units;
 
 public class AccountControllerUnitTests
 {
