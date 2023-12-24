@@ -4,6 +4,7 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
+using System.Collections.Generic;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -20,13 +21,38 @@ namespace AuthorVerseServer.Controllers
             _redis = redisConnection.GetDatabase();
         }
 
+
+        [HttpGet("GetAllContentBy")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<AllContentDTO>> GetAllContentSections(int chapterId, int flow)
+        {
+            var choiceContent = await _section.GetChoiceAsync(chapterId, flow, 0);
+            int choiceNumber = choiceContent?.Number ?? int.MaxValue;
+            var contentIds = await _section.GetReadSectionsAsync(chapterId, flow, choiceNumber, 0);
+
+            var allContent = new AllContentDTO()
+            {
+                Choice = choiceContent,
+                SectionsDTO = new List<SectionDTO>()
+            };
+
+            foreach (var content in contentIds)
+            {
+                var section = await UseContentType.GetContent(_section, content.ContentType).Invoke(content.ContentId);
+                allContent.SectionsDTO.Add(section);
+            }
+
+            return Ok(allContent);
+        }
+
         [HttpGet("GetManagerBy/{chapterId}/{flow}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         public async Task<ActionResult<ContentManagerDTO>> GetChapterSections(int chapterId, int flow)
         {
             var choiceContent = await _section.GetChoiceAsync(chapterId, flow, 0);
-            int choiceNumber = choiceContent == null ? int.MaxValue : choiceContent.Number;
+            int choiceNumber = choiceContent?.Number ?? int.MaxValue;
             var contentIds = await _section.GetReadSectionsAsync(chapterId, flow, choiceNumber, 0);
 
             ContentManagerDTO mangerDTO = new ContentManagerDTO()
@@ -43,7 +69,7 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<ContentManagerDTO>> GetChapterSections(int chapterId, int flow, int lastChoiceNumber)
         {
             var choiceContent = await _section.GetChoiceAsync(chapterId, flow, lastChoiceNumber);
-            int choiceNumber = choiceContent == null ? int.MaxValue : choiceContent.Number;
+            int choiceNumber = choiceContent?.Number ?? int.MaxValue;
             var contentIds = await _section.GetReadSectionsAsync(chapterId, flow, choiceNumber, lastChoiceNumber);
 
             ContentManagerDTO managerDTO = new ContentManagerDTO()

@@ -15,20 +15,21 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task AddBookQuoteAsync(BookQuote quote)
+        public Task AddBookQuoteAsync(BookQuote quote)
         {
-            await _context.BookQuotes.AddAsync(quote);
+            _context.BookQuotes.AddAsync(quote);
+            return Task.CompletedTask;
         }
 
-        public async Task DeleteBookQuoteAsync(int deleteQuoteId)
+        public Task DeleteBookQuoteAsync(int deleteQuoteId)
         {
-            await _context.BookQuotes.Where(quote => quote.BaseId == deleteQuoteId).ExecuteDeleteAsync();
+            _context.BookQuotes.Where(quote => quote.BaseId == deleteQuoteId).ExecuteDeleteAsync();
+            return Task.CompletedTask;
         }
 
-        public async Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page)
+        public Task<List<QuoteDTO>> GetBookQuotesAsync(int bookId, int page)
         {
-            var quotes = await _context.BookQuotes
-                .AsNoTracking()
+            var quotes = _context.BookQuotes
                 .OrderByDescending(book => book.BaseId)
                 .Where(quote => quote.BookId == bookId)
                 .Skip(5 * page)

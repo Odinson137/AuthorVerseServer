@@ -209,5 +209,24 @@ namespace ServerTests.Integrations
             Assert.Equal(HttpStatusCode.OK, autoResponse.StatusCode);
             Assert.Equal(autoContent, content);
         }
+
+        [Fact]
+        public async Task GetAllContentSections_ShouldReturnPathOfContentIncludingChoice_ReturnsOkResult()
+        {
+            // Arrange
+            int chapterId = 1;
+            int flow = 1;
+
+            // Act
+            var response = await _client.GetAsync($"/api/ChapterSection/GetAllContentBy?chapterId={chapterId}&flow={flow}");
+            var content = await response.Content.ReadAsStringAsync();
+            var allContent = JsonConvert.DeserializeObject<AllContentDTO>(content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(allContent);
+            Assert.True(allContent.SectionsDTO.Count > 1);
+            Assert.NotNull(allContent.Choice);
+        }
     }
 }

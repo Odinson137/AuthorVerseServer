@@ -6,12 +6,12 @@ public interface IBookChapter
 {
     Task<BookChapter?> GetBookChapterAsync(int commentId, string userId);
     Task<bool> AnyChildExistAsync(int commentId);
-    Task<ICollection<BookChapterDTO>> GetBookReadingChaptersAsync(int bookId);
+    Task<List<BookChapterDTO>> GetBookReadingChaptersAsync(int bookId);
     Task<int> GetUserReadingNumberAsync(int bookId, string userId);
     Task<bool> IsAuthorAsync(int chapterId, string userId);
     Task<ChapterInfo?> GetChapterNumberAsync(int chapterId, string userId);
     Task PublicateChapterAsync(int chapterId);
-    Task<ICollection<ShortAuthorChapterDTO>> GetAuthorChaptersAsync(int bookId, string userId);
+    Task<List<ShortAuthorChapterDTO>> GetAuthorChaptersAsync(int bookId, string userId);
     Task<DetaildAuthorChapterDTO?> GetAuthorDetaildChapterAsync(int chapter, string userId);
     Task AddNewChapterAsync(BookChapter chapter);
     Task DeleteChapterAsync(int chapterId);

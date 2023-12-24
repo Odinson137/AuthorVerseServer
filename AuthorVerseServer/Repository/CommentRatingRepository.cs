@@ -14,25 +14,27 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<bool> CheckRatingExistAsync(string userId, int commentId)
+        public Task<bool> CheckRatingExistAsync(string userId, int commentId)
         {
-            return await _context.CommentRatings.AnyAsync(rating =>
+            return _context.CommentRatings.AnyAsync(rating =>
                 rating.UserCommentedId == userId && rating.CommentId == commentId);
         }
 
-        public async Task AddRatingAsync(Rating rating)
+        public Task AddRatingAsync(Rating rating)
         {
-            await _context.CommentRatings.AddAsync(rating);
+            _context.CommentRatings.AddAsync(rating);
+            return Task.CompletedTask;
         }
 
-        public async Task DeleteRatingAsync(int commentId, RatingEntityType entityType)
+        public Task DeleteRatingAsync(int commentId, RatingEntityType entityType)
         {
-            await _context.CommentRatings.Where(x => x.CommentId == commentId && x.Discriminator == entityType).ExecuteDeleteAsync();
+            _context.CommentRatings.Where(x => x.CommentId == commentId && x.Discriminator == entityType).ExecuteDeleteAsync();
+            return Task.CompletedTask;
         }
 
-        public async Task<LikeRating> GetRatingAsync(string userId, int commentId)
+        public Task<LikeRating> GetRatingAsync(string userId, int commentId)
         {
-            return await _context.CommentRatings
+            return _context.CommentRatings
                 .Where(rating => rating.UserCommentedId == userId && rating.CommentId == commentId)
                 .Select(rating => rating.LikeRating)
                 .FirstOrDefaultAsync();
@@ -43,11 +45,12 @@ namespace AuthorVerseServer.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task ChangeRatingAsync(int commentId, RatingEntityType entityType, LikeRating rating)
+        public Task ChangeRatingAsync(int commentId, RatingEntityType entityType, LikeRating rating)
         {
-            await _context.CommentRatings
+            _context.CommentRatings
                 .Where(rating => rating.CommentId == commentId && rating.Discriminator == entityType)
                 .ExecuteUpdateAsync(setter => setter.SetProperty(r => r.LikeRating, rating));
+            return Task.CompletedTask;
         }
 
 

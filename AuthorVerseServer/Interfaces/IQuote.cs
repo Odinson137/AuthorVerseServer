@@ -5,7 +5,7 @@ namespace AuthorVerseServer.Interfaces
 {
     public interface IQuote
     {
-        Task<ICollection<QuoteDTO>> GetBookQuotesAsync(int bookId, int page);
+        Task<List<QuoteDTO>> GetBookQuotesAsync(int bookId, int page);
         Task AddBookQuoteAsync(BookQuote quote);
         Task DeleteBookQuoteAsync(int deleteQuoteId);
         Task SaveAsync();

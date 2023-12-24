@@ -13,9 +13,9 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<ICollection<Note>> GetNoteAsync()
+        public Task<List<Note>> GetNoteAsync()
         {
-            return await _context.Notes.OrderBy(n => n.BaseId).ToListAsync();
+            return _context.Notes.OrderBy(n => n.BaseId).ToListAsync();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<ICollection<GenreDTO>> GetGenreAsync()
+        public Task<List<GenreDTO>> GetGenreAsync()
         {
             var genres = _context.Genres.Select(genre => new GenreDTO
             {
@@ -22,15 +22,17 @@ namespace AuthorVerseServer.Repository
                 Name = genre.Name,
             });
 
-            return await genres.ToListAsync();
+            return genres.ToListAsync();
         }
 
-        public async Task AddGenre(string name)
+        public Task AddGenre(string name)
         {
-            await _context.Genres.AddAsync(new Genre()
+            _context.Genres.AddAsync(new Genre()
             {
                 Name = name
             });
+
+            return Task.CompletedTask;
         }
 
         public async Task Save()

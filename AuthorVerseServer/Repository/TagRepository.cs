@@ -14,15 +14,16 @@ namespace AuthorVerseServer.Repository
         {
             _context = context;
         }
-        public async Task AddTag(string name)
+        public Task AddTag(string name)
         {
-            await _context.Tags.AddAsync(new Tag()
+            _context.Tags.AddAsync(new Tag()
             {
                 Name = name
             });
+            return Task.CompletedTask;
         }
 
-        public async Task<ICollection<TagDTO>> GetTagAsync()
+        public Task<List<TagDTO>> GetTagAsync()
         {
             var tags = _context.Tags.Select(tag => new TagDTO
             {
@@ -30,7 +31,7 @@ namespace AuthorVerseServer.Repository
                 Name = tag.Name,
             });
 
-            return await tags.ToListAsync();
+            return tags.ToListAsync();
         }
 
         public async Task Save()

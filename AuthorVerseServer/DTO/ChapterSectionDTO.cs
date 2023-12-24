@@ -1,5 +1,10 @@
 ﻿namespace AuthorVerseServer.DTO
 {
+    public class AllContentDTO
+    {
+        public ChoiceBaseDTO? Choice { get; set; }
+        public required ICollection<SectionDTO> SectionsDTO { get; set; }
+    }
 
     public class ContentManagerDTO
     {

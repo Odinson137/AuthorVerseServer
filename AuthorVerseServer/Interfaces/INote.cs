@@ -3,6 +3,6 @@ using AuthorVerseServer.Models;
 
 public interface INote
 {
-    Task<ICollection<Note>> GetNoteAsync();
+    Task<List<Note>> GetNoteAsync();
 }
 

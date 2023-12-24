@@ -14,24 +14,26 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<int> ChechExistBookAsync(int bookId)
+        public Task<int> ChechExistBookAsync(int bookId)
         {
-            return await _context.Books.Where(x => x.BookId == bookId).Select(x => x.BookId).FirstOrDefaultAsync();
+            return _context.Books.Where(x => x.BookId == bookId).Select(x => x.BookId).FirstOrDefaultAsync();
         }
 
-        public async Task AddComment(Comment newComment)
+        public Task AddComment(Comment newComment)
         {
-            await _context.Comments.AddAsync(newComment);
+            _context.Comments.AddAsync(newComment);
+            return Task.CompletedTask;
         }
 
-        public async Task DeleteComment(int commentId)
+        public Task DeleteComment(int commentId)
         {
-            await _context.Comments.Where(c => c.BaseId == commentId).ExecuteDeleteAsync();
+            _context.Comments.Where(c => c.BaseId == commentId).ExecuteDeleteAsync();
+            return Task.CompletedTask;
         }
 
-        public async Task<Comment?> GetCommentAsync(int commentId)
+        public Task<Comment?> GetCommentAsync(int commentId)
         {
-            return await _context.Comments.FirstOrDefaultAsync(x=> x.BaseId == commentId);
+            return _context.Comments.FirstOrDefaultAsync(x=> x.BaseId == commentId);
         }
 
         public async Task<int> Save()
@@ -39,7 +41,7 @@ namespace AuthorVerseServer.Repository
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<CommentDTO>> GetCommentsByBookAsync(int bookId, int page, string? userId)
+        public Task<List<CommentDTO>> GetCommentsByBookAsync(int bookId, int page, string? userId)
         {
             var comments = _context.Comments
                 .AsNoTracking()
@@ -67,12 +69,12 @@ namespace AuthorVerseServer.Repository
                     CreatedDateTime = DateOnly.FromDateTime(c.CreatedDateTime),
                 });
 
-            return await comments.ToListAsync();
+            return comments.ToListAsync();
         }
 
-        public async Task<bool> CheckExistCommentAsync(int bookId, string userId)
+        public Task<bool> CheckExistCommentAsync(int bookId, string userId)
         {
-            return await _context.Comments.Where(x => x.BookId == bookId & x.UserId == userId).AnyAsync();
+            return _context.Comments.Where(x => x.BookId == bookId & x.UserId == userId).AnyAsync();
         }
     }
 }

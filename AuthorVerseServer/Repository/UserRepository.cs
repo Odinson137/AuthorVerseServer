@@ -15,17 +15,18 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task CreateMicrosoftUser(MicrosoftUser microsoftUser)
+        public Task CreateMicrosoftUser(MicrosoftUser microsoftUser)
         {
-            await _context.MicrosoftUsers.AddAsync(microsoftUser);
+            _context.MicrosoftUsers.AddAsync(microsoftUser);
+            return Task.CompletedTask;
         }
 
-        public async Task<MicrosoftUser?> GetMicrosoftUser(string azureName)
+        public Task<MicrosoftUser?> GetMicrosoftUser(string azureName)
         {
-            return await _context.MicrosoftUsers.Include(x => x.User).FirstOrDefaultAsync(x => x.AzureName == azureName);
+            return _context.MicrosoftUsers.Include(x => x.User).FirstOrDefaultAsync(x => x.AzureName == azureName);
         }
 
-        public async Task<ICollection<string>> GetUserEmailAsync(int bookId)
+        public Task<List<string>> GetUserEmailAsync(int bookId)
         {
             var emails = _context.UserSelectedBooks
                 .Where(b => b.BookId == bookId)
@@ -33,7 +34,7 @@ namespace AuthorVerseServer.Repository
                 .Where(b => b.User.EmailConfirmed == true)
                 .Select(b => b.User.Email!);
 
-            return await emails.ToListAsync();
+            return emails.ToListAsync();
         }
 
         public async Task Save()

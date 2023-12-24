@@ -9,8 +9,8 @@ public interface ICharacter
     Task<bool> IsAuthorByChapterIdAsync(int chapterId, string userId);
     Task<bool> IsAuthorByBookIdAsync(int bookId, string userId);
     Task<Character?> GetCharacterAsync(int characterId);
-    Task<ICollection<BookCharacterDTO>> GetCharactersAsync(int bookId);
-    Task<ICollection<BookCharacterDTO>> GetCharactersByNameAsync(int bookId, string name);
+    Task<List<BookCharacterDTO>> GetCharactersAsync(int bookId);
+    Task<List<BookCharacterDTO>> GetCharactersByNameAsync(int bookId, string name);
     Task<bool> ExistNameAsync(int bookId, string name);
     Task<bool> ExistCharacterChaption(int chapterId, int characterId);
     Task AddCharacterToBookAsync(Character character);

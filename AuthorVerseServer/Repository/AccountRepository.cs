@@ -2,13 +2,7 @@
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
-using Google.Apis.Util;
-using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Net.NetworkInformation;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AuthorVerseServer.Repository
 {
@@ -20,7 +14,7 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<ICollection<UpdateAccountBook>> CheckUserUpdatesAsync(string userId)
+        public  Task<List<UpdateAccountBook>> CheckUserUpdatesAsync(string userId)
         {
             var books = _context.UserSelectedBooks
                 .AsNoTracking()
@@ -34,12 +28,12 @@ namespace AuthorVerseServer.Repository
                     BookCoverUrl = book.Book.BookCover,
                 });
 
-            return await books.ToListAsync();
+            return  books.ToListAsync();
         }
 
-        public async Task<UserProfileDTO> GetUserAsync(string userId)
+        public  Task<UserProfileDTO> GetUserAsync(string userId)
         {
-            return await _context.Users.Where(data => data.Id == userId).Select(data => new UserProfileDTO
+            return  _context.Users.Where(data => data.Id == userId).Select(data => new UserProfileDTO
             {
                 UserName = data.UserName,
                 Description = data.Description,
@@ -167,7 +161,7 @@ namespace AuthorVerseServer.Repository
             };
         }
 
-        public async Task<ICollection<UserBookDTO>> GetUserBooksAsync(string userId)
+        public  Task<List<UserBookDTO>> GetUserBooksAsync(string userId)
         {
             var books = _context.Books
                 .Where(book => book.AuthorId == userId)
@@ -181,11 +175,11 @@ namespace AuthorVerseServer.Repository
                     Earnings = book.Earnings
                 });
 
-            return await books.ToListAsync();
+            return books.ToListAsync();
         }
 
 
-        public async Task<ICollection<FriendDTO>> GetUserFriendsAsync(string userId)
+        public async Task<List<FriendDTO>> GetUserFriendsAsync(string userId)
         {
             var friends = await _context.Friendships
                 .Where(x => x.User1Id == userId)
@@ -213,9 +207,9 @@ namespace AuthorVerseServer.Repository
             return friendC.ToList();
         }
 
-        public async Task<ICollection<SelectedUserBookDTO>> GetUserSelectedBooksAsync(string userId)
+        public  Task<List<SelectedUserBookDTO>> GetUserSelectedBooksAsync(string userId)
         {
-            return await _context.UserSelectedBooks
+            return  _context.UserSelectedBooks
                 .Where(data => data.UserId == userId)
                 .Select(data=> new SelectedUserBookDTO
                 {
@@ -231,7 +225,7 @@ namespace AuthorVerseServer.Repository
 
         public async Task SaveAsync()
         {
-            await _context.SaveChangesAsync();
+             await _context.SaveChangesAsync();
         }
     }
 }

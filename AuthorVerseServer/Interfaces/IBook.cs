@@ -7,21 +7,21 @@ using Microsoft.EntityFrameworkCore.Storage;
 public interface IBook
 {
     Task Save();
-    Task<ICollection<Book>> GetBooksAsync();
+    Task<List<Book>> GetBooksAsync();
     Task<int> GetCountBooks();
-    Task<ICollection<PopularBook>> GetPopularBooks();
-    Task<ICollection<PopularBook>> GetLastBooks();
-    Task<ICollection<BookDTO>> GetCertainBooksPage(int tag, int genre, int page, string searchText);
+    Task<List<PopularBook>> GetPopularBooks();
+    Task<List<PopularBook>> GetLastBooks();
+    Task<List<BookDTO>> GetCertainBooksPage(int tag, int genre, int page, string searchText);
     Task<int> GetBooksCountByTagsAndGenres(int tagId, int genreId, string searchText);
-    Task<ICollection<MainPopularBook>> GetMainPopularBook();
+    Task<List<MainPopularBook>> GetMainPopularBook();
     Task<DetailBookDTO?> GetBookById(int bookId);
     Task<ShoptBookDTO?> GetShortBookById(int bookId);
     Task<bool> ExistBookAsync(int bookId);
     Task<GenreTagDTO?> GetBookGenresTagsAsync(int bookId);
     Task AddBook(Book book);
-    Task<Genre?> GetGenreById(int id);
-    Task<Tag?> GetTagById(int id);
-    Task<ICollection<MinimalBook>> GetAuthorBooksAsync(string userId);
-    Task<ICollection<MinimalBook>> GetSimilarBooksAsync(int bookId, GenreTagDTO book);
+    ValueTask<Genre?> GetGenreById(int id);
+    ValueTask<Tag?> GetTagById(int id);
+    Task<List<MinimalBook>> GetAuthorBooksAsync(string userId);
+    Task<List<MinimalBook>> GetSimilarBooksAsync(int bookId, GenreTagDTO book);
 }
 

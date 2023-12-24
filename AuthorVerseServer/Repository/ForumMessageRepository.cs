@@ -16,9 +16,9 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<int> AddForumMessageProcedureAsync(SendForumMessageDTO message)
+        public Task<int> AddForumMessageProcedureAsync(SendForumMessageDTO message)
         {
-            int messageId = await _context.AddForumMessageAsync(
+            Task<int> messageId = _context.AddForumMessageAsync(
                 bookId: message.BookId,
                 userId: message.UserId,
                 parentMessageId: message.AnswerId,
@@ -28,40 +28,42 @@ namespace AuthorVerseServer.Repository
         }
 
 
-        public async Task<bool> CheckUserMessageExistAsync(int messageId, string userId)
+        public Task<bool> CheckUserMessageExistAsync(int messageId, string userId)
         {
-            bool value = await _context.ForumMessages
+            var value = _context.ForumMessages
                 .AnyAsync(message => message.UserId == userId && message.MessageId == messageId);
             return value;
         }
 
-        public async Task DeleteMessageAsync(int messageId)
+        public Task DeleteMessageAsync(int messageId)
         {
-            await _context.ForumMessages
+            _context.ForumMessages
                 .Where(message => message.MessageId == messageId)
                 .ExecuteDeleteAsync();
+            return Task.CompletedTask;
         }
 
 
-        public async Task ChangeParentMessage(int messageId)
+        public Task ChangeParentMessage(int messageId)
         {
-            await _context.ForumMessages
+            _context.ForumMessages
                 .Where(message => message.ParrentMessageId == messageId)
                 .ExecuteUpdateAsync(setter => setter
                     .SetProperty(b => b.ParrentMessageId, (int?)null));
+            return Task.CompletedTask;
         }
 
-        public async Task<ForumMessage> GetForumMessageAsync(int messageId)
+        public Task<ForumMessage> GetForumMessageAsync(int messageId)
         {
-            var message = await _context.ForumMessages
+            var message = _context.ForumMessages
                 .Where(message => message.MessageId == messageId)
                 .FirstAsync();
             return message;
         }
 
-        public async Task<ICollection<ForumMessageDTO>> GetForumMessagesAsync(int bookId, int part)
+        public Task<List<ForumMessageDTO>> GetForumMessagesAsync(int bookId, int part)
         {
-            var messages = await _context.ForumMessages
+            var messages = _context.ForumMessages
                 .AsNoTracking()
                 .OrderByDescending(x => x.SendTime)
                 .Where(x => x.BookId == bookId)
@@ -73,7 +75,7 @@ namespace AuthorVerseServer.Repository
                     Text = x.Text,
                     ParrentMessageId = x.ParrentMessageId,
                     SendTime = x.SendTime,
-                }).ToArrayAsync();
+                }).ToListAsync();
             return messages;
         }
 
@@ -87,7 +89,7 @@ namespace AuthorVerseServer.Repository
             return _context.Database.BeginTransaction();
         }
 
-        public async Task<ICollection<ForumMessageDTO>> GetToParentMessagesAsync(int bookId, int lastMessageId, int parentMessageId)
+        public Task<List<ForumMessageDTO>> GetToParentMessagesAsync(int bookId, int lastMessageId, int parentMessageId)
         {
             var messages = _context.ForumMessages
                     .Where(message => message.MessageId > lastMessageId && message.MessageId <= parentMessageId)
@@ -99,7 +101,7 @@ namespace AuthorVerseServer.Repository
                         SendTime = message.SendTime,
                     });
 
-            return await messages.ToListAsync();
+            return messages.ToListAsync();
         }
     }
 }

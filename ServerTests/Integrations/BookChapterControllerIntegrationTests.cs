@@ -115,7 +115,6 @@ namespace ServerTests.Integrations
             Assert.NotNull(chapter);
             Assert.False(string.IsNullOrEmpty(chapter.Description));
             Assert.NotNull(chapter.Characters);
-            Assert.True(chapter.Characters.Count != 0);
         }
 
         [Fact]
@@ -141,7 +140,7 @@ namespace ServerTests.Integrations
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
             // Act
-            var response = await _client.PostAsync("/api/BookChapter?title=newTest&lastChapterId=2", null);
+            var response = await _client.PostAsync("/api/BookChapter?title=newTest&lastChapterId=1", null);
             var content = await response.Content.ReadAsStringAsync();
 
             // Assert

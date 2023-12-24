@@ -1,7 +1,9 @@
 ﻿using AuthorVerseServer.Data;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Frozen;
 
 namespace AuthorVerseServer.Repository
 {
@@ -13,7 +15,7 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public async Task<ChoiceBaseDTO?> GetChoiceAsync(int chapterId, int flow, int lastChoiceNumber)
+        public Task<ChoiceBaseDTO?> GetChoiceAsync(int chapterId, int flow, int lastChoiceNumber)
         {
             var choiceContent = _context.ChapterSections
                 .OrderBy(c => c.Number)
@@ -35,11 +37,10 @@ namespace AuthorVerseServer.Repository
                     }).ToList(),
                 });
 
-            return await choiceContent.FirstOrDefaultAsync();
+            return choiceContent.FirstOrDefaultAsync();
         }
 
-
-        public async Task<ICollection<ContentDTO>> GetReadSectionsAsync(int chapterId, int choiceFlow, int choiceNumber, int lastChoiceNumber = 0)
+        public Task<List<ContentDTO>> GetReadSectionsAsync(int chapterId, int choiceFlow, int choiceNumber, int lastChoiceNumber = 0)
         {
             var choiceContent = _context.ChapterSections
                 .OrderBy(c => c.Number)
@@ -55,11 +56,11 @@ namespace AuthorVerseServer.Repository
                     ContentType = c.ContentType,
                 });
 
-            return await choiceContent.ToListAsync();
+            return choiceContent.ToListAsync();
         }
 
 
-        public async Task<SectionDTO> GetTextContentAsync(int contentId)
+        public Task<SectionDTO> GetTextContentAsync(int contentId)
         {
             var section = _context.TextContents
                 .Where(c => c.ContentId == contentId)
@@ -69,11 +70,11 @@ namespace AuthorVerseServer.Repository
                     Type = Data.Enums.ContentType.Text,
                 });
 
-            return await section.SingleAsync();
+            return section.SingleAsync();
         }
 
 
-        public async Task<SectionDTO> GetAudioContentAsync(int contentId)
+        public Task<SectionDTO> GetAudioContentAsync(int contentId)
         {
             var section = _context.AudioContents
                 .Where(c => c.ContentId == contentId)
@@ -83,10 +84,10 @@ namespace AuthorVerseServer.Repository
                     Type = Data.Enums.ContentType.Audio,
                 });
 
-            return await section.SingleAsync();
+            return section.SingleAsync();
         }
 
-        public async Task<SectionDTO> GetVideoContentAsync(int contentId)
+        public Task<SectionDTO> GetVideoContentAsync(int contentId)
         {
             var section = _context.VideoContents
                 .Where(c => c.ContentId == contentId)
@@ -96,10 +97,10 @@ namespace AuthorVerseServer.Repository
                     Type = Data.Enums.ContentType.Video,
                 });
 
-            return await section.SingleAsync();
+            return section.SingleAsync();
         }
 
-        public async Task<SectionDTO> GetImageContentAsync(int contentId)
+        public Task<SectionDTO> GetImageContentAsync(int contentId)
         {
             var section = _context.ImageContents
                 .Where(c => c.ContentId == contentId)
@@ -109,7 +110,7 @@ namespace AuthorVerseServer.Repository
                     Type = Data.Enums.ContentType.Image,
                 });
 
-            return await section.SingleAsync();
+            return section.SingleAsync();
         }
     }
 }
