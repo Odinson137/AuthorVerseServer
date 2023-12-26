@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorVerseForum", "AuthorV
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForumHubTests", "ForumHubTests\ForumHubTests.csproj", "{3A9FF8DD-0027-425F-BC78-04CE4B443CC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerTests", "ServerTests\ServerTests.csproj", "{1FFE1276-3F71-4682-A937-F604F987B271}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerTests", "ServerTests\ServerTests.csproj", "{1FFE1276-3F71-4682-A937-F604F987B271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

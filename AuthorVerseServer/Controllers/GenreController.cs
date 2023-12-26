@@ -39,8 +39,7 @@ namespace AuthorVerseServer.Controllers
                 return Ok(genresDb);
             }
 
-            var genresCache = JsonConvert.DeserializeObject<List<GenreDTO>>(genres);
-            return Ok(genresCache);
+            return Ok(genres);
         }
 
         [HttpPost("{name}")]
@@ -49,7 +48,7 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<string>> AddGenre(string name)
         {
             await _genre.AddGenre(name);
-            await _genre.Save();
+            await _genre.SaveAsync();
 
             _redis.Remove("genres");
 

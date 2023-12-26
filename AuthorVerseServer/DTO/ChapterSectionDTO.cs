@@ -46,4 +46,10 @@
         public required string Content { get; set; } // если что то бросать всё в серилизацию и в строку если данные не буду стразу в виде строки. Я не собираюсь для каждого нового типа писать свой DTO для отправки
         public required Data.Enums.ContentType Type { get; set; }
     }
+
+    public class TextToRedisContent
+    {
+        public required string Content { get; set; }
+        public Data.Enums.ContentType Type { get; set; }
+    }
 }

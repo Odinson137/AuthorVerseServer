@@ -8,6 +8,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="wwwroot\api\images\37569307.webp" />
     <None Include="wwwroot\api\images\3f56fdacff697f8b003b7882aae2f179.webp" />
     <None Include="wwwroot\api\images\8748cb1354b3ac23f9f05a39f87da339ed50ddbf_hq.webp" />

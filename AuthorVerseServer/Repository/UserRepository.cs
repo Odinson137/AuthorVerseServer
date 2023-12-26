@@ -37,9 +37,9 @@ namespace AuthorVerseServer.Repository
             return emails.ToListAsync();
         }
 
-        public async Task Save()
+        public Task<int> SaveAsync()
         {
-            await _context.SaveChangesAsync();
+            return _context.SaveChangesAsync();
         }
     }
 }

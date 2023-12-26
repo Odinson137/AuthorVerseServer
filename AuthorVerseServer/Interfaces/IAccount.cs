@@ -5,7 +5,7 @@ namespace AuthorVerseServer.Interfaces
 {
     public interface IAccount
     {
-        Task SaveAsync();
+        Task<int> SaveAsync();
         Task<UserProfileDTO> GetUserAsync(string userId);
         Task<List<SelectedUserBookDTO>> GetUserSelectedBooksAsync(string userId); // то что читает пользователь
         Task<CommentPageDTO> GetUserCommentsAsync(CommentType commentType, int page, string searchComment, string userId);

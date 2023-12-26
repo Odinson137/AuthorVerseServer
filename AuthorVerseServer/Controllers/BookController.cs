@@ -171,13 +171,7 @@ namespace AuthorVerseServer.Controllers
 
             await _book.AddBook(book);
 
-            try
-            {
-                await _book.Save();
-            } catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
+            await _book.SaveAsync();
 
             return Ok(book.BookId);
         }

@@ -10,6 +10,6 @@ public interface IComment
     Task<int> ChechExistBookAsync(int bookId);
     Task AddComment(Comment newComment);
     Task DeleteComment(int commentId);
-    Task<int> Save();
+    Task<int> SaveAsync();
 }
 

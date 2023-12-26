@@ -6,7 +6,7 @@ namespace AuthorVerseServer.Interfaces
     public interface IGenre
     {
         Task<List<GenreDTO>> GetGenreAsync();
-        Task Save();
+        Task<int> SaveAsync();
         Task AddGenre(string name);
     }
 }

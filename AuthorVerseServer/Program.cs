@@ -14,6 +14,7 @@ using StackExchange.Redis;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Diagnostics;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -35,6 +36,7 @@ services.AddScoped<ITag, TagRepository>();
 services.AddScoped<IQuote, QuoteRepository>();
 services.AddScoped<IForumMessage, ForumMessageRepository>();
 services.AddScoped<ICommentRating, CommentRatingRepository>();
+services.AddScoped<ISectionCreateManager, SectionCreateManager>();
 
 services.AddScoped<ILoadImage, LoadImageService>();
 services.AddTransient<MailService>();
@@ -61,6 +63,8 @@ services.AddControllers(options =>
     })
     .AddNewtonsoftJson(options =>
     {
+        //options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
+
         options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
 
         options.SerializerSettings.Error = (sender, args) =>
@@ -74,7 +78,11 @@ services.AddControllers(options =>
         };
     });
 
-
+JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+{
+    Formatting = Formatting.Indented,
+    ContractResolver = new CamelCasePropertyNamesContractResolver()
+};
 
 services.AddEndpointsApiExplorer();
 

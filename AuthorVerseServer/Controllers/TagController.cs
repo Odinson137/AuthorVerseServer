@@ -30,7 +30,7 @@ namespace AuthorVerseServer.Controllers
             {
                 var tagsDb = await _tag.GetTagAsync();
 
-                await _redis.SetStringAsync("tags", JsonConvert.SerializeObject(tagsDb), new DistributedCacheEntryOptions
+                await _redis.SetStringAsync("tags", JsonConvert.SerializeObject(tagsDb, Formatting.Indented), new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
                 });
@@ -38,8 +38,7 @@ namespace AuthorVerseServer.Controllers
                 return Ok(tagsDb);
             }
 
-            var deserializedTags = JsonConvert.DeserializeObject<List<TagDTO>>(tags);
-            return Ok(deserializedTags);
+            return Ok(tags);
         }
 
         [HttpPost("{name}")]
@@ -48,7 +47,7 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<string>> AddGenre(string name)
         {
             await _tag.AddTag(name);
-            await _tag.Save();
+            await _tag.SaveAsync();
 
             _redis.Remove("tags");
 

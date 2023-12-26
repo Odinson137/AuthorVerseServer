@@ -6,7 +6,7 @@ namespace AuthorVerseServer.Interfaces
     public interface ITag
     {
         Task<List<TagDTO>> GetTagAsync();
-        Task Save();
+        Task<int> SaveAsync();
         Task AddTag(string name);
     }
 }

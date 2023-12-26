@@ -36,9 +36,9 @@ namespace AuthorVerseServer.Repository
             return _context.Comments.FirstOrDefaultAsync(x=> x.BaseId == commentId);
         }
 
-        public async Task<int> Save()
+        public Task<int> SaveAsync()
         {
-            return await _context.SaveChangesAsync();
+            return _context.SaveChangesAsync();
         }
 
         public Task<List<CommentDTO>> GetCommentsByBookAsync(int bookId, int page, string? userId)

@@ -223,9 +223,9 @@ namespace AuthorVerseServer.Repository
                 }).ToListAsync();
         }
 
-        public async Task SaveAsync()
+        public Task<int> SaveAsync()
         {
-             await _context.SaveChangesAsync();
+             return _context.SaveChangesAsync();
         }
     }
 }

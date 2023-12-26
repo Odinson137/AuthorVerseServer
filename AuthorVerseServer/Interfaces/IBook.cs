@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 public interface IBook
 {
-    Task Save();
+    Task<int> SaveAsync();
     Task<List<Book>> GetBooksAsync();
     Task<int> GetCountBooks();
     Task<List<PopularBook>> GetPopularBooks();

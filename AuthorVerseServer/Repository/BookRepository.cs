@@ -173,9 +173,9 @@ namespace AuthorVerseServer.Repository
             return Task.CompletedTask;
         }
 
-        public async Task Save()
+        public Task<int> SaveAsync()
         {
-            await _context.SaveChangesAsync();
+            return _context.SaveChangesAsync();
         }
 
         public ValueTask<Genre?> GetGenreById(int id)

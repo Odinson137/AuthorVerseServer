@@ -72,7 +72,7 @@ namespace AuthorVerseServer.Controllers
             };
 
             await _comment.AddComment(newComment);
-            await _comment.Save();
+            await _comment.SaveAsync();
             return Ok();
         }
 
@@ -92,7 +92,7 @@ namespace AuthorVerseServer.Controllers
                 return NotFound("Comment not found");
 
             await _comment.DeleteComment(commentId);
-            await _comment.Save();
+            await _comment.SaveAsync();
 
             return Ok();
         }
@@ -114,7 +114,7 @@ namespace AuthorVerseServer.Controllers
             else
                 return NotFound("Comment from this user to this book not found");
 
-            if (await _comment.Save() == 0)
+            if (await _comment.SaveAsync() == 0)
             {
                 return BadRequest("There are problems with save");
             }

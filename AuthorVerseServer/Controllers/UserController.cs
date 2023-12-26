@@ -289,7 +289,7 @@ namespace AuthorVerseServer.Controllers
                 AzureName = userInfo.UserPrincipalName
             });
 
-            await _user.Save();
+            await _user.SaveAsync();
 
             return Ok();
         }

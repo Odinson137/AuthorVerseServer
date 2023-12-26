@@ -3,6 +3,8 @@ using AuthorVerseForum.Hubs;
 using AuthorVerseForum.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
 using System.Text;
 
@@ -67,6 +69,11 @@ services.AddAuthentication(options =>
     };
 });
 
+JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+{
+    Formatting = Formatting.Indented,
+    ContractResolver = new CamelCasePropertyNamesContractResolver()
+};
 
 var app = builder.Build();
 

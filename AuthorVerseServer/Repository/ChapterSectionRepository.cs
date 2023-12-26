@@ -1,9 +1,7 @@
 ﻿using AuthorVerseServer.Data;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Frozen;
 
 namespace AuthorVerseServer.Repository
 {
@@ -15,6 +13,20 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
+        /// <summary>
+        /// Check a new section can be added to the db
+        /// </summary>
+        /// <param name="number">The section number</param>
+        /// <param name="flow">The flow that describe current user choice</param>
+        /// <returns></returns>
+        public Task<bool> CheckAddingNewSectionAsync(int number, int flow)
+        {
+            return _context.ChapterSections
+                .Where(c => c.ChoiceFlow == flow)
+                .Where(c => c.Number == number - 1)
+                .AnyAsync();
+        }
+
         public Task<ChoiceBaseDTO?> GetChoiceAsync(int chapterId, int flow, int lastChoiceNumber)
         {
             var choiceContent = _context.ChapterSections
@@ -22,6 +34,7 @@ namespace AuthorVerseServer.Repository
                 .Where(c => c.BookChapterId == chapterId)
                 .Where(c => c.Number > lastChoiceNumber)
                 .Where(c => c.ChoiceFlow == flow)
+                .Where(c => c.Visibility == true)
                 .Where(c => c.SectionChoices != null && c.SectionChoices.Count() >= 1)
                 .Select(c => new ChoiceBaseDTO
                 {
@@ -48,6 +61,7 @@ namespace AuthorVerseServer.Repository
                 .Where(c => c.ChoiceFlow == choiceFlow)
                 .Where(c => c.Number < choiceNumber)
                 .Where(c => c.Number > lastChoiceNumber)
+                .Where(c => c.Visibility == true)
                 .Select(c => new ContentDTO
                 {
                     ChoiceFlow = c.ChoiceFlow,

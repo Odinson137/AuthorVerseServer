@@ -34,9 +34,9 @@ namespace AuthorVerseServer.Repository
             return tags.ToListAsync();
         }
 
-        public async Task Save()
+        public Task<int> SaveAsync()
         {
-            await _context.SaveChangesAsync();
+            return _context.SaveChangesAsync();
         }
     }
 }
