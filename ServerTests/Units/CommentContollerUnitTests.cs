@@ -118,7 +118,7 @@ public class CommentContollerUnitTests
 
         mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
-        mockCommentRepository.Setup(com => com.Save());
+        mockCommentRepository.Setup(com => com.SaveAsync());
 
         var claim = new Claim(JwtRegisteredClaimNames.Sub, "admin");
 
@@ -155,7 +155,7 @@ public class CommentContollerUnitTests
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
         mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-        mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
+        mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
         // Act
         var result = await controller.ChangeComment(1, "new longer text dgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgfgf");
@@ -171,7 +171,7 @@ public class CommentContollerUnitTests
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
         mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-        mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
+        mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(0);
 
         // Act
         var result = await controller.ChangeComment(1, "new longer text dfgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
@@ -187,7 +187,7 @@ public class CommentContollerUnitTests
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
         mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
 
-        mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
+        mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
         // Act
         var result = await controller.ChangeComment(1, "new dgffffffffffffff longer sdfffffffffffffffddf text must contains 50 letters or more");
@@ -203,7 +203,7 @@ public class CommentContollerUnitTests
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
     //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-    //    mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
+    //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
     //    // Act
     //    var result = await controller.ChangeUpRating(1);
@@ -219,7 +219,7 @@ public class CommentContollerUnitTests
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
     //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-    //    mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
+    //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(0);
 
     //    // Act
     //    var result = await controller.ChangeUpRating(1);
@@ -235,7 +235,7 @@ public class CommentContollerUnitTests
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
     //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-    //    mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
+    //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
     //    // Act
     //    var result = await controller.ChangeUpRating(1);
@@ -252,7 +252,7 @@ public class CommentContollerUnitTests
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
     //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-    //    mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
+    //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
     //    // Act
     //    var result = await controller.ChangeDownRating(1);
@@ -268,7 +268,7 @@ public class CommentContollerUnitTests
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
     //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-    //    mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(0);
+    //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(0);
 
     //    // Act
     //    var result = await controller.ChangeDownRating(1);
@@ -284,7 +284,7 @@ public class CommentContollerUnitTests
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
     //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
 
-    //    mockCommentRepository.Setup(com => com.Save()).ReturnsAsync(1);
+    //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
     //    // Act
     //    var result = await controller.ChangeDownRating(1);

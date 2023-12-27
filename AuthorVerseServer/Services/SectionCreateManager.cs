@@ -1,7 +1,10 @@
-﻿using AuthorVerseServer.DTO;
+﻿using System.Collections;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 
 namespace AuthorVerseServer.Services
@@ -10,45 +13,67 @@ namespace AuthorVerseServer.Services
     {
         private readonly IChapterSection _section;
         private readonly IDatabase _redis;
-        public SectionCreateManager(IChapterSection section, IDatabase redis)
+        public SectionCreateManager(IChapterSection section, IConnectionMultiplexer connectionMultiplexer)
         {
             _section = section;
-            _redis = redis;
+            _redis = connectionMultiplexer.GetDatabase();
         }
 
-        public async ValueTask<SortedSetEntry[]?> CreateManagerAsync(string userId, int chapterId)
+
+        public async ValueTask<ICollection<string>?> CreateManagerAsync(string userId)
         {
             // здесь потому будет множество
-            var stringChapterId = await _redis.StringGetAsync($"manager:{userId}");
-            if (string.IsNullOrEmpty(stringChapterId))
+            var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
+            if (manager.Length == 0)
             {
-                await _redis.StringSetAsync(
-                    $"manager:{userId}",
-                    chapterId,
-                    TimeSpan.FromHours(3),
-                    flags: CommandFlags.FireAndForget).ConfigureAwait(false);
-
                 return null;
             }
             else
             {
                 // отправить пользователю всю информацию об его прошлых изменениях до выхода и повторного входа
-                var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
-                return manager;
+                ICollection<string> collection = new List<string>();
+                foreach (var content in manager)
+                {
+                    var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Score}:{content.Element}");
+                    collection.Add(contentValue!);
+                }
+
+                return collection;
             }
         }
 
-        public async ValueTask<string> CreateTextSectionAsync(string userId, int number, int flow, string text)
+        public async ValueTask<string> DeleteSectionAsync(string userId, int number, int flow)
         {
-            var stringManager = await _redis.StringGetAsync($"manager:{userId}");
-            if (stringManager.IsNullOrEmpty)
+            var managerExist = await _redis.KeyExistsAsync($"manager:{userId}");
+            if (managerExist == false)
             {
                 return "The creating session has time out";
             }
 
-            var checkContent = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
+            var content = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
 
-            if (checkContent.HasValue)
+            if (content.IsNullOrEmpty)
+            {
+                return "The section with this number and in this flow doesn't exist";
+            }
+
+            _redis.SortedSetRemoveAsync($"manager:{userId}", content, flags: CommandFlags.FireAndForget);
+            _redis.KeyDeleteAsync($"content:{userId}:{number}:{flow}", flags: CommandFlags.FireAndForget);
+
+            return string.Empty;
+        }
+
+        public async ValueTask<string> CreateTextSectionAsync(string userId, int number, int flow, string text)
+        {
+            var managerExist = await _redis.KeyExistsAsync($"manager:{userId}");
+            if (managerExist == false)
+            {
+                return "The creating session has time out";
+            }
+
+            var checkContent = await _redis.KeyExistsAsync($"content:{userId}:{number}:{flow}");
+
+            if (checkContent == true)
             {
                 return "The section with this number and in this flow already exists";
             }
@@ -75,5 +100,11 @@ namespace AuthorVerseServer.Services
 
             return string.Empty;
         }
+
+        public ValueTask<string> CreateImageSectionAsync(string userId, int number, int flow, IFormFile file)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

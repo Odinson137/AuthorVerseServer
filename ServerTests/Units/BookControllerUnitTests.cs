@@ -277,7 +277,7 @@ public class BookControllerUnitTests
         mockBookRepository.Verify(repo => repo.GetGenreById(18), Times.Once);
         mockBookRepository.Verify(repo => repo.GetTagById(1), Times.Once);
         mockBookRepository.Verify(repo => repo.GetTagById(2), Times.Once);
-        mockBookRepository.Verify(repo => repo.Save(), Times.Once);
+        mockBookRepository.Verify(repo => repo.SaveAsync(), Times.Once);
     }
 
     [Fact]

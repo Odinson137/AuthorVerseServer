@@ -19,10 +19,11 @@ namespace AuthorVerseServer.Controllers
 
         private readonly CreateJWTtokenService _token;
 
-        public ChapterSectionController(IChapterSection chapterSection, IConnectionMultiplexer redisConnection, ISectionCreateManager manager)
+        public ChapterSectionController(IChapterSection chapterSection, IConnectionMultiplexer redisConnection, ISectionCreateManager manager, CreateJWTtokenService token)
         {
             _section = chapterSection;
             _manager = manager;
+            _token = token;
             _redis = redisConnection.GetDatabase();
         }
 
@@ -134,19 +135,18 @@ namespace AuthorVerseServer.Controllers
         /// <summary>
         /// Registers the user in the chapter creation manager
         /// </summary>
-        /// <param name="chapterId"></param>
         /// <returns>if user already had in process to create the chapter, return CreateManagerDTO else nothing</returns>
         [Authorize]
         [HttpPost("CreateManager")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<SortedSetEntry[]?>> CreateBookManager(int chapterId)
+        public async Task<ActionResult<SortedSetEntry[]?>> CreateBookManager()
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("Token user is not correct");
 
-            return Ok(await _manager.CreateManagerAsync(userId, chapterId));
+            return Ok(await _manager.CreateManagerAsync(userId));
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace AuthorVerseServer.Controllers
         [Authorize]
         [HttpPost("CreateTextSection")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> CreateNewTextSection(int number, int flow, string text)
         {
             var userId = _token.GetIdFromToken(this.User);
@@ -168,6 +168,44 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("Token user is not correct");
 
             var error = await _manager.CreateTextSectionAsync(userId, number, flow, text);
+            if (!string.IsNullOrEmpty(error))
+            {
+                return BadRequest(error);
+            }
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("CreateImageSection")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> CreateNewImageSection(int number, int flow, IFormFile imageFile)
+        {
+            var userId = _token.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            var error = await _manager.CreateImageSectionAsync(userId, number, flow, imageFile);
+            if (!string.IsNullOrEmpty(error))
+            {
+                return BadRequest(error);
+            }
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("DeleteSection")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> DeleteSection(int number, int flow)
+        {
+            var userId = _token.GetIdFromToken(this.User);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("Token user is not correct");
+
+            var error = await _manager.DeleteSectionAsync(userId, number, flow);
             if (!string.IsNullOrEmpty(error))
             {
                 return BadRequest(error);

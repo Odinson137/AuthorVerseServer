@@ -4,7 +4,9 @@ namespace AuthorVerseServer.Interfaces.ServiceInterfaces
 {
     public interface ISectionCreateManager
     {
-        ValueTask<SortedSetEntry[]?> CreateManagerAsync(string userId, int chapterId);
+        ValueTask<ICollection<string>?> CreateManagerAsync(string userId);
+        ValueTask<string> DeleteSectionAsync(string userId, int number, int flow);
         ValueTask<string> CreateTextSectionAsync(string userId, int number, int flow, string text);
+        ValueTask<string> CreateImageSectionAsync(string userId, int number, int flow, IFormFile file);
     }
 }
