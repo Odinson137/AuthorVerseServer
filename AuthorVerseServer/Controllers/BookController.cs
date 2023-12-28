@@ -117,7 +117,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (bookDTO.GenresId.Count == 0)
             {

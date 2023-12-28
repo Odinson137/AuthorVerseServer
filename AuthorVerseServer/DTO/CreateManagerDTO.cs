@@ -14,7 +14,9 @@
     public class FileContent : ContentBase
     {
         public required IFormFile SectionContent { get; set; }
+
     }
+    public class ImageContent : FileContent { }
 
 
 }

@@ -50,6 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\Attributes\" />
     <Folder Include="wwwroot\api\audio\" />
     <Folder Include="wwwroot\api\videos\" />
   </ItemGroup>

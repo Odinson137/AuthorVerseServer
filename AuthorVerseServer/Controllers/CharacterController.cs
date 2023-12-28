@@ -32,7 +32,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByBookIdAsync(bookId, userId) == false)
                 return BadRequest("You are not the Author!");
@@ -50,7 +50,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByBookIdAsync(bookId, userId) == false)
                 return BadRequest("You are not the Author!");
@@ -68,7 +68,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByBookIdAsync(bookId, userId) == false)
                 return BadRequest("You are not the Author!");
@@ -98,7 +98,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByCharacterIdAsync(characterId, userId) == false)
                 return BadRequest("You are not the Author!");
@@ -127,7 +127,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByCharacterIdAsync(characterDTO.CharacterId, userId) == false)
                 return BadRequest("You are not the Author!");
@@ -153,7 +153,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByCharacterIdAsync(characterDTO.CharacterId, userId) == false)
                 return BadRequest("You are not the Author!");
@@ -182,7 +182,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByCharacterIdAsync(characterId, userId) == false)
                 return BadRequest("You are not the Author!");
@@ -201,7 +201,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _token.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (await _character.IsAuthorByCharacterIdAsync(characterId, userId) == false)
                 return BadRequest("You are not the Author!");

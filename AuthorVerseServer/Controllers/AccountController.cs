@@ -37,7 +37,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             UserProfileDTO profile = await _account.GetUserAsync(userId);
             if (profile == null)
@@ -53,7 +53,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             return Ok(await _account.GetUserSelectedBooksAsync(userId));
         }
@@ -69,7 +69,7 @@ namespace AuthorVerseServer.Controllers
 
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             if (--page < 0)
                 return BadRequest("Page is smaller than zero");
@@ -85,7 +85,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var friends = await _account.GetUserFriendsAsync(userId);
 
@@ -99,7 +99,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var books = await _account.GetUserBooksAsync(userId);
             return Ok(books);
@@ -112,7 +112,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var books = await _account.CheckUserUpdatesAsync(userId);
 
@@ -127,7 +127,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)

@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using AuthorVerseServer.Data.Patterns;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
+using AuthorVerseServer.Models;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,12 +22,13 @@ namespace AuthorVerseServer.Services
         }
 
 
-        public async ValueTask<ICollection<string>?> CreateManagerAsync(string userId)
+        public async ValueTask<ICollection<string>?> CreateManagerAsync(string userId, int chapterId)
         {
             // здесь потому будет множество
             var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
             if (manager.Length == 0)
             {
+                _redis.StringSetAsync($"managerInfo:{userId}", chapterId, TimeSpan.FromMinutes(1), flags: CommandFlags.FireAndForget);
                 return null;
             }
             else
@@ -42,13 +45,26 @@ namespace AuthorVerseServer.Services
             }
         }
 
+        public async Task ManagerSaveAsync(string userId)
+        {
+            var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
+            //ICollection<ContentBase> collection = new List<ContentBase>();
+            foreach (var content in manager)
+            {
+                var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Element}:{content.Score}");
+                var contentTypeBase = UseContentFromJson.GetContent(contentValue);
+                // записывать в файл потом после получение в виде out Название папки!!!
+                //collection.Add(contentBase!);
+            }
+        }
+
         public async ValueTask<string> DeleteSectionAsync(string userId, int number, int flow)
         {
-            var managerExist = await _redis.KeyExistsAsync($"manager:{userId}");
-            if (managerExist == false)
-            {
-                return "The creating session has time out";
-            }
+            //var managerExist = await _redis.KeyExistsAsync($"manager:{userId}");
+            //if (managerExist == false)
+            //{
+            //    return "The creating session has time out";
+            //}
 
             var content = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
 
@@ -65,8 +81,8 @@ namespace AuthorVerseServer.Services
 
         public async ValueTask<string> CreateTextSectionAsync(string userId, int number, int flow, string text)
         {
-            var managerExist = await _redis.KeyExistsAsync($"manager:{userId}");
-            if (managerExist == false)
+            var managerInfo = await _redis.StringGetAsync($"managerInfo:{userId}");
+            if (!int.TryParse(managerInfo, out int chapterId))
             {
                 return "The creating session has time out";
             }
@@ -78,12 +94,14 @@ namespace AuthorVerseServer.Services
                 return "The section with this number and in this flow already exists";
             }
 
-            // проверить на возможность добавления данных в бд,
-            // то есть узнать не содержится ли элемент с такими параметрами уже в бд 
-            // и узнать является ли передаваемый number последующим в коллекции в данном потоке
-            if (await _section.CheckAddingNewSectionAsync(number, flow))
+            var checkBeforeAsync = await _redis.KeyExistsAsync($"content:{userId}:{number-1}:{flow}");
+
+            if (checkBeforeAsync == false)
             {
-                return "The section cannot be added to the db";
+                if (await _section.CheckAddingNewSectionAsync(chapterId, flow) != number - 1)
+                {
+                    return "The section cannot be added to the db";
+                }
             }
 
             var content = new TextContent()

@@ -26,7 +26,7 @@ namespace AuthorVerseServer.Controllers.BaseRating
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var rating = await _rating.GetRatingAsync(userId, commentId);
 
@@ -65,7 +65,7 @@ namespace AuthorVerseServer.Controllers.BaseRating
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var rating = await _rating.GetRatingAsync(userId, commentId);
 
@@ -103,7 +103,7 @@ namespace AuthorVerseServer.Controllers.BaseRating
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var rating = await _rating.GetRatingAsync(userId, commentId);
 

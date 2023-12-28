@@ -1,8 +1,8 @@
-﻿using AuthorVerseServer.Data.Patterns;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.Data.Patterns;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
-using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
@@ -11,20 +11,16 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ChapterSectionController : ControllerBase
+    public class ChapterSectionController : AuthorVerseController
     {
         private readonly IChapterSection _section;
-        private readonly IDatabase _redis;
         private readonly ISectionCreateManager _manager;
 
-        private readonly CreateJWTtokenService _token;
-
-        public ChapterSectionController(IChapterSection chapterSection, IConnectionMultiplexer redisConnection, ISectionCreateManager manager, CreateJWTtokenService token)
+        public ChapterSectionController(IChapterSection chapterSection, 
+            ISectionCreateManager manager)
         {
             _section = chapterSection;
             _manager = manager;
-            _token = token;
-            _redis = redisConnection.GetDatabase();
         }
 
 
@@ -61,7 +57,7 @@ namespace AuthorVerseServer.Controllers
             int choiceNumber = choiceContent?.Number ?? int.MaxValue;
             var contentIds = await _section.GetReadSectionsAsync(chapterId, flow, choiceNumber, 0);
 
-            ContentManagerDTO mangerDTO = new ContentManagerDTO()
+            var mangerDTO = new ContentManagerDTO()
             {
                 ContentsDTO = contentIds,
                 Choice = choiceContent,
@@ -137,16 +133,13 @@ namespace AuthorVerseServer.Controllers
         /// </summary>
         /// <returns>if user already had in process to create the chapter, return CreateManagerDTO else nothing</returns>
         [Authorize]
-        [HttpPost("CreateManager")]
+        [HttpPost("CreateManager/{chapterId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<SortedSetEntry[]?>> CreateBookManager()
+        public async Task<ActionResult<ICollection<string>?>> CreateBookManager(int chapterId)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
-
-            return Ok(await _manager.CreateManagerAsync(userId));
+            var value = await _manager.CreateManagerAsync(UserId, chapterId);
+            return Ok(value);
         }
 
         /// <summary>
@@ -163,11 +156,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> CreateNewTextSection(int number, int flow, string text)
         {
-            var userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
-
-            var error = await _manager.CreateTextSectionAsync(userId, number, flow, text);
+            var error = await _manager.CreateTextSectionAsync(UserId, number, flow, text);
             if (!string.IsNullOrEmpty(error))
             {
                 return BadRequest(error);
@@ -182,11 +171,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> CreateNewImageSection(int number, int flow, IFormFile imageFile)
         {
-            var userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
-
-            var error = await _manager.CreateImageSectionAsync(userId, number, flow, imageFile);
+            var error = await _manager.CreateImageSectionAsync(UserId, number, flow, imageFile);
             if (!string.IsNullOrEmpty(error))
             {
                 return BadRequest(error);
@@ -196,16 +181,27 @@ namespace AuthorVerseServer.Controllers
         }
 
         [Authorize]
-        [HttpPost("DeleteSection")]
+        [HttpPost("FinallySave")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> SaveSectionFromManager(int number, int flow)
+        {
+            await _manager.ManagerSaveAsync(UserId);
+            //if (!string.IsNullOrEmpty(error))
+            //{
+            //    return BadRequest(error);
+            //}
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpDelete("DeleteSection")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> DeleteSection(int number, int flow)
         {
-            var userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
-
-            var error = await _manager.DeleteSectionAsync(userId, number, flow);
+            var error = await _manager.DeleteSectionAsync(UserId, number, flow);
             if (!string.IsNullOrEmpty(error))
             {
                 return BadRequest(error);

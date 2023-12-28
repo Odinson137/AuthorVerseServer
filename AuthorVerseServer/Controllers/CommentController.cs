@@ -49,7 +49,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             User? user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -85,7 +85,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             var isExist = await _comment.CheckExistCommentAsync(commentId, userId);
             if (isExist == false)
@@ -106,7 +106,7 @@ namespace AuthorVerseServer.Controllers
         {
             string? userId = _jWTtokenService.GetIdFromToken(this.User);
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("Token user is not correct");
+                return Unauthorized("Token user is not correct");
 
             Comment? comment = await _comment.GetCommentAsync(commentId);
             if (comment != null)

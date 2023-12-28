@@ -16,15 +16,16 @@ namespace AuthorVerseServer.Repository
         /// <summary>
         /// Check a new section can be added to the db
         /// </summary>
-        /// <param name="number">The section number</param>
+        /// <param name="chapterId"></param>
         /// <param name="flow">The flow that describe current user choice</param>
         /// <returns></returns>
-        public Task<bool> CheckAddingNewSectionAsync(int number, int flow)
+        public Task<int> CheckAddingNewSectionAsync(int chapterId, int flow)
         {
-            return _context.ChapterSections
+            var value = _context.ChapterSections
+                .Where(c => c.BookChapterId == chapterId)
                 .Where(c => c.ChoiceFlow == flow)
-                .Where(c => c.Number == number - 1)
-                .AnyAsync();
+                .MaxAsync(c => c.Number);
+            return value;
         }
 
         public Task<ChoiceBaseDTO?> GetChoiceAsync(int chapterId, int flow, int lastChoiceNumber)

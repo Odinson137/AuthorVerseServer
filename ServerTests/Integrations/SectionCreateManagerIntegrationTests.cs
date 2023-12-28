@@ -1,6 +1,5 @@
 ﻿using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +7,8 @@ using AuthorVerseServer.DTO;
 using Newtonsoft.Json;
 using System.Net;
 using StackExchange.Redis;
-using AuthorVerseServer.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Http;
 
 namespace ServerTests.Integrations
 {
@@ -18,11 +16,12 @@ namespace ServerTests.Integrations
     {
         private readonly HttpClient _client;
         private readonly IDatabase _redis;
+        private readonly IConnectionMultiplexer redisService;
 
         public SectionCreateManagerIntegrationTests(WebApplicationFactory<Program> factory)
         {
             var configuration = factory.Services.GetRequiredService<IConfiguration>();
-            var redisService = factory.Services.GetRequiredService<IConnectionMultiplexer>();
+            redisService = factory.Services.GetRequiredService<IConnectionMultiplexer>();
             _redis = redisService.GetDatabase();
 
             var token = new CreateJWTtokenService(configuration);
@@ -32,26 +31,35 @@ namespace ServerTests.Integrations
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
         }
 
+        private async Task ClearTable()
+        {
+            var endpoints = redisService.GetEndPoints();
+            var server = redisService.GetServer(endpoints.First());
+
+            var keys = server.Keys();
+            foreach (var key in keys)
+            {
+                await _redis.KeyDeleteAsync(key);
+            }
+        }
+
         [Fact]
         public async Task CreateBookManager_AddNullDataToRedis_ReturnsOkResult()
         {
             // Arrange
-            await _redis.KeyDeleteAsync($"manager:admin");
+            await ClearTable();
 
             // Act
-            var response = await _client.PostAsync($"/api/ChapterSection/CreateManager", null);
+            var response = await _client.PostAsync($"/api/ChapterSection/CreateManager/1", null);
 
+            var chapterId = await _redis.KeyExistsAsync("managerInfo:admin");
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            Assert.True(chapterId);
         }
 
-
-        [Fact]
-        public async Task CreateBookManager_AddDLastManagerFromRedis_ReturnsOkResult()
+        private async Task AddValueToRedisAsync(int number, int flow)
         {
-            // Arrange
-            await _redis.KeyDeleteAsync($"manager:admin");
-            await _redis.KeyDeleteAsync($"content:admin:1:1");
             var testContent = new TextContent()
             {
                 SectionContent = "test",
@@ -60,13 +68,82 @@ namespace ServerTests.Integrations
             };
 
             string value = JsonConvert.SerializeObject(testContent);
-            await _redis.SortedSetAddAsync($"manager:admin", 1, 1, flags: CommandFlags.FireAndForget);
-            await _redis.StringSetAsync($"content:admin:1:1", value, TimeSpan.FromSeconds(10), flags: CommandFlags.FireAndForget);
+            await _redis.SortedSetAddAsync($"manager:admin", number, 1,  flags: CommandFlags.FireAndForget);
+            await _redis.StringSetAsync($"managerInfo:admin", 1, flags: CommandFlags.FireAndForget);
+            await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
+        }
+
+        [Fact]
+        public async Task CreateBookManager_AddLastManagerFromRedis_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await AddValueToRedisAsync(1, 1);
 
             // Act
-            var response = await _client.PostAsync($"/api/ChapterSection/CreateManager", null);
+            var response = await _client.PostAsync($"/api/ChapterSection/CreateManager/1", null);
             var content = await response.Content.ReadAsStringAsync();
             var contents = JsonConvert.DeserializeObject<ICollection<string>>(content);
+
+            var isExistManagerInfo = await _redis.KeyExistsAsync($"managerInfo:admin");
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(isExistManagerInfo);
+            Assert.NotNull(contents);
+            Assert.True(contents.Count > 0);
+        }
+
+
+        [Fact]
+        public async Task CreateNewTextSection_CheckDataInRedis_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await AddValueToRedisAsync(11, 1);
+
+            const int number = 12;
+            const int flow = 1;
+
+            // Act
+            var response = await _client.PostAsync($"/api/ChapterSection/CreateTextSection?number={number}&flow={flow}&text=test", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var isExistContent = await _redis.KeyExistsAsync($"content:admin:{number}:{flow}");
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(isExistContent);
+        }
+
+        [Fact]
+        public async Task CreateNewTextSection_CheckDataInDb_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await AddValueToRedisAsync(1, 1);
+
+            const int number = 11;
+            const int flow = 1;
+
+            // Act
+            var response = await _client.PostAsync($"/api/ChapterSection/CreateTextSection?number={number}&flow={flow}&text=test", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var isExistContent = await _redis.KeyExistsAsync($"content:admin:{number}:{flow}");
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(isExistContent);
+        }
+
+        [Fact]
+        public async Task SaveSectionFromManager_Ok_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await AddValueToRedisAsync(11, 1);
+
+            // Act
+            var response = await _client.PostAsync($"/api/ChapterSection/FinallySave", null);
+            var content = await response.Content.ReadAsStringAsync();
 
             var isExistManager = await _redis.KeyExistsAsync($"manager:admin");
             var isExistContent = await _redis.KeyExistsAsync($"content:admin:1:1");
@@ -74,8 +151,25 @@ namespace ServerTests.Integrations
             Assert.True(response.IsSuccessStatusCode);
             Assert.True(isExistManager);
             Assert.True(isExistContent);
-            Assert.NotNull(contents);
-            Assert.True(contents.Count > 0);
+        }
+
+        [Fact]
+        public async Task DeleteSection_DeleteFromRedis_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await AddValueToRedisAsync(1, 1);
+
+            // Act
+            var response = await _client.PostAsync($"/api/ChapterSection/DeleteSection?number=1&flow=1&text=test", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var isExistManager = await _redis.KeyExistsAsync($"manager:admin");
+            var isExistContent = await _redis.KeyExistsAsync($"content:admin:1:1");
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(isExistManager);
+            Assert.True(isExistContent);
         }
     }
 }
