@@ -16,34 +16,41 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json.Serialization;
 
-var builder = WebApplication.CreateBuilder(args);
-var services = builder.Services;
-var configuration = builder.Configuration;
+    var builder = WebApplication.CreateBuilder(args);
+    var services = builder.Services;
+    var configuration = builder.Configuration;
 
 
-// Add services to the container.
-services.AddScoped<IChapterSection, ChapterSectionRepository>();
-services.AddScoped<IComment, CommentRepository>();
-services.AddScoped<IBookChapter, BookChapterRepository>();
-services.AddScoped<IGenre, GenreRepository>();
-services.AddScoped<IAccount, AccountRepository>();
-services.AddScoped<IChapterSection, ChapterSectionRepository>();
-services.AddScoped<IBook, BookRepository>();
-services.AddScoped<ICharacter, CharacterRepository>();
-services.AddScoped<INote, NoteRepository>();
-services.AddScoped<IUser, UserRepository>();
-services.AddScoped<ITag, TagRepository>();
-services.AddScoped<IQuote, QuoteRepository>();
-services.AddScoped<IForumMessage, ForumMessageRepository>();
-services.AddScoped<ICommentRating, CommentRatingRepository>();
-services.AddScoped<ISectionCreateManager, SectionCreateManager>();
+    // Add services to the container.
+    services.AddScoped<IChapterSection, ChapterSectionRepository>();
+    services.AddScoped<IComment, CommentRepository>();
+    services.AddScoped<IBookChapter, BookChapterRepository>();
+    services.AddScoped<IGenre, GenreRepository>();
+    services.AddScoped<IAccount, AccountRepository>();
+    services.AddScoped<IChapterSection, ChapterSectionRepository>();
+    services.AddScoped<IBook, BookRepository>();
+    services.AddScoped<ICharacter, CharacterRepository>();
+    services.AddScoped<INote, NoteRepository>();
+    services.AddScoped<IUser, UserRepository>();
+    services.AddScoped<ITag, TagRepository>();
+    services.AddScoped<IQuote, QuoteRepository>();
+    services.AddScoped<IForumMessage, ForumMessageRepository>();
+    services.AddScoped<ICommentRating, CommentRatingRepository>();
+    services.AddScoped<ISectionCreateManager, SectionCreateManager>();
 
-services.AddScoped<ILoadImage, LoadImageService>();
-services.AddTransient<MailService>();
-services.AddTransient<GenerateRandomNameService>();
-services.AddSingleton<CreateJWTtokenService>();
+    services.AddScoped<LoadFileService>();
+    services.AddScoped<ISectionCreateManager, SectionCreateManager>();
+    services.AddTransient<MailService>();
+    services.AddTransient<GenerateRandomNameService>();
+    services.AddSingleton<CreateJWTtokenService>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+    services.AddLogging(builder =>
+    {
+        builder.AddConsole();
+        builder.AddDebug();
+    });
 
 services.AddControllers(options =>
     {
@@ -113,14 +120,6 @@ services.AddSwaggerGen(c =>
                     }
                 });
 });
-
-ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
-{
-    builder.AddConsole(); 
-    builder.AddDebug();
-});
-
-
 
 services.AddDbContext<DataContext>(options =>
 {
@@ -229,6 +228,7 @@ using (var scope = app.Services.CreateScope())
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
+    
     {
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
@@ -237,7 +237,6 @@ app.UseExceptionHandler(errorApp =>
         if (error != null)
         {
             //context.Response.StatusCode = error.Error.St;
-            var stackTrace = error.Error.StackTrace; // for debug
             
             var errorMessage = new
             {

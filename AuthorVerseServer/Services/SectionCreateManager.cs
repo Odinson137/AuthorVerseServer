@@ -1,13 +1,12 @@
-﻿using System.Collections;
+﻿using AsyncAwaitBestPractices;
 using AuthorVerseServer.Data.Patterns;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
-using AuthorVerseServer.Models;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
+using System;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AuthorVerseServer.Services
 {
@@ -15,9 +14,14 @@ namespace AuthorVerseServer.Services
     {
         private readonly IChapterSection _section;
         private readonly IDatabase _redis;
-        public SectionCreateManager(IChapterSection section, IConnectionMultiplexer connectionMultiplexer)
+        private readonly LoadFileService _loadFile;
+        private readonly ILogger<LoadFileService> _logger;
+
+        public SectionCreateManager(IChapterSection section, IConnectionMultiplexer connectionMultiplexer, LoadFileService loadFile, ILogger<LoadFileService> logger)
         {
             _section = section;
+            _loadFile = loadFile;
+            _logger = logger;
             _redis = connectionMultiplexer.GetDatabase();
         }
 
@@ -37,7 +41,7 @@ namespace AuthorVerseServer.Services
                 ICollection<string> collection = new List<string>();
                 foreach (var content in manager)
                 {
-                    var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Score}:{content.Element}");
+                    var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Element}:{content.Score}");
                     collection.Add(contentValue!);
                 }
 
@@ -48,15 +52,24 @@ namespace AuthorVerseServer.Services
         public async Task ManagerSaveAsync(string userId)
         {
             var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
-            //ICollection<ContentBase> collection = new List<ContentBase>();
             foreach (var content in manager)
             {
                 var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Element}:{content.Score}");
-                var contentTypeBase = UseContentFromJson.GetContent(contentValue);
-                // записывать в файл потом после получение в виде out Название папки!!!
-                //collection.Add(contentBase!);
+                var contentTypeBase = UseContentFromJson.GetContent(contentValue, out string folder);
+                
+                if (contentTypeBase is FileContent fileContent)
+                {
+                    var name = _loadFile.GetUniqueName(fileContent.SectionContent, fileContent.Expansion);
+                    await _loadFile.CreateFileAsync(fileContent.SectionContent, name, folder);
+                }
             }
         }
+
+        private void Print(Exception ex)
+        {
+            _logger.LogError($"Ошибка при сохранение данных. Ошибка: {ex}");
+        }
+
 
         public async ValueTask<string> DeleteSectionAsync(string userId, int number, int flow)
         {
@@ -114,14 +127,41 @@ namespace AuthorVerseServer.Services
             string value = JsonConvert.SerializeObject(content);
 
             _redis.StringSetAsync($"content:{userId}:{number}:{flow}", value, TimeSpan.FromHours(3), flags: CommandFlags.FireAndForget);
-            _redis.SortedSetAddAsync($"manager:{userId}", flow, number, flags: CommandFlags.FireAndForget);
+            _redis.SortedSetAddAsync($"manager:{userId}", number, flow, flags: CommandFlags.FireAndForget);
 
             return string.Empty;
         }
 
-        public ValueTask<string> CreateImageSectionAsync(string userId, int number, int flow, IFormFile file)
+        public async ValueTask<string> CreateImageSectionAsync(string userId, int number, int flow, IFormFile file)
         {
-            throw new NotImplementedException();
+            var content = new ImageContent()
+            {
+                SectionContent = GetBytesFromIFormFile(file),
+                Expansion = Path.GetExtension(file.FileName),
+                Operation = Data.Enums.ChangeType.Create,
+                Type = Data.Enums.ContentType.Image,
+            };
+
+            string value = JsonConvert.SerializeObject(content);
+
+            await _redis.StringSetAsync($"content:{userId}:{number}:{flow}", value, TimeSpan.FromHours(3), flags: CommandFlags.FireAndForget);
+            await _redis.SortedSetAddAsync($"manager:{userId}", number, flow, flags: CommandFlags.FireAndForget);
+
+            return string.Empty;
+        }
+
+        byte[] GetBytesFromIFormFile(IFormFile file)
+        {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                // Копирование содержимого файла в MemoryStream
+                file.CopyTo(memoryStream);
+
+                // Получение массива байтов из MemoryStream
+                byte[] byteArray = memoryStream.ToArray();
+
+                return byteArray;
+            }
         }
 
     }

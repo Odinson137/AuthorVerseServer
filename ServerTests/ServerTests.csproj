@@ -10,6 +10,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\javascript-it-юмор-geek-5682739.jpeg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Images\javascript-it-юмор-geek-5682739.jpeg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Microsoft.TestPlatform" Version="17.8.0" />
@@ -29,6 +40,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthorVerseServer\AuthorVerseServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\api\sectionImages\" />
   </ItemGroup>
 
 </Project>

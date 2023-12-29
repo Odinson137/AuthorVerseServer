@@ -22,7 +22,6 @@ services.AddControllers();
 services.AddEndpointsApiExplorer();
 
 services.AddSignalR();
-services.AddSignalR();
 
 
 services.AddLogging(builder =>

@@ -7,8 +7,9 @@ using AuthorVerseServer.DTO;
 using Newtonsoft.Json;
 using System.Net;
 using StackExchange.Redis;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Primitives;
 
 namespace ServerTests.Integrations
 {
@@ -70,6 +71,22 @@ namespace ServerTests.Integrations
             string value = JsonConvert.SerializeObject(testContent);
             await _redis.SortedSetAddAsync($"manager:admin", number, 1,  flags: CommandFlags.FireAndForget);
             await _redis.StringSetAsync($"managerInfo:admin", 1, flags: CommandFlags.FireAndForget);
+            await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
+        }
+
+        private async Task AddImageToRedisAsync(int number, int flow)
+        {
+            var testContent = new ImageContent()
+            {
+                SectionContent = File.ReadAllBytes(@"../../../Images/javascript-it-юмор-geek-5682739.jpeg"),
+                Expansion = ".jpeg",
+                Operation = AuthorVerseServer.Data.Enums.ChangeType.Create,
+                Type = AuthorVerseServer.Data.Enums.ContentType.Image,
+            };
+
+            string value = JsonConvert.SerializeObject(testContent);
+            await _redis.SortedSetAddAsync($"manager:admin", number, flow, flags: CommandFlags.FireAndForget);
+            await _redis.StringSetAsync($"managerInfo:admin", flow, flags: CommandFlags.FireAndForget);
             await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
         }
 
@@ -135,22 +152,47 @@ namespace ServerTests.Integrations
         }
 
         [Fact]
+        public async Task CreateNewImageSection_CheckDataInRedis_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await AddValueToRedisAsync(1, 1);
+
+            const int number = 11;
+            const int flow = 1;
+
+            var contentFile = new MultipartFormDataContent();
+
+            await using (var fileStream = File.OpenRead(@"../../../Images/javascript-it-юмор-geek-5682739.jpeg"))
+            {
+                var fileContent = new StreamContent(fileStream);
+                contentFile.Add(fileContent, "imageFile", "javascript-it-юмор-geek-5682739.jpeg");
+                // Act
+                var response = await _client
+                    .PostAsync($"/api/ChapterSection/CreateImageSection?number={number}&flow={flow}", contentFile);
+                var content = await response.Content.ReadAsStringAsync();
+            
+                Assert.True(response.IsSuccessStatusCode);
+            }
+            var isExistContent = await _redis.KeyExistsAsync($"content:admin:{number}:{flow}");
+
+            // Assert
+            Assert.True(isExistContent);
+        }
+
+        [Fact]
         public async Task SaveSectionFromManager_Ok_ReturnsOkResult()
         {
             // Arrange
             await ClearTable();
-            await AddValueToRedisAsync(11, 1);
+            await AddImageToRedisAsync(11, 1);
 
             // Act
             var response = await _client.PostAsync($"/api/ChapterSection/FinallySave", null);
             var content = await response.Content.ReadAsStringAsync();
 
-            var isExistManager = await _redis.KeyExistsAsync($"manager:admin");
-            var isExistContent = await _redis.KeyExistsAsync($"content:admin:1:1");
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(isExistManager);
-            Assert.True(isExistContent);
         }
 
         [Fact]

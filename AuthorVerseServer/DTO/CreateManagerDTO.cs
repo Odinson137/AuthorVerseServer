@@ -13,7 +13,8 @@
 
     public class FileContent : ContentBase
     {
-        public required IFormFile SectionContent { get; set; }
+        public required byte[] SectionContent { get; set; }
+        public required string Expansion { get; set; }
 
     }
     public class ImageContent : FileContent { }

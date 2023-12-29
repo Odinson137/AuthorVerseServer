@@ -18,10 +18,10 @@ namespace AuthorVerseServer.Controllers
         private readonly IAccount _account;
         private readonly CreateJWTtokenService _jWTtokenService;
         private readonly UserManager<User> _userManager;
-        private readonly ILoadImage _loadImage;
+        private readonly ILoadFile _loadImage;
 
         public AccountController(
-            IAccount account, CreateJWTtokenService jWTtokenService, UserManager<User> userManager, ILoadImage loadImage)
+            IAccount account, CreateJWTtokenService jWTtokenService, UserManager<User> userManager, ILoadFile loadImage)
         {
             _account = account;
             _jWTtokenService = jWTtokenService;
@@ -147,7 +147,7 @@ namespace AuthorVerseServer.Controllers
             if (profile.Logo != null)
             {
                 string nameFile = _loadImage.GetUniqueName(profile.Logo);
-                await _loadImage.CreateImageAsync(profile.Logo, nameFile, "Images");
+                await _loadImage.CreateFileAsync(profile.Logo, nameFile, "Images");
                 user.LogoUrl = nameFile;
             } else
             {

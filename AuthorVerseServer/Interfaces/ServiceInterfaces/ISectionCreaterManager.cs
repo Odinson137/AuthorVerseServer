@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using AuthorVerseServer.DTO;
+using StackExchange.Redis;
 
 namespace AuthorVerseServer.Interfaces.ServiceInterfaces
 {

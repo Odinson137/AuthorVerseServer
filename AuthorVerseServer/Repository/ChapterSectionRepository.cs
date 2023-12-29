@@ -1,6 +1,7 @@
 ﻿using AuthorVerseServer.Data;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Models.ContentModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorVerseServer.Repository
@@ -126,6 +127,26 @@ namespace AuthorVerseServer.Repository
                 });
 
             return section.SingleAsync();
+        }
+
+        public Task AddContentAsync(Models.ContentModels.TextContent content)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddContentAsync(Models.ContentModels.ImageContent content)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddContentAsync(VideoContent content)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddContentAsync(AudioContent content)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -16,10 +16,10 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IBook _book;
         private readonly IDatabase _redis;
-        private readonly ILoadImage _loadImage;
+        private readonly ILoadFile _loadImage;
         private readonly CreateJWTtokenService _jWTtokenService;
 
-        public BookController(IBook book, IConnectionMultiplexer redisConnection, ILoadImage loadImage, CreateJWTtokenService jWTtokenService)
+        public BookController(IBook book, IConnectionMultiplexer redisConnection, ILoadFile loadImage, CreateJWTtokenService jWTtokenService)
         {
             _book = book;
             _redis = redisConnection.GetDatabase();
@@ -138,7 +138,7 @@ namespace AuthorVerseServer.Controllers
             if (bookDTO.BookCoverImage != null)
             {
                 string nameFile = _loadImage.GetUniqueName(bookDTO.BookCoverImage);
-                await _loadImage.CreateImageAsync(bookDTO.BookCoverImage, nameFile, "Images");
+                await _loadImage.CreateFileAsync(bookDTO.BookCoverImage, nameFile, "Images");
                 book.BookCover = nameFile;
             }
 

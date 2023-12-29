@@ -20,12 +20,12 @@ public class AccountControllerUnitTests
     private readonly AccountController _accountController;
     private readonly Mock<UserManager<User>> _mockUserManager;
     private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
-    private readonly Mock<ILoadImage> _mockLoadImage;
+    private readonly Mock<ILoadFile> _mockLoadImage;
 
     public AccountControllerUnitTests()
     {
         _mockAccount = new Mock<IAccount>();
-        _mockLoadImage = new Mock<ILoadImage>();
+        _mockLoadImage = new Mock<ILoadFile>();
         _mockUserManager = new Mock<UserManager<User>>(
             Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
         _mockJWTTokenService = new Mock<CreateJWTtokenService>();
@@ -465,7 +465,7 @@ public class AccountControllerUnitTests
         _mockUserManager.Setup(a => a.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(failedIdentityResult);
 
         _mockLoadImage.Setup(a => a.GetUniqueName(It.IsAny<IFormFile>())).Returns("uniqueName");
-        _mockLoadImage.Setup(a => a.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), "Images"));
+        _mockLoadImage.Setup(a => a.CreateFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), "Images"));
 
         _mockAccount.Setup(a => a.SaveAsync());
 
@@ -493,7 +493,7 @@ public class AccountControllerUnitTests
         _mockUserManager.Setup(a => a.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(failedIdentityResult);
 
         _mockLoadImage.Setup(a => a.GetUniqueName(It.IsAny<IFormFile>())).Returns("uniqueName");
-        _mockLoadImage.Setup(a => a.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), "Images"));
+        _mockLoadImage.Setup(a => a.CreateFileAsync(It.IsAny<IFormFile>(), It.IsAny<string?>(), "Images"));
 
         _mockAccount.Setup(a => a.SaveAsync());
 

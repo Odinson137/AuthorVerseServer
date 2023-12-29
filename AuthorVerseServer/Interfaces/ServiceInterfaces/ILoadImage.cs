@@ -1,8 +1,8 @@
 ﻿namespace AuthorVerseServer.Interfaces.ServiceInterfaces
 {
-    public interface ILoadImage
+    public interface ILoadFile
     {
         string GetUniqueName(IFormFile file);
-        Task CreateImageAsync(IFormFile file, string path, string imagesFolder);
+        Task CreateFileAsync(IFormFile file, string path, string imagesFolder);
     }
 }

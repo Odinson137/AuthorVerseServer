@@ -15,9 +15,9 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly ICharacter _character;
         private readonly CreateJWTtokenService _token;
-        private readonly ILoadImage _loadImage;
+        private readonly ILoadFile _loadImage;
 
-        public CharacterController(ICharacter character, CreateJWTtokenService token, ILoadImage loadImage)
+        public CharacterController(ICharacter character, CreateJWTtokenService token, ILoadFile loadImage)
         {
             _character = character;
             _token = token;
@@ -164,7 +164,7 @@ namespace AuthorVerseServer.Controllers
                 return NotFound("Character not found");
 
             string nameFile = _loadImage.GetUniqueName(characterDTO.Image);
-            await _loadImage.CreateImageAsync(characterDTO.Image, nameFile, "Images");
+            await _loadImage.CreateFileAsync(characterDTO.Image, nameFile, "Images");
             character.CharacterImageUrl = nameFile;
 
             await _character.SaveAsync();

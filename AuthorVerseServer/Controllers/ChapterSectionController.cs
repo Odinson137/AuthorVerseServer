@@ -180,11 +180,12 @@ namespace AuthorVerseServer.Controllers
             return Ok();
         }
 
+
         [Authorize]
         [HttpPost("FinallySave")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> SaveSectionFromManager(int number, int flow)
+        public async Task<ActionResult> SaveSectionFromManager()
         {
             await _manager.ManagerSaveAsync(UserId);
             //if (!string.IsNullOrEmpty(error))

@@ -18,7 +18,7 @@ public class BookControllerUnitTests
 {
     readonly Mock<IBook> mockBookRepository;
     readonly Mock<UserManager<User>> mockUserManager;
-    readonly Mock<ILoadImage> mockLoadImage;
+    readonly Mock<ILoadFile> mockLoadImage;
     readonly BookController controller;
     private readonly Mock<IDatabase> _redis;
     private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
@@ -26,7 +26,7 @@ public class BookControllerUnitTests
     {
         mockBookRepository = new Mock<IBook>();
         mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        mockLoadImage = new Mock<ILoadImage>();
+        mockLoadImage = new Mock<ILoadFile>();
         _mockJWTTokenService = new Mock<CreateJWTtokenService>();
         var redisConnection = new Mock<IConnectionMultiplexer>();
 
@@ -191,7 +191,7 @@ public class BookControllerUnitTests
         mockBookRepository.Setup(repo => repo.GetTagById(It.IsAny<int>()))
                         .ReturnsAsync((int tagId) => tagId == 1 ? tag1 : tag2);
 
-        mockLoadImage.Setup(repo => repo.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()));
+        mockLoadImage.Setup(repo => repo.CreateFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()));
 
         // Act
         var result = await controller.CreateBook(bookDTO);
@@ -199,7 +199,7 @@ public class BookControllerUnitTests
         // Assert
         var objectResult = Assert.IsType<ActionResult<int>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
-        mockLoadImage.Verify(repo => repo.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        mockLoadImage.Verify(repo => repo.CreateFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -237,7 +237,7 @@ public class BookControllerUnitTests
         // Assert
         var objectResult = Assert.IsType<ActionResult<int>>(result);
         Assert.IsType<OkObjectResult>(result.Result);
-        mockLoadImage.Verify(repo => repo.CreateImageAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        mockLoadImage.Verify(repo => repo.CreateFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
