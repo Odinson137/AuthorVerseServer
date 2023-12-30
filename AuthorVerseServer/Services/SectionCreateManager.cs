@@ -1,12 +1,10 @@
-﻿using AsyncAwaitBestPractices;
-using AuthorVerseServer.Data.Patterns;
-using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.Data.JsonModels;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
+using AuthorVerseServer.Models;
 using Newtonsoft.Json;
 using StackExchange.Redis;
-using System;
-using static System.Net.Mime.MediaTypeNames;
+using AuthorVerseServer.Models.ContentModels;
 
 namespace AuthorVerseServer.Services
 {
@@ -41,7 +39,7 @@ namespace AuthorVerseServer.Services
                 ICollection<string> collection = new List<string>();
                 foreach (var content in manager)
                 {
-                    var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Element}:{content.Score}");
+                    var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Score}:{content.Element}");
                     collection.Add(contentValue!);
                 }
 
@@ -49,20 +47,58 @@ namespace AuthorVerseServer.Services
             }
         }
 
-        public async Task ManagerSaveAsync(string userId)
+        public async Task<string> ManagerSaveAsync(string userId)
         {
+            var managerInfo = await _redis.StringGetAsync($"managerInfo:{userId}");
+            if (!int.TryParse(managerInfo, out int chapterId))
+            {
+                return "The creating session has time out";
+            }
+
             var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
             foreach (var content in manager)
             {
-                var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Element}:{content.Score}");
-                var contentTypeBase = UseContentFromJson.GetContent(contentValue, out string folder);
-                
-                if (contentTypeBase is FileContent fileContent)
+                int number = (int)content.Score;
+                int flow = int.Parse(content.Element.ToString().Split(":")[0]);
+
+                var contentValue = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
+
+                var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+                var contentDTO = JsonConvert.DeserializeObject<ContentBaseJM>(contentValue!, settings);
+
+                var model = contentDTO.CreateModel();
+
+                if (contentDTO is IFileContent fileContent)
                 {
-                    var name = _loadFile.GetUniqueName(fileContent.SectionContent, fileContent.Expansion);
-                    await _loadFile.CreateFileAsync(fileContent.SectionContent, name, folder);
+                    await _loadFile.CreateFileAsync(fileContent.SectionContent, fileContent.Url, fileContent.Path);
                 }
+
+                var section = new ChapterSection()
+                {
+                    BookChapterId = chapterId,
+                    ChoiceFlow = flow,
+                    Number = number,
+                    ContentType = contentDTO.Type,
+                    ContentBase = model,
+                };
+
+                await _section.AddContentAsync(section);
+                //await contentDTO.AddContext(_section, model);
             }
+
+            await _section.SaveAsync();
+
+            return string.Empty;
+        }
+
+        public TextContent CreateModel(TextContentJM textContent)
+        {
+            var model = new TextContent()
+            {
+                Text = textContent.SectionContent,
+            };
+
+            return model;
         }
 
         private void Print(Exception ex)
@@ -117,35 +153,56 @@ namespace AuthorVerseServer.Services
                 }
             }
 
-            var content = new TextContent()
+            var content = new TextContentJM()
             {
                 SectionContent = text,
                 Operation = Data.Enums.ChangeType.Create,
-                Type = Data.Enums.ContentType.Text,
             };
 
             string value = JsonConvert.SerializeObject(content);
 
             _redis.StringSetAsync($"content:{userId}:{number}:{flow}", value, TimeSpan.FromHours(3), flags: CommandFlags.FireAndForget);
-            _redis.SortedSetAddAsync($"manager:{userId}", number, flow, flags: CommandFlags.FireAndForget);
+            _redis.SortedSetAddAsync($"manager:{userId}",flow, number, flags: CommandFlags.FireAndForget);
 
             return string.Empty;
         }
 
         public async ValueTask<string> CreateImageSectionAsync(string userId, int number, int flow, IFormFile file)
         {
-            var content = new ImageContent()
+            var managerInfo = await _redis.StringGetAsync($"managerInfo:{userId}");
+            if (!int.TryParse(managerInfo, out int chapterId))
+            {
+                return "The creating session has time out";
+            }
+
+            var checkContent = await _redis.KeyExistsAsync($"content:{userId}:{number}:{flow}");
+
+            if (checkContent == true)
+            {
+                return "The section with this number and in this flow already exists";
+            }
+
+            var checkBeforeAsync = await _redis.KeyExistsAsync($"content:{userId}:{number - 1}:{flow}");
+
+            if (checkBeforeAsync == false)
+            {
+                if (await _section.CheckAddingNewSectionAsync(chapterId, flow) != number - 1)
+                {
+                    return "The section cannot be added to the db";
+                }
+            }
+
+            var content = new ImageContentJM()
             {
                 SectionContent = GetBytesFromIFormFile(file),
                 Expansion = Path.GetExtension(file.FileName),
                 Operation = Data.Enums.ChangeType.Create,
-                Type = Data.Enums.ContentType.Image,
             };
 
             string value = JsonConvert.SerializeObject(content);
 
-            await _redis.StringSetAsync($"content:{userId}:{number}:{flow}", value, TimeSpan.FromHours(3), flags: CommandFlags.FireAndForget);
-            await _redis.SortedSetAddAsync($"manager:{userId}", number, flow, flags: CommandFlags.FireAndForget);
+            _redis.StringSetAsync($"content:{userId}:{number}:{flow}", value, TimeSpan.FromHours(3), flags: CommandFlags.FireAndForget);
+            _redis.SortedSetAddAsync($"manager:{userId}", flow, number, flags: CommandFlags.FireAndForget);
 
             return string.Empty;
         }

@@ -242,6 +242,7 @@ app.UseExceptionHandler(errorApp =>
             {
                 message = "Internal Server Error",
                 error = error.Error.Message,
+                exp = error.Error.InnerException,
             };
 
             await context.Response.WriteAsync(JsonConvert.SerializeObject(errorMessage));

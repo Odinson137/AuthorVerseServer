@@ -20,3 +20,5 @@ obj/
 
 /ServerTests/bin
 /ServerTests/obj
+
+/ServerTests/wwwroot/api/sectionImages/

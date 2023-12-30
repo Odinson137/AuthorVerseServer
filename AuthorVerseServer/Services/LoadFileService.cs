@@ -13,7 +13,7 @@ namespace AuthorVerseServer.Services
             return $"Image_{DateTime.Now:yyyyMMdd_HHmmss}{Path.GetExtension(file.FileName)}";
         }
 
-        public string GetUniqueName(byte[] file, string extension)
+        public string GetUniqueName(string extension)
         {
             return $"Image_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
         }
@@ -31,7 +31,7 @@ namespace AuthorVerseServer.Services
         {
             await using (var stream = File.Create($@"../../../wwwroot/api/{imagesFolder}/{nameFile}"))
             {
-                stream.Write(file, 0, file.Length);
+                await stream.WriteAsync(file, 0, file.Length);
             }
         }
 #else

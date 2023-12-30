@@ -3,6 +3,8 @@ using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models.ContentModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using TextContent = AuthorVerseServer.Models.ContentModels.TextContent;
 
 namespace AuthorVerseServer.Repository
 {
@@ -12,6 +14,11 @@ namespace AuthorVerseServer.Repository
         public ChapterSectionRepository(DataContext context)
         {
             _context = context;
+        }
+
+        public Task<int> SaveAsync()
+        {
+            return _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -129,24 +136,36 @@ namespace AuthorVerseServer.Repository
             return section.SingleAsync();
         }
 
-        public Task AddContentAsync(Models.ContentModels.TextContent content)
+
+        public Task AddContentAsync<T>(T content)
         {
-            throw new NotImplementedException();
+            _context.AddAsync(content!);
+            return Task.CompletedTask;
         }
 
-        public Task AddContentAsync(Models.ContentModels.ImageContent content)
+        public Task AddContentAsync(TextContent content)
         {
-            throw new NotImplementedException();
+            _context.TextContents.AddAsync(content);
+            return Task.CompletedTask;
+        }
+
+        public Task AddContentAsync(ImageContent content)
+        {
+            _context.ImageContents.AddAsync(content);
+            return Task.CompletedTask;
         }
 
         public Task AddContentAsync(VideoContent content)
         {
-            throw new NotImplementedException();
+            _context.VideoContents.AddAsync(content);
+            return Task.CompletedTask;
         }
 
         public Task AddContentAsync(AudioContent content)
         {
-            throw new NotImplementedException();
+            _context.AudioContents.AddAsync(content);
+            return Task.CompletedTask;
         }
+
     }
 }

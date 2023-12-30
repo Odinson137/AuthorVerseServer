@@ -1,12 +1,17 @@
-﻿using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.Data.JsonModels;
+using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Models.ContentModels;
+using AuthorVerseServer.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AuthorVerseServer.Data.Patterns
 {
-    public class UseContentFromJson
+    public static class UseContentFromJson
     {
-        public static ContentBase GetContent(string contentValue, out string? folder)
+        //public delegate Task UseContentContent<in T>(T content);
+
+        public static Type GetContent(string contentValue, out string? folder)
         {
             var jsonObject = JObject.Parse(contentValue!);
             var contentType = jsonObject["type"]!.ToObject<Enums.ContentType>();
@@ -14,13 +19,12 @@ namespace AuthorVerseServer.Data.Patterns
             {
                 case Enums.ContentType.Text:
                     folder = string.Empty;
-                    return JsonConvert.DeserializeObject<TextContent>(contentValue)!;
-                    //var content = jsonObject.ToObject<TextContent>()!;
-                    //_section.AddContentAsync(content);
-                    //return content;
+                    //var textContent = JsonConvert.DeserializeObject<TextContentJM>(contentValue)!;
+                    return typeof(TextContentJM);
                 case Enums.ContentType.Image:
                     folder = "sectionImages";
-                    return JsonConvert.DeserializeObject<ImageContent>(contentValue)!;
+                    //var imageContent = JsonConvert.DeserializeObject<ImageContentJM>(contentValue);
+                    return typeof(TextContentJM);
                 default:
                     throw new NotSupportedException($"Unsupported content type: {contentType}");
             }

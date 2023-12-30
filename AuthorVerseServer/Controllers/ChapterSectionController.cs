@@ -187,11 +187,11 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> SaveSectionFromManager()
         {
-            await _manager.ManagerSaveAsync(UserId);
-            //if (!string.IsNullOrEmpty(error))
-            //{
-            //    return BadRequest(error);
-            //}
+            string error = await _manager.ManagerSaveAsync(UserId);
+            if (!string.IsNullOrEmpty(error))
+            {
+                return BadRequest(error);
+            }
 
             return Ok();
         }

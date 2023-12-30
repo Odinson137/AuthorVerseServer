@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using AuthorVerseServer.DTO;
 using Newtonsoft.Json;
 using System.Net;
+using AuthorVerseServer.Data.JsonModels;
+using AuthorVerseServer.Models.ContentModels;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
@@ -61,32 +63,32 @@ namespace ServerTests.Integrations
 
         private async Task AddValueToRedisAsync(int number, int flow)
         {
-            var testContent = new TextContent()
+            var testContent = new TextContentJM()
             {
                 SectionContent = "test",
                 Operation = AuthorVerseServer.Data.Enums.ChangeType.Create,
-                Type = AuthorVerseServer.Data.Enums.ContentType.Text,
             };
 
-            string value = JsonConvert.SerializeObject(testContent);
-            await _redis.SortedSetAddAsync($"manager:admin", number, 1,  flags: CommandFlags.FireAndForget);
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            string value = JsonConvert.SerializeObject(testContent, settings);
+            await _redis.SortedSetAddAsync($"manager:admin", $"{flow}:{number}", number, flags: CommandFlags.FireAndForget);
             await _redis.StringSetAsync($"managerInfo:admin", 1, flags: CommandFlags.FireAndForget);
             await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
         }
 
         private async Task AddImageToRedisAsync(int number, int flow)
         {
-            var testContent = new ImageContent()
+            var testContent = new ImageContentJM()
             {
                 SectionContent = File.ReadAllBytes(@"../../../Images/javascript-it-юмор-geek-5682739.jpeg"),
                 Expansion = ".jpeg",
                 Operation = AuthorVerseServer.Data.Enums.ChangeType.Create,
-                Type = AuthorVerseServer.Data.Enums.ContentType.Image,
             };
 
-            string value = JsonConvert.SerializeObject(testContent);
-            await _redis.SortedSetAddAsync($"manager:admin", number, flow, flags: CommandFlags.FireAndForget);
-            await _redis.StringSetAsync($"managerInfo:admin", flow, flags: CommandFlags.FireAndForget);
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            string value = JsonConvert.SerializeObject(testContent, settings);
+            await _redis.SortedSetAddAsync($"manager:admin", $"{flow}:{number}", number, flags: CommandFlags.FireAndForget);
+            await _redis.StringSetAsync($"managerInfo:admin", 1, flags: CommandFlags.FireAndForget);
             await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
         }
 

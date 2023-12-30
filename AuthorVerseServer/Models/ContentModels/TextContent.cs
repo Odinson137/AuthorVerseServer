@@ -2,6 +2,6 @@
 {
     public class TextContent : ContentBase
     {
-        public string Text { get; set; }
+        public required string Text { get; set; }
     }
 }
