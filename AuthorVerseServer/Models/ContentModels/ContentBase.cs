@@ -6,6 +6,7 @@ namespace AuthorVerseServer.Models.ContentModels
     {
         [Key]
         public int ContentId { get; set; }
+        //public int ChapterSectionId { get; set; }
         public ChapterSection ChapterSection { get; set; }
     }
 }

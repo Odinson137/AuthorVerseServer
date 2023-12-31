@@ -1,10 +1,10 @@
 ﻿using AuthorVerseServer.Data;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
+using AuthorVerseServer.Models;
 using AuthorVerseServer.Models.ContentModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using TextContent = AuthorVerseServer.Models.ContentModels.TextContent;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AuthorVerseServer.Repository
 {
@@ -19,6 +19,37 @@ namespace AuthorVerseServer.Repository
         public Task<int> SaveAsync()
         {
             return _context.SaveChangesAsync();
+        }
+
+        //public Task DeleteContentByContentIdAsync(int contentId)
+        //{
+        //    return _context.ChapterSections
+        //        .Where(c => c.ContentId == contentId)
+        //        .Select(c => c.ContentBase)
+        //        .ExecuteDeleteAsync();
+        //}
+
+        //public Task DeleteContentAsync(int chapterId, int number, int flow)
+        //{
+        //    return _context.ChapterSections
+        //        .Where(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow)
+        //        .Select(c => c.ContentBase)
+        //        .ExecuteDeleteAsync();
+        //}
+
+        public void DeleteSection(ChapterSection chapter)
+        {
+            _context.ChapterSections.Remove(chapter);
+
+            //return _context.ChapterSections
+            //    .Where(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow)
+            //    .ExecuteDeleteAsync();
+        }
+
+        public Task<ChapterSection> GetSectionAsync(int chapterId, int number, int flow)
+        {
+            return _context.ChapterSections
+                .SingleAsync(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow);
         }
 
         /// <summary>
@@ -142,30 +173,5 @@ namespace AuthorVerseServer.Repository
             _context.AddAsync(content!);
             return Task.CompletedTask;
         }
-
-        public Task AddContentAsync(TextContent content)
-        {
-            _context.TextContents.AddAsync(content);
-            return Task.CompletedTask;
-        }
-
-        public Task AddContentAsync(ImageContent content)
-        {
-            _context.ImageContents.AddAsync(content);
-            return Task.CompletedTask;
-        }
-
-        public Task AddContentAsync(VideoContent content)
-        {
-            _context.VideoContents.AddAsync(content);
-            return Task.CompletedTask;
-        }
-
-        public Task AddContentAsync(AudioContent content)
-        {
-            _context.AudioContents.AddAsync(content);
-            return Task.CompletedTask;
-        }
-
     }
 }

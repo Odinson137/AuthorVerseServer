@@ -5,7 +5,7 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Redis;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -152,14 +152,17 @@ namespace AuthorVerseServer.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost("CreateTextSection")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> CreateNewTextSection(int number, int flow, string text)
         {
-            var error = await _manager.CreateTextSectionAsync(UserId, number, flow, text);
-            if (!string.IsNullOrEmpty(error))
+            try
             {
-                return BadRequest(error);
+                await _manager.CreateTextSectionAsync(UserId, number, flow, text);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
             return Ok();
@@ -167,34 +170,22 @@ namespace AuthorVerseServer.Controllers
 
         [Authorize]
         [HttpPost("CreateImageSection")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> CreateNewImageSection(int number, int flow, IFormFile imageFile)
         {
-            var error = await _manager.CreateImageSectionAsync(UserId, number, flow, imageFile);
-            if (!string.IsNullOrEmpty(error))
+            try
             {
-                return BadRequest(error);
+                await _manager.CreateImageSectionAsync(UserId, number, flow, imageFile);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
             return Ok();
         }
 
-
-        [Authorize]
-        [HttpPost("FinallySave")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> SaveSectionFromManager()
-        {
-            string error = await _manager.ManagerSaveAsync(UserId);
-            if (!string.IsNullOrEmpty(error))
-            {
-                return BadRequest(error);
-            }
-
-            return Ok();
-        }
 
         [Authorize]
         [HttpDelete("DeleteSection")]
@@ -210,5 +201,21 @@ namespace AuthorVerseServer.Controllers
 
             return Ok();
         }
+
+        [Authorize]
+        [HttpPost("FinallySave")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> SaveSectionFromManager()
+        {
+            await _manager.ManagerSaveAsync(UserId);
+            //if (!string.IsNullOrEmpty(error))
+            //{
+            //    return BadRequest(error);
+            //}
+
+            return Ok();
+        }
+
     }
 }

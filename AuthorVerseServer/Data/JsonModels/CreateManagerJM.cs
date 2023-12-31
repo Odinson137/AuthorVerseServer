@@ -1,10 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using AuthorVerseServer.Data.Enums;
-using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
 using AuthorVerseServer.Models.ContentModels;
-using Microsoft.AspNetCore.Components;
 
 namespace AuthorVerseServer.Data.JsonModels
 {
@@ -14,7 +10,7 @@ namespace AuthorVerseServer.Data.JsonModels
     [JsonDerivedType(typeof(ImageContentJM))]
     public class ContentBaseJM
     {
-        public required Enums.ChangeType Operation { get; set; }
+        public required ChangeType Operation { get; set; }
 
         public virtual ContentBase CreateModel()
         {
@@ -22,7 +18,7 @@ namespace AuthorVerseServer.Data.JsonModels
         }
 
         [JsonIgnore]
-        public virtual ContentType Type { get; set; } = ContentType.Text;
+        public virtual ContentType Type { get; set; }
     }
 
     public class TextContentJM : ContentBaseJM

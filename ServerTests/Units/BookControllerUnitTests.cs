@@ -102,7 +102,7 @@ public class BookControllerUnitTests
         var result = await controller.CreateBook(bookDTO);
 
         // Assert
-        Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.IsType<UnauthorizedObjectResult>(result.Result);
     }
 
     [Fact]

@@ -34,6 +34,12 @@ namespace AuthorVerseServer.Services
                 await stream.WriteAsync(file, 0, file.Length);
             }
         }
+
+        public void DeleteFile(string fileName, string folderPath)
+        {
+            File.Delete($@"../../../wwwroot/api/{folderPath}/{fileName}");
+        }
+
 #else
         public async Task CreateFileAsync(byte[] file, string nameFile, string imagesFolder)
         {
@@ -41,6 +47,11 @@ namespace AuthorVerseServer.Services
             {
                 stream.Write(file, 0, file.Length);
             }
+        }
+        
+        public void DeleteFile(string fileName, string folderPath)
+        {
+            File.Delete($@"./wwwroot/api/{folderPath}/{fileName}");
         }
 #endif
 
