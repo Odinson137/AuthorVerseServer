@@ -6,7 +6,10 @@ using Newtonsoft.Json;
 using StackExchange.Redis;
 using AsyncAwaitBestPractices;
 using AuthorVerseServer.Data.Enums;
+using AuthorVerseServer.Models.ContentModels;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace AuthorVerseServer.Services
 {
@@ -28,25 +31,22 @@ namespace AuthorVerseServer.Services
 
         public async ValueTask<ICollection<string>?> CreateManagerAsync(string userId, int chapterId)
         {
-            // здесь потому будет множество
             var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
             if (manager.Length == 0)
             {
-                _redis.StringSetAsync($"managerInfo:{userId}", chapterId, TimeSpan.FromMinutes(1), flags: CommandFlags.FireAndForget).SafeFireAndForget();
+                _redis.StringSetAsync($"managerInfo:{userId}", chapterId, flags: CommandFlags.FireAndForget).SafeFireAndForget();
                 return null;
             }
-            else
-            {
-                // отправить пользователю всю информацию об его прошлых изменениях до выхода и повторного входа
-                ICollection<string> collection = new List<string>();
-                foreach (var content in manager)
-                {
-                    var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Element}");
-                    collection.Add(contentValue!);
-                }
 
-                return collection;
+            // отправить пользователю всю информацию об его прошлых изменениях до выхода и повторного входа
+            ICollection<string> collection = new List<string>();
+            foreach (var content in manager)
+            {
+                var contentValue = await _redis.StringGetAsync($"content:{userId}:{content.Element}");
+                collection.Add(contentValue!);
             }
+
+            return collection;
         }
 
         public async Task<int> ManagerSaveAsync(string userId)
@@ -61,7 +61,7 @@ namespace AuthorVerseServer.Services
             foreach (var content in manager)
             {
                 int number = (int)content.Score;
-                int flow = (int)content.Element - number;
+                int flow = int.Parse(content.Element.ToString().Split(":")[1]);
 
                 var contentValue = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
 
@@ -97,13 +97,13 @@ namespace AuthorVerseServer.Services
             foreach (var contentSection in manager)
             {
                 int number = (int)contentSection.Score;
-                await _redis.KeyDeleteAsync($"content:{userId}:{number}:{(int)contentSection.Element - number}", flags: CommandFlags.FireAndForget);
+                await _redis.KeyDeleteAsync($"content:{userId}:{number}:{int.Parse(contentSection.Element.ToString().Split(":")[1])}", flags: CommandFlags.FireAndForget);
             }
 
             await _redis.KeyDeleteAsync($"manager:{userId}");
         }
 
-        private Task CreateContentAsync<T>(T contentDTO, int chapterId, int number, int flow) where T : ContentBaseJM
+        private ValueTask<EntityEntry> CreateContentAsync<T>(T contentDTO, int chapterId, int number, int flow) where T : ContentBaseJM
         {
             var model = contentDTO!.CreateModel();
 
@@ -139,10 +139,16 @@ namespace AuthorVerseServer.Services
             }
 
             dbSection.ContentType = contentDTO.Type;
-            dbSection.ContentBase = model;
 
-            // потом сделать FireAndForget;
-            //await _section.DeleteContentAsync(chapterId, number, flow);
+            if (contentDTO is TextContentJM textContent && dbSection.ContentBase is TextContent textModel)
+            {
+                textModel.Text = textContent.SectionContent;
+            }
+            else
+            {
+                _section.DeleteContent(dbSection.ContentBase);
+                dbSection.ContentBase = model;
+            }
         }
 
         private async Task DeleteContentAsync<T>(T contentDTO, int chapterId, int number, int flow) where T : ContentBaseJM
@@ -154,9 +160,9 @@ namespace AuthorVerseServer.Services
                 _loadFile.DeleteFile(fileContent.Path, fileContent.Url);
             }
 
-            _section.DeleteSection(dbSection);
+            _section.DeleteContent(dbSection.ContentBase);
 
-            await _section.SaveAsync();
+            _section.DeleteSection(dbSection);
         }
 
 
@@ -198,7 +204,7 @@ namespace AuthorVerseServer.Services
 
                 var jsonContent = JsonConvert.SerializeObject(contentBase);
 
-                _redis.SortedSetAddAsync($"manager:{userId}", number + flow, number).SafeFireAndForget();
+                _redis.SortedSetAddAsync($"manager:{userId}", $"{number}:{flow}", number).SafeFireAndForget();
                 _redis.StringSetAsync($"content:{userId}:{number}:{flow}", jsonContent, flags: CommandFlags.FireAndForget).SafeFireAndForget();
 
             } else {
@@ -221,15 +227,16 @@ namespace AuthorVerseServer.Services
             }
 
             // есть ли предыдущий элемент
-            var checkBeforeAsync = await _redis.KeyExistsAsync($"content:{userId}:{number - 1}:{flow}");
+            var checkBeforeAsync = await _redis.StringGetAsync($"content:{userId}:{number - 1}:{flow}");
 
-            if (checkBeforeAsync == false)
+            if (checkBeforeAsync.HasValue) 
             {
-                if (await _section.CheckAddingNewSectionAsync(chapterId, flow) != number - 1)
+                var operationType = JObject.Parse(checkBeforeAsync!)["operation"]!.ToObject<ChangeType>();
+                if (operationType == ChangeType.Delete)
                 {
-                    throw new Exception("The section cannot be added to the db");
+                    throw new Exception("The last section was deleted, and you can't add the next values");
                 }
-            }
+            } 
 
             // если ли уже текущий элемент и если это удаление, то гуд, а если нет, то ошибка
             var checkContent = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
@@ -246,7 +253,10 @@ namespace AuthorVerseServer.Services
                 {
                     throw new Exception("The section with this number and in this flow already exists");
                 }
-
+            }
+            else if (checkBeforeAsync.IsNullOrEmpty && await _section.CheckAddingNewSectionAsync(chapterId, flow) != number - 1)
+            {
+                throw new Exception("The section cannot be added to the db");
             }
 
             return changeType;
@@ -255,7 +265,7 @@ namespace AuthorVerseServer.Services
         public ValueTask SetValueToRedisAsync(string userId, int number, int flow, string value)
         {
             _redis.StringSetAsync($"content:{userId}:{number}:{flow}", value, TimeSpan.FromHours(3), flags: CommandFlags.FireAndForget);
-            _redis.SortedSetAddAsync($"manager:{userId}", number + flow, number, flags: CommandFlags.FireAndForget);
+            _redis.SortedSetAddAsync($"manager:{userId}", $"{number}:{flow}", number, flags: CommandFlags.FireAndForget);
             return ValueTask.CompletedTask;
         }
 
@@ -293,6 +303,12 @@ namespace AuthorVerseServer.Services
 
             return string.Empty;
         }
+
+        public ValueTask<string> UpdateTextSectionAsync(string userId, int number, int flow, string text)
+        {
+            throw new NotImplementedException();
+        }
+
 
         byte[] GetBytesFromIFormFile(IFormFile file)
         {

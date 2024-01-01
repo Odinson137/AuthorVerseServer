@@ -24,14 +24,33 @@ namespace AuthorVerseServer.Controllers
         }
 
 
+        [HttpGet("GetAllWithModelContentBy")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<AllContentWithModelDTO>> GetAllWithModelContentSections(int chapterId, int flow)
+        {
+            var choiceContent = await _section.GetChoiceWithModelAsync(chapterId, flow, 0);
+            int choiceNumber = choiceContent?.Number ?? int.MaxValue;
+
+            var contents = await _section.GetImmediatelyReadSectionsAsync(chapterId, flow, choiceNumber, 0);
+
+            var allContent = new AllContentWithModelDTO()
+            {
+                Choice = choiceContent,
+                ContentsDTO = contents,
+            };
+
+            return Ok(allContent);
+        }
+
         [HttpGet("GetAllContentBy")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<AllContentDTO>> GetAllContentSections(int chapterId, int flow)
+        public async Task<ActionResult<AllContentDTO>> GetAllContentSections(int chapterId, int flow, int lastChoiceNumber = 0)
         {
-            var choiceContent = await _section.GetChoiceAsync(chapterId, flow, 0);
+            var choiceContent = await _section.GetChoiceAsync(chapterId, flow, lastChoiceNumber);
             int choiceNumber = choiceContent?.Number ?? int.MaxValue;
-            var contentIds = await _section.GetReadSectionsAsync(chapterId, flow, choiceNumber, 0);
+            var contentIds = await _section.GetReadSectionsAsync(chapterId, flow, choiceNumber, lastChoiceNumber);
 
             var allContent = new AllContentDTO()
             {
@@ -48,27 +67,9 @@ namespace AuthorVerseServer.Controllers
             return Ok(allContent);
         }
 
-        [HttpGet("GetManagerBy/{chapterId}/{flow}")]
+        [HttpGet("GetManagerBy")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<ContentManagerDTO>> GetChapterSections(int chapterId, int flow)
-        {
-            var choiceContent = await _section.GetChoiceAsync(chapterId, flow, 0);
-            int choiceNumber = choiceContent?.Number ?? int.MaxValue;
-            var contentIds = await _section.GetReadSectionsAsync(chapterId, flow, choiceNumber, 0);
-
-            var mangerDTO = new ContentManagerDTO()
-            {
-                ContentsDTO = contentIds,
-                Choice = choiceContent,
-            };
-
-            return Ok(mangerDTO);
-        }
-
-        [HttpGet("GetManagerBy/{chapterId}/{flow}/{lastChoiceNumber}")]
-        [ProducesResponseType(200)]
-        public async Task<ActionResult<ContentManagerDTO>> GetChapterSections(int chapterId, int flow, int lastChoiceNumber)
+        public async Task<ActionResult<ContentManagerDTO>> GetChapterSections(int chapterId, int flow, int lastChoiceNumber = 0)
         {
             var choiceContent = await _section.GetChoiceAsync(chapterId, flow, lastChoiceNumber);
             int choiceNumber = choiceContent?.Number ?? int.MaxValue;
@@ -177,6 +178,24 @@ namespace AuthorVerseServer.Controllers
             try
             {
                 await _manager.CreateImageSectionAsync(UserId, number, flow, imageFile);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPut("UpdateImageSection")]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> UpdateNewImageSection(int number, int flow, string text)
+        {
+            try
+            {
+                await _manager.UpdateTextSectionAsync(UserId, number, flow, text);
             }
             catch (Exception ex)
             {

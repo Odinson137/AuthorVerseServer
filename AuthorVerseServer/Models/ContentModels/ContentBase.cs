@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AuthorVerseServer.Models.ContentModels
 {
@@ -6,7 +7,7 @@ namespace AuthorVerseServer.Models.ContentModels
     {
         [Key]
         public int ContentId { get; set; }
-        //public int ChapterSectionId { get; set; }
+        [JsonIgnore]
         public ChapterSection ChapterSection { get; set; }
     }
 }

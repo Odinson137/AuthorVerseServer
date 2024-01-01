@@ -4,6 +4,7 @@ using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Models.ContentModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AuthorVerseServer.Repository
@@ -21,21 +22,10 @@ namespace AuthorVerseServer.Repository
             return _context.SaveChangesAsync();
         }
 
-        //public Task DeleteContentByContentIdAsync(int contentId)
-        //{
-        //    return _context.ChapterSections
-        //        .Where(c => c.ContentId == contentId)
-        //        .Select(c => c.ContentBase)
-        //        .ExecuteDeleteAsync();
-        //}
-
-        //public Task DeleteContentAsync(int chapterId, int number, int flow)
-        //{
-        //    return _context.ChapterSections
-        //        .Where(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow)
-        //        .Select(c => c.ContentBase)
-        //        .ExecuteDeleteAsync();
-        //}
+        public void DeleteContent(ContentBase content)
+        {
+            _context.Remove(content);
+        }
 
         public void DeleteSection(ChapterSection chapter)
         {
@@ -49,6 +39,7 @@ namespace AuthorVerseServer.Repository
         public Task<ChapterSection> GetSectionAsync(int chapterId, int number, int flow)
         {
             return _context.ChapterSections
+                .Include(c => c.ContentBase)
                 .SingleAsync(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow);
         }
 
@@ -65,6 +56,33 @@ namespace AuthorVerseServer.Repository
                 .Where(c => c.ChoiceFlow == flow)
                 .MaxAsync(c => c.Number);
             return value;
+        }
+
+        public Task<ChoiceBaseWithModelDTO?> GetChoiceWithModelAsync(int chapterId, int flow, int lastChoiceNumber)
+        {
+            var choiceContent = _context.ChapterSections
+                .OrderBy(c => c.Number)
+                .Where(c => c.BookChapterId == chapterId)
+                .Where(c => c.Number > lastChoiceNumber)
+                .Where(c => c.ChoiceFlow == flow)
+                .Where(c => c.Visibility == true)
+                .Where(c => c.SectionChoices != null && c.SectionChoices.Count() >= 1)
+                .Include(c => c.ContentBase)
+                .Select(c => new ChoiceBaseWithModelDTO
+                {
+                    ChoiceFlow = c.ChoiceFlow,
+                    Number = c.Number,
+                    Content = c.ContentBase,
+                    ContentType = c.ContentType,
+                    SectionChoices = c.SectionChoices!.Select(sc => new SectionChoiceDTO
+                    {
+                        ChoiceFlow = sc.TargetSection.ChoiceFlow,
+                        Number = sc.TargetSection.Number,
+                        ChoiceText = sc.ChoiceText,
+                    }).ToList(),
+                });
+
+            return choiceContent.FirstOrDefaultAsync();
         }
 
         public Task<ChoiceBaseDTO?> GetChoiceAsync(int chapterId, int flow, int lastChoiceNumber)
@@ -91,6 +109,27 @@ namespace AuthorVerseServer.Repository
                 });
 
             return choiceContent.FirstOrDefaultAsync();
+        }
+
+        public Task<List<ContentWithModelDTO>> GetImmediatelyReadSectionsAsync(int chapterId, int choiceFlow, int choiceNumber, int lastChoiceNumber = 0)
+        {
+            var choiceContent = _context.ChapterSections
+                .Include(c => c.ContentBase)
+                .OrderBy(c => c.Number)
+                .Where(c => c.BookChapterId == chapterId)
+                .Where(c => c.ChoiceFlow == choiceFlow)
+                .Where(c => c.Visibility == true)
+                .Where(c => c.Number < choiceNumber)
+                .Where(c => c.Number > lastChoiceNumber)
+                .Select(c => new ContentWithModelDTO
+                {
+                    ChoiceFlow = c.ChoiceFlow,
+                    Number = c.Number,
+                    ContentType = c.ContentType,
+                    Content = c.ContentBase,
+                });
+
+            return choiceContent.ToListAsync();
         }
 
         public Task<List<ContentDTO>> GetReadSectionsAsync(int chapterId, int choiceFlow, int choiceNumber, int lastChoiceNumber = 0)
@@ -168,10 +207,9 @@ namespace AuthorVerseServer.Repository
         }
 
 
-        public Task AddContentAsync<T>(T content)
+        public ValueTask<EntityEntry> AddContentAsync<T>(T content)
         {
-            _context.AddAsync(content!);
-            return Task.CompletedTask;
+            return _context.AddAsync(content!);
         }
     }
 }

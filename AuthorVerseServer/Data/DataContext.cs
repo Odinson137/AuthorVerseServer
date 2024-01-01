@@ -277,6 +277,8 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey<ChapterSection>(m => m.ContentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+
+
             modelBuilder.Entity<ChapterSection>()
                 .HasMany(c => c.SectionChoices)
                 .WithOne(c => c.ChapterSection)

@@ -5,8 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Net;
+using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Data.JsonModels;
 using StackExchange.Redis;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ServerTests.Integrations
 {
@@ -46,12 +48,12 @@ namespace ServerTests.Integrations
             var testContent = new TextContentJM()
             {
                 SectionContent = "test",
-                Operation = AuthorVerseServer.Data.Enums.ChangeType.Create,
+                Operation = ChangeType.Create,
             };
 
             var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
             string value = JsonConvert.SerializeObject(testContent, settings);
-            await _redis.SortedSetAddAsync($"manager:admin", number + flow, number, flags: CommandFlags.FireAndForget);
+            await _redis.SortedSetAddAsync($"manager:admin", $"{number}:{flow}", number, flags: CommandFlags.FireAndForget);
             await InitManager();
             await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
         }
@@ -72,7 +74,7 @@ namespace ServerTests.Integrations
 
             var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
             string value = JsonConvert.SerializeObject(testContent, settings);
-            await _redis.SortedSetAddAsync($"manager:admin", number + flow, number, flags: CommandFlags.FireAndForget);
+            await _redis.SortedSetAddAsync($"manager:admin", $"{number}:{flow}", number, flags: CommandFlags.FireAndForget);
             await _redis.StringSetAsync($"managerInfo:admin", 1, flags: CommandFlags.FireAndForget);
             await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
         }
@@ -81,6 +83,20 @@ namespace ServerTests.Integrations
         {
             var context = await _client.PostAsync($"/api/ChapterSection/CreateTextSection?number={number}&flow={flow}&text=test", null);
             await SaveAsync();
+        }
+
+        private async Task DeleteTextFromRedisAsync(int number, int flow)
+        {
+            var deleteContent = new ContentBaseJM()
+            {
+                Operation = ChangeType.Delete,
+            };
+
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            string value = JsonConvert.SerializeObject(deleteContent, settings);
+            await _redis.SortedSetAddAsync($"manager:admin", $"{number}:{flow}", number, flags: CommandFlags.FireAndForget);
+            await InitManager();
+            await _redis.StringSetAsync($"content:admin:{number}:{flow}", value, flags: CommandFlags.FireAndForget);
         }
 
         private async Task SaveAsync()
@@ -194,6 +210,62 @@ namespace ServerTests.Integrations
             Assert.True(isExistContent);
         }
 
+        /// <summary>
+        /// если прошлую секцию с такими flow и number пытались удалить и затем на её месте создать новую
+        /// то из операций delete и create, она переходит в операцию update
+        /// </summary>
+        [Fact]
+        public async Task CreateNewTextSection_FromDeleteToUpdateRedis_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await InitManager();
+            await DeleteTextFromRedisAsync(10, 1);
+
+            // Act
+            var response = await _client.PostAsync($"/api/ChapterSection/CreateTextSection?number={10}&flow={1}&text=test", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            var existContent = await _redis.StringGetAsync($"content:admin:10:1");
+
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            var redisContent = JsonConvert.DeserializeObject<ContentBaseJM>(existContent, settings);
+            
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.NotNull(redisContent);
+            Assert.True(redisContent.Operation == ChangeType.Update);
+        }
+
+        [Fact]
+        public async Task CreateNewTextSection_FromDeleteToUpdateToDb_ReturnsOkResult()
+        {
+            // Arrange
+            await ClearTable();
+            await InitManager();
+            await DeleteTextFromRedisAsync(10, 1);
+
+            // Act
+            var response = await _client.PostAsync($"/api/ChapterSection/CreateTextSection?number={10}&flow={1}&text=контент должен остаться, но текст измениться", null);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var existContent = await _redis.StringGetAsync($"content:admin:10:1");
+            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+            var redisContent = JsonConvert.DeserializeObject<ContentBaseJM>(existContent, settings);
+
+            await SaveAsync();
+
+            var existContentAfterSaving = await _redis.KeyExistsAsync($"content:admin:10:1");
+
+            // Assert
+
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.NotNull(redisContent);
+            Assert.True(redisContent.Operation == ChangeType.Update);
+            
+            Assert.False(existContentAfterSaving);
+        }
+
         [Fact]
         public async Task SaveSectionFromManager_Ok_ReturnsOkResult()
         {
@@ -208,6 +280,7 @@ namespace ServerTests.Integrations
             // Assert
             Assert.True(response.IsSuccessStatusCode);
         }
+
 
         [Fact]
         public async Task DeleteSection_DeleteFromRedis_ReturnsOkResult()

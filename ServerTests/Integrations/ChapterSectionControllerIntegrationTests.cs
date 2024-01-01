@@ -31,7 +31,7 @@ namespace ServerTests.Integrations
             int chapterId = 1;
             int flow = 1;
             // Act
-            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy/{chapterId}/{flow}");
+            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy?chapterId={chapterId}&flow={flow}");
             var content = await response.Content.ReadAsStringAsync();
             var manager = JsonConvert.DeserializeObject<ContentManagerDTO> (content);
 
@@ -50,7 +50,7 @@ namespace ServerTests.Integrations
             int lastChoiceNumber = 5;
 
             // Act
-            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy/{chapterId}/{flow}/{lastChoiceNumber}");
+            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy?chapterId={chapterId}&flow={flow}&lastChoiceNumber={lastChoiceNumber}");
             var content = await response.Content.ReadAsStringAsync();
             var manager = JsonConvert.DeserializeObject<ContentManagerDTO>(content);
 
@@ -69,7 +69,7 @@ namespace ServerTests.Integrations
             int lastChoiceNumber = 8;
 
             // Act
-            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy/{chapterId}/{flow}/{lastChoiceNumber}");
+            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy?chapterId={chapterId}&flow={flow}&lastChoiceNumber={lastChoiceNumber}");
             var content = await response.Content.ReadAsStringAsync();
             var manager = JsonConvert.DeserializeObject<ContentManagerDTO>(content);
 
@@ -88,7 +88,7 @@ namespace ServerTests.Integrations
             int lastChoiceNumber = 5;
 
             // Act
-            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy/{chapterId}/{flow}/{lastChoiceNumber}");
+            var response = await _client.GetAsync($"/api/ChapterSection/GetManagerBy?chapterId={chapterId}&flow={flow}&lastChoiceNumber={lastChoiceNumber}");
             var content = await response.Content.ReadAsStringAsync();
             var manager = JsonConvert.DeserializeObject<ContentManagerDTO>(content);
 
@@ -226,6 +226,26 @@ namespace ServerTests.Integrations
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(allContent);
             Assert.True(allContent.SectionsDTO.Count > 1);
+            Assert.NotNull(allContent.Choice);
+        }
+
+
+        [Fact]
+        public async Task GetAllWithModelContentSections_ShouldReturnPathOfContentIncludingChoice_ReturnsOkResult()
+        {
+            // Arrange
+            int chapterId = 1;
+            int flow = 1;
+
+            // Act
+            var response = await _client.GetAsync($"/api/ChapterSection/GetAllWithModelContentBy?chapterId={chapterId}&flow={flow}");
+            var content = await response.Content.ReadAsStringAsync();
+            var allContent = JsonConvert.DeserializeObject<AllContentWithModelDTO>(content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(allContent);
+            Assert.True(allContent.ContentsDTO.Count > 0);
             Assert.NotNull(allContent.Choice);
         }
     }

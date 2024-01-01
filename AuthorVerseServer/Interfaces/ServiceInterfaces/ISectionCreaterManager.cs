@@ -10,5 +10,6 @@ namespace AuthorVerseServer.Interfaces.ServiceInterfaces
         ValueTask<string> DeleteSectionAsync(string userId, int number, int flow);
         ValueTask<string> CreateTextSectionAsync(string userId, int number, int flow, string text);
         ValueTask<string> CreateImageSectionAsync(string userId, int number, int flow, IFormFile file);
+        ValueTask<string> UpdateTextSectionAsync(string userId, int number, int flow, string text);
     }
 }
