@@ -43,6 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\api\audio\" />
     <Folder Include="wwwroot\api\sectionImages\" />
   </ItemGroup>
 

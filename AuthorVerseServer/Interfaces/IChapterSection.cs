@@ -11,7 +11,9 @@ namespace AuthorVerseServer.Interfaces
         public void DeleteContent(ContentBase content);
         public void DeleteSection(ChapterSection chapter);
         public Task<ChapterSection> GetSectionAsync(int chapterId, int number, int flow);
+        // возвращает макимальный номер секции для данного потока
         public Task<int> CheckAddingNewSectionAsync(int chapterId, int flow);
+        public Task<bool> CheckUpdatingNewSectionAsync(int chapterId, int number, int flow);
         public Task<ChoiceBaseWithModelDTO?> GetChoiceWithModelAsync(int chapterId, int flow, int lastChoiceNumber);
         public Task<ChoiceBaseDTO?> GetChoiceAsync(int chapterId, int flow, int lastChoiceNumber);
 

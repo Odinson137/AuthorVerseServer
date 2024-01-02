@@ -58,6 +58,15 @@ namespace AuthorVerseServer.Repository
             return value;
         }
 
+        public Task<bool> CheckUpdatingNewSectionAsync(int chapterId, int number, int flow)
+        {
+            return _context.ChapterSections
+                .Where(c => c.BookChapterId == chapterId)
+                .Where(c => c.Number == number)
+                .Where(c => c.ChoiceFlow == flow)
+                .AnyAsync();
+        }
+
         public Task<ChoiceBaseWithModelDTO?> GetChoiceWithModelAsync(int chapterId, int flow, int lastChoiceNumber)
         {
             var choiceContent = _context.ChapterSections

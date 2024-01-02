@@ -159,7 +159,7 @@ namespace AuthorVerseServer.Controllers
         {
             try
             {
-                await _manager.CreateTextSectionAsync(UserId, number, flow, text);
+                await _manager.AddSectionToRedisAsync(UserId, number, flow, "text", text);
             }
             catch (Exception ex)
             {
@@ -177,7 +177,7 @@ namespace AuthorVerseServer.Controllers
         {
             try
             {
-                await _manager.CreateImageSectionAsync(UserId, number, flow, imageFile);
+                await _manager.AddSectionToRedisAsync(UserId, number, flow, "image", imageFile);
             }
             catch (Exception ex)
             {
@@ -188,14 +188,32 @@ namespace AuthorVerseServer.Controllers
         }
 
         [Authorize]
-        [HttpPut("UpdateImageSection")]
+        [HttpPost("CreateAudioSection")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> UpdateNewImageSection(int number, int flow, string text)
+        public async Task<ActionResult> CreateNewAudioSection(int number, int flow, IFormFile file)
         {
             try
             {
-                await _manager.UpdateTextSectionAsync(UserId, number, flow, text);
+                await _manager.AddSectionToRedisAsync(UserId, number, flow, "audio", file);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok();
+        }
+        
+        [Authorize]
+        [HttpPut("UpdateTextSection")]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> UpdateImageSection(int number, int flow, string text)
+        {
+            try
+            {
+                await _manager.UpdateSectionToRedisAsync(UserId, number, flow, "text", text);
             }
             catch (Exception ex)
             {
@@ -205,17 +223,54 @@ namespace AuthorVerseServer.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [HttpPut("UpdateVideoSection")]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> UpdateVideoSection(int number, int flow, IFormFile formFile)
+        {
+            try
+            {
+                await _manager.UpdateSectionToRedisAsync(UserId, number, flow, "image", formFile);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPut("UpdateAudioSection")]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<ActionResult> UpdateAudioSection(int number, int flow, IFormFile formFile)
+        {
+            try
+            {
+                await _manager.UpdateSectionToRedisAsync(UserId, number, flow, "audio", formFile);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Ok();
+        }
+        
         [Authorize]
         [HttpDelete("DeleteSection")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> DeleteSection(int number, int flow)
         {
-            var error = await _manager.DeleteSectionAsync(UserId, number, flow);
-            if (!string.IsNullOrEmpty(error))
+            try
             {
-                return BadRequest(error);
+                await _manager.DeleteSectionFromRedisAsync(UserId, number, flow);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
             return Ok();
@@ -227,14 +282,16 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult> SaveSectionFromManager()
         {
-            await _manager.ManagerSaveAsync(UserId);
-            //if (!string.IsNullOrEmpty(error))
-            //{
-            //    return BadRequest(error);
-            //}
+            try
+            {
+                await _manager.ManagerSaveAsync(UserId);
+            }
+            catch (Exception e)
+            {
+                BadRequest(e.Message);
+            }
 
             return Ok();
         }
-
     }
 }

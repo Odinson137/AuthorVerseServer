@@ -8,7 +8,6 @@ using System.Net;
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Data.JsonModels;
 using StackExchange.Redis;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ServerTests.Integrations
 {
@@ -67,9 +66,9 @@ namespace ServerTests.Integrations
         {
             var testContent = new ImageContentJM()
             {
-                SectionContent = File.ReadAllBytes(@"../../../Images/javascript-it-юмор-geek-5682739.jpeg"),
+                SectionContent = await File.ReadAllBytesAsync(@"../../../Images/javascript-it-юмор-geek-5682739.jpeg"),
                 Expansion = ".jpeg",
-                Operation = AuthorVerseServer.Data.Enums.ChangeType.Create,
+                Operation = ChangeType.Create,
             };
 
             var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
@@ -223,14 +222,15 @@ namespace ServerTests.Integrations
             await DeleteTextFromRedisAsync(10, 1);
 
             // Act
-            var response = await _client.PostAsync($"/api/ChapterSection/CreateTextSection?number={10}&flow={1}&text=test", null);
+            var response =
+                await _client.PostAsync("/api/ChapterSection/CreateTextSection?number=10&flow=1&text=test", null);
             var content = await response.Content.ReadAsStringAsync();
 
             // Assert
             var existContent = await _redis.StringGetAsync($"content:admin:10:1");
 
             var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
-            var redisContent = JsonConvert.DeserializeObject<ContentBaseJM>(existContent, settings);
+            var redisContent = JsonConvert.DeserializeObject<ContentBaseJM>(existContent!, settings);
             
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(redisContent);
@@ -246,12 +246,13 @@ namespace ServerTests.Integrations
             await DeleteTextFromRedisAsync(10, 1);
 
             // Act
-            var response = await _client.PostAsync($"/api/ChapterSection/CreateTextSection?number={10}&flow={1}&text=контент должен остаться, но текст измениться", null);
+            var response = await _client
+                .PostAsync($"/api/ChapterSection/CreateTextSection?number=10&flow=1&text=контент должен остаться, но текст измениться", null);
             var content = await response.Content.ReadAsStringAsync();
 
             var existContent = await _redis.StringGetAsync($"content:admin:10:1");
             var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
-            var redisContent = JsonConvert.DeserializeObject<ContentBaseJM>(existContent, settings);
+            var redisContent = JsonConvert.DeserializeObject<ContentBaseJM>(existContent!, settings);
 
             await SaveAsync();
 

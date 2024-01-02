@@ -16,18 +16,16 @@ namespace AuthorVerseServer.Data.JsonModels
         {
             throw new AccessViolationException("Not admit object");
         }
-
-        [JsonIgnore]
-        public virtual ContentType Type { get; set; }
+        public virtual ContentType GetContentType()
+        {
+            throw new AccessViolationException("Not admit object");
+        }
     }
 
     public class TextContentJM : ContentBaseJM
     {
         public required string SectionContent { get; set; }
-        
-        [JsonIgnore]
-        public override ContentType Type { get; set; } = ContentType.Text;
-
+        public override ContentType GetContentType() => ContentType.Text;
         public override TextContent CreateModel()
         {
             var model = new TextContent()
@@ -37,22 +35,22 @@ namespace AuthorVerseServer.Data.JsonModels
 
             return model;
         }
-
     }
 
     public interface IFileContent
     {
         public byte[] SectionContent { get; set; }
         public string Expansion { get; set; }
-        [JsonIgnore] public string Url { get; set; }
-        [JsonIgnore] public string Path { get; set; }
+        // public string Url { get; set; }
+        public string GetPath();
+        public string GetUrl();
     }
 
     public class ImageContentJM : ContentBaseJM, IFileContent
     {
         public required byte[] SectionContent { get; set; }
         public required string Expansion { get; set; }
-
+        private string Url { get; set; }
         public override ImageContent CreateModel()
         {
             Url = $"Image_{DateTime.Now:yyyyMMdd_HHmmss}{Expansion}";
@@ -63,10 +61,28 @@ namespace AuthorVerseServer.Data.JsonModels
 
             return model;
         }
+        public override ContentType GetContentType() => ContentType.Image;
+        public string GetPath() => "sectionImages";
+        public string GetUrl() => Url;
+    }
+    
+    public class AudioContentJM : ContentBaseJM, IFileContent
+    {
+        public required byte[] SectionContent { get; set; }
+        public required string Expansion { get; set; }
+        private string Url { get; set; }
+        public override ImageContent CreateModel()
+        {
+            Url = $"Audio_{DateTime.Now:yyyyMMdd_HHmmss}{Expansion}";
+            var model = new ImageContent()
+            {
+                Url = Url,
+            };
 
-        [JsonIgnore]
-        public override ContentType Type { get; set; } = ContentType.Image;
-        [JsonIgnore] public string Url { get; set; }
-        [JsonIgnore] public string Path { get; set; } = "sectionImages";
+            return model;
+        }
+        public override ContentType GetContentType() => ContentType.Audio;
+        public string GetPath() => "audio";
+        public string GetUrl() => Url;
     }
 }
