@@ -20,11 +20,11 @@ namespace AuthorVerseServer.Data.Patterns
                 case Enums.ContentType.Text:
                     folder = string.Empty;
                     //var textContent = JsonConvert.DeserializeObject<TextContentJM>(contentValue)!;
-                    return typeof(TextContentJM);
+                    return typeof(TextContentJm);
                 case Enums.ContentType.Image:
                     folder = "sectionImages";
                     //var imageContent = JsonConvert.DeserializeObject<ImageContentJM>(contentValue);
-                    return typeof(TextContentJM);
+                    return typeof(TextContentJm);
                 default:
                     throw new NotSupportedException($"Unsupported content type: {contentType}");
             }

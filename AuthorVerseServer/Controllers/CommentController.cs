@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
@@ -10,17 +11,15 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CommentController : ControllerBase
+    public class CommentController : AuthorVerseController
     {
         private readonly IComment _comment;
         private readonly UserManager<User> _userManager;
-        private readonly CreateJWTtokenService _jWTtokenService;
 
-        public CommentController(IComment comment, UserManager<User> userManager, CreateJWTtokenService jWTtokenService)
+        public CommentController(IComment comment, UserManager<User> userManager)
         {
             _comment = comment;
             _userManager = userManager;
-            _jWTtokenService = jWTtokenService;
         }
 
         // can be Authorize
@@ -34,9 +33,7 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("Bad page");
             }
 
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-
-            var comments = await _comment.GetCommentsByBookAsync(bookId, page, userId);
+            var comments = await _comment.GetCommentsByBookAsync(bookId, page, UserId);
             return Ok(comments);
         }
 
@@ -47,11 +44,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateComment([FromBody] CreateCommentDTO commentDTO)
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            User? user = await _userManager.FindByIdAsync(userId);
+            User? user = await _userManager.FindByIdAsync(UserId);
             if (user == null)
                 return NotFound("User not found");
 
@@ -59,12 +52,12 @@ namespace AuthorVerseServer.Controllers
             if (bookId == 0)
                 return NotFound("Book not found");
 
-            if (await _comment.CheckExistCommentAsync(bookId, userId) == true)
+            if (await _comment.CheckExistCommentAsync(bookId, UserId) == true)
                 return BadRequest("This user alredy made a comment");
 
             Comment newComment = new Comment()
             {
-                UserId = userId,
+                UserId = UserId,
                 BookId = commentDTO.BookId,
                 Text = commentDTO.Text,
                 ReaderRating = commentDTO.Rating,
@@ -83,11 +76,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<string>> DeleteComment(int commentId)
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            var isExist = await _comment.CheckExistCommentAsync(commentId, userId);
+            var isExist = await _comment.CheckExistCommentAsync(commentId, UserId);
             if (isExist == false)
                 return NotFound("Comment not found");
 
@@ -104,10 +93,6 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<string>> ChangeComment(int commentId, string bookText)
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
             Comment? comment = await _comment.GetCommentAsync(commentId);
             if (comment != null)
                 comment.Text = bookText;

@@ -11,12 +11,12 @@ namespace AuthorVerseServer.Services;
 public class BaseCudService
 {
     private readonly IDatabase _redis;
-    private readonly IChapterSection _section;
-    
-    public BaseCudService(IConnectionMultiplexer connectionMultiplexer, IChapterSection section)
+    private readonly ICreator _creator;
+
+    public BaseCudService(IConnectionMultiplexer connectionMultiplexer, ICreator creator)
     {
         _redis = connectionMultiplexer.GetDatabase();
-        _section = section;
+        _creator = creator;
     }
     
     private protected async Task<ChangeType> CheckCreateNewContentAsync(string userId, int number, int flow)
@@ -56,9 +56,13 @@ public class BaseCudService
                 throw new Exception("The section with this number and in this flow already exists");
             }
         }
-        else if (checkBeforeAsync.IsNullOrEmpty && await _section.CheckAddingNewSectionAsync(chapterId, flow) != number - 1)
+        else if (checkBeforeAsync.IsNullOrEmpty)
         {
-            throw new Exception("The section cannot be added to the db");
+            var checkDb = await _creator.CheckAddingNewSectionAsync(chapterId, flow);
+            if (checkDb != number - 1)
+            {
+                throw new Exception("The section cannot be added to the db");
+            }
         }
 
         return changeType;
@@ -83,7 +87,7 @@ public class BaseCudService
                 throw new Exception("The section with this number and in this flow already exists");
             }
         }
-        else if (await _section.CheckUpdatingNewSectionAsync(chapterId, number, flow) == false)
+        else if (await _creator.CheckUpdatingNewSectionAsync(chapterId, number, flow) == false)
         {
             throw new Exception("The section cannot be added to the db");
         }
@@ -109,13 +113,13 @@ public class BaseCudService
         if (content.IsNullOrEmpty)
         {
             // если в редисе ничего не содержится, то проверить в бд есть ли такой элемент и добавить в редис контент на удаление
-            if (await _section.CheckAddingNewSectionAsync(chapterId, flow) != number)
+            if (await _creator.CheckAddingNewSectionAsync(chapterId, flow) != number)
             {
                 throw new Exception("The section cannot be deleted from the db");
             }
 
             // добавить контент на удаление
-            var contentBase = new ContentBaseJM()
+            var contentBase = new ContentBaseJm()
             {
                 Operation = ChangeType.Delete,
             };

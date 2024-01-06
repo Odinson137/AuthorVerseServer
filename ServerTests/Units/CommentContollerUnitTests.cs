@@ -14,16 +14,14 @@ namespace ServerTests.Units;
 public class CommentContollerUnitTests
 {
     public readonly Mock<IComment> mockCommentRepository;
-    public readonly Mock<CreateJWTtokenService> mockTokenService;
     public readonly Mock<UserManager<User>> mockUserManager;
     public readonly CommentController controller;
     public CommentContollerUnitTests()
     {
         mockCommentRepository = new Mock<IComment>();
-        mockTokenService = new Mock<CreateJWTtokenService>();
         mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
         
-        controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object, mockTokenService.Object);
+        controller = new CommentController(mockCommentRepository.Object, mockUserManager.Object);
     }
 
     [Fact]
@@ -36,7 +34,7 @@ public class CommentContollerUnitTests
             Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
         };
 
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
         mockCommentRepository.Setup(com => com.CheckExistCommentAsync(It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(true);
 
@@ -56,7 +54,7 @@ public class CommentContollerUnitTests
             Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
         };
 
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
         mockCommentRepository.Setup(com => com.ChechExistBookAsync(-5)).ReturnsAsync(0);
 
@@ -77,7 +75,7 @@ public class CommentContollerUnitTests
             Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
         };
 
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
         mockCommentRepository.Setup(com => com.ChechExistBookAsync(commentDTO.BookId)).ReturnsAsync(1);
         mockCommentRepository.Setup(com => com.CheckExistCommentAsync(It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(true);
@@ -98,7 +96,7 @@ public class CommentContollerUnitTests
             BookId = 0,
             Text = "Я и мой комментарий. Почти как Мама, папа я и бд, но только с комментарием",
         };
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
 
         mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
         mockCommentRepository.Setup(com => com.ChechExistBookAsync(commentDTO.BookId)).ReturnsAsync(1);
@@ -116,7 +114,7 @@ public class CommentContollerUnitTests
     {
         // Arrange
 
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
         mockCommentRepository.Setup(com => com.SaveAsync());
 
@@ -136,7 +134,7 @@ public class CommentContollerUnitTests
 
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
 
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+        
 
         mockCommentRepository.Setup(com => com.DeleteComment(It.IsAny<int>()));
         mockCommentRepository.Setup(com => com.CheckExistCommentAsync(It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(true);
@@ -153,7 +151,7 @@ public class CommentContollerUnitTests
         // Arrange
 
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+        
 
         mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
@@ -169,7 +167,7 @@ public class CommentContollerUnitTests
         // Arrange
 
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+        
 
         mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(0);
 
@@ -185,7 +183,7 @@ public class CommentContollerUnitTests
         // Arrange
 
         mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-        mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
 
         mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
@@ -201,7 +199,7 @@ public class CommentContollerUnitTests
     //    // Arrange
 
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
-    //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+    //    
 
     //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
@@ -217,7 +215,7 @@ public class CommentContollerUnitTests
     //    // Arrange
 
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-    //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+    //    
 
     //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(0);
 
@@ -233,7 +231,7 @@ public class CommentContollerUnitTests
     //    // Arrange
 
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-    //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+    //    
 
     //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
@@ -250,7 +248,7 @@ public class CommentContollerUnitTests
     //    // Arrange
 
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync((Comment?)null);
-    //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+    //    
 
     //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 
@@ -266,7 +264,7 @@ public class CommentContollerUnitTests
     //    // Arrange
 
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-    //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+    //    
 
     //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(0);
 
@@ -282,7 +280,7 @@ public class CommentContollerUnitTests
     //    // Arrange
 
     //    mockCommentRepository.Setup(com => com.GetCommentAsync(It.IsAny<int>())).ReturnsAsync(new Comment());
-    //    mockTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal?>())).Returns("admin");
+    //    
 
     //    mockCommentRepository.Setup(com => com.SaveAsync()).ReturnsAsync(1);
 

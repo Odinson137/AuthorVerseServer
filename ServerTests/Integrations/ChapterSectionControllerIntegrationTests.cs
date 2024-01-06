@@ -11,17 +11,17 @@ namespace ServerTests.Integrations
     public class ChapterSectionControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
-        private readonly CreateJWTtokenService _token;
+        // private readonly CreateJWTtokenService _token;
 
         public ChapterSectionControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
             var configuration = factory.Services.GetRequiredService<IConfiguration>();
 
-            _token = new CreateJWTtokenService(configuration);
+            var token = new CreateJWTtokenService(configuration);
             _client = factory.CreateClient();
 
-            //string jwtToken = _token.GenerateJwtToken("admin");
-            //_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+            // var jwtToken = token.GenerateJwtToken("admin");
+            // _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
         }
 
         [Fact]
@@ -248,5 +248,7 @@ namespace ServerTests.Integrations
             Assert.True(allContent.ContentsDTO.Count > 0);
             Assert.NotNull(allContent.Choice);
         }
+        
+
     }
 }

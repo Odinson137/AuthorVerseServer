@@ -325,14 +325,14 @@ namespace AuthorVerseServer.Data
                 var choiceSection1 = new SectionChoice()
                 {
                     ChoiceText = "Run outside",
-
+                    ChoiceNumber = 1,
                     TargetSection = new ChapterSection()
                     {
                         Number = 5,
                         ChoiceFlow = 1,
                         BookChapter = chapter1,
                         ContentType = ContentType.Image,
-                        ContentBase = new ImageContent
+                        ContentBase = new FileContent
                         {
                             Url = "javascript-it-юмор-geek-5682739.jpeg",
                         }
@@ -353,6 +353,7 @@ namespace AuthorVerseServer.Data
 
                 var choiceSection2 = new SectionChoice()
                 {
+                    ChoiceNumber = 2,
                     ChoiceText = "Run forward",
                     TargetSection = returnChoiceSection,
                 };
@@ -394,6 +395,7 @@ namespace AuthorVerseServer.Data
                 var choiceSection3 = new SectionChoice()
                 {
                     ChoiceText = "Идти направо",
+                    ChoiceNumber = 1,
 
                     TargetSection = new ChapterSection()
                     {
@@ -410,6 +412,7 @@ namespace AuthorVerseServer.Data
 
                 var choiceSection4 = new SectionChoice()
                 {
+                    ChoiceNumber = 2,
                     ChoiceText = "Идти налево",
                     TargetSection = new ChapterSection()
                     {
@@ -460,6 +463,7 @@ namespace AuthorVerseServer.Data
 
                 var choiceSection5 = new SectionChoice()
                 {
+                    ChoiceNumber = 1,
                     ChoiceText = "Вернуться к самому началу. по факту это будет единственный путь. Так тоже можно, кто мешает",
                     TargetSection = returnChoiceSection,
                 };

@@ -120,7 +120,8 @@ namespace AuthorVerseServer.Repository
         {
             _context.BookChapters
                 .Where(c => c.BookChapterId == chapterId)
-                .ExecuteUpdateAsync(setter => setter.SetProperty(x => x.PublicationType, Data.Enums.PublicationType.Publicated));
+                .ExecuteUpdateAsync(setter =>
+                    setter.SetProperty(x => x.PublicationType, Data.Enums.PublicationType.Publicated));
             return Task.CompletedTask;
         }
 

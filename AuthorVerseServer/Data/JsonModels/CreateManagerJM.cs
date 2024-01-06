@@ -1,16 +1,42 @@
-﻿using System.Text.Json.Serialization;
-using AuthorVerseServer.Data.Enums;
+﻿using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Models.ContentModels;
 
 namespace AuthorVerseServer.Data.JsonModels
 {
-    [JsonPolymorphic(
-        UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
-    [JsonDerivedType(typeof(TextContentJM))]
-    [JsonDerivedType(typeof(ImageContentJM))]
-    public class ContentBaseJM
+    public class ChoiceContent(int chapterId)
     {
-        public required ChangeType Operation { get; set; }
+        public required ChangeType Operation { get; init; }
+
+        private int _nextChapterId;
+        private int[] _choiceValues = null!;
+
+        public string SetChoiceKey
+        {
+            set => _choiceValues = value.Split(":").Select(int.Parse).ToArray();
+        }
+
+        public int GetChoiceNumber() => _choiceValues[0];
+        public int GetNumber() => _choiceValues[1];
+        public int GetFlow() => _choiceValues[2];
+        public int NextChapterId
+        {
+            get => _nextChapterId == 0 ? chapterId : _nextChapterId;
+            init => _nextChapterId = value;
+        }
+        public int NextNumber { get; init; }
+        public int NextFlow { get; init; }
+        public string Content { get; set; } = null!;
+
+    }
+
+    public class ExistSection
+    {
+        public ICollection<int> Choices { get; init; } = null!;
+    }
+    
+    public class ContentBaseJm
+    {
+        public required ChangeType Operation { get; init; }
 
         public virtual ContentBase CreateModel()
         {
@@ -22,9 +48,9 @@ namespace AuthorVerseServer.Data.JsonModels
         }
     }
 
-    public class TextContentJM : ContentBaseJM
+    public class TextContentJm : ContentBaseJm
     {
-        public required string SectionContent { get; set; }
+        public required string SectionContent { get; init; }
         public override ContentType GetContentType() => ContentType.Text;
         public override TextContent CreateModel()
         {
@@ -41,20 +67,19 @@ namespace AuthorVerseServer.Data.JsonModels
     {
         public byte[] SectionContent { get; set; }
         public string Expansion { get; set; }
-        // public string Url { get; set; }
         public string GetPath();
         public string GetUrl();
     }
 
-    public class ImageContentJM : ContentBaseJM, IFileContent
+    public class ImageContentJm : ContentBaseJm, IFileContent
     {
         public required byte[] SectionContent { get; set; }
         public required string Expansion { get; set; }
         private string Url { get; set; }
-        public override ImageContent CreateModel()
+        public override FileContent CreateModel()
         {
             Url = $"Image_{DateTime.Now:yyyyMMdd_HHmmss}{Expansion}";
-            var model = new ImageContent()
+            var model = new FileContent()
             {
                 Url = Url,
             };
@@ -66,15 +91,15 @@ namespace AuthorVerseServer.Data.JsonModels
         public string GetUrl() => Url;
     }
     
-    public class AudioContentJM : ContentBaseJM, IFileContent
+    public class AudioContentJm : ContentBaseJm, IFileContent
     {
         public required byte[] SectionContent { get; set; }
         public required string Expansion { get; set; }
         private string Url { get; set; }
-        public override ImageContent CreateModel()
+        public override FileContent CreateModel()
         {
             Url = $"Audio_{DateTime.Now:yyyyMMdd_HHmmss}{Expansion}";
-            var model = new ImageContent()
+            var model = new FileContent()
             {
                 Url = Url,
             };

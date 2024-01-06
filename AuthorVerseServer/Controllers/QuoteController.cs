@@ -8,12 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Text.Json.Serialization;
+using AuthorVerseServer.Data.ControllerSettings;
 
 namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class QuoteController : ControllerBase
+    public class QuoteController : AuthorVerseController
     {
         private readonly IQuote _quote;
         private readonly IDatabase _redis;

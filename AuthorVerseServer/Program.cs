@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces.SectionCreateManager;
+using AuthorVerseServer.Services.SectionCreateManager;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
@@ -37,25 +38,26 @@ services.AddScoped<ITag, TagRepository>();
 services.AddScoped<IQuote, QuoteRepository>();
 services.AddScoped<IForumMessage, ForumMessageRepository>();
 services.AddScoped<ICommentRating, CommentRatingRepository>();
+services.AddScoped<ICreator, CreatorRepository>();
 services.AddScoped<ISectionCreateManager, SectionCreateManager>();
 
 services.AddScoped<BaseCudService>();
-services.AddKeyedScoped<ICudOperation, TextCudService>("text");
-services.AddKeyedScoped<ICudOperation, ImageCudService>("image");
-services.AddKeyedScoped<ICudOperation, AudioCudService>("audio");
+services.AddScoped<ICudChoiceOperations, ChoiceService>();
+services.AddKeyedScoped<ICudOperations, TextCudService>("text");
+services.AddKeyedScoped<ICudOperations, ImageCudService>("image");
+services.AddKeyedScoped<ICudOperations, AudioCudService>("audio");
 
 services.AddScoped<LoadFileService>();
-services.AddScoped<ISectionCreateManager, SectionCreateManager>();
 services.AddTransient<MailService>();
 services.AddTransient<GenerateRandomNameService>();
 services.AddTransient<CreateJWTtokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
-services.AddLogging(builder =>
+services.AddLogging(loggingBuilder =>
 {
-    builder.AddConsole();
-    builder.AddDebug();
+    loggingBuilder.AddConsole();
+    loggingBuilder.AddDebug();
 });
 
 services.AddControllers(options =>

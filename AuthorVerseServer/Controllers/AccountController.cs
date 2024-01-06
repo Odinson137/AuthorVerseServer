@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.Data.Enums;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
@@ -13,18 +14,16 @@ namespace AuthorVerseServer.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountController :  ControllerBase
+    public class AccountController :  AuthorVerseController
     {
         private readonly IAccount _account;
-        private readonly CreateJWTtokenService _jWTtokenService;
         private readonly UserManager<User> _userManager;
-        private readonly ILoadFile _loadImage;
+        private readonly LoadFileService _loadImage;
 
         public AccountController(
-            IAccount account, CreateJWTtokenService jWTtokenService, UserManager<User> userManager, ILoadFile loadImage)
+            IAccount account, UserManager<User> userManager, LoadFileService loadImage)
         {
             _account = account;
-            _jWTtokenService = jWTtokenService;
             _userManager = userManager;
             _loadImage = loadImage;
         }
@@ -35,11 +34,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404, Type = typeof(string))]
         public async Task<ActionResult<UserProfileDTO>> GetUserProfile()
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            UserProfileDTO profile = await _account.GetUserAsync(userId);
+            UserProfileDTO profile = await _account.GetUserAsync(UserId);
             if (profile == null)
                 return NotFound("User's not found");
 
@@ -51,11 +46,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<ICollection<SelectedUserBookDTO>>> GetSelectedBooks()
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            return Ok(await _account.GetUserSelectedBooksAsync(userId));
+            return Ok(await _account.GetUserSelectedBooksAsync(UserId));
         }
 
         [HttpGet("UserComments")]
@@ -67,27 +58,19 @@ namespace AuthorVerseServer.Controllers
                 return BadRequest("CommentType is not correct");
             }
 
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
             if (--page < 0)
                 return BadRequest("Page is smaller than zero");
             
-           //int commentsCount = page == 0 ? await _account.GetCommentsPagesCount(commentType, searchComment, userId) : 0;
+           //int commentsCount = page == 0 ? await _account.GetCommentsPagesCount(commentType, searchComment, UserId) : 0;
 
-            var commentPage = await _account.GetUserCommentsAsync(commentType, page, searchComment, userId);
+            var commentPage = await _account.GetUserCommentsAsync(commentType, page, searchComment, UserId);
             return Ok(commentPage);
         }
 
         [HttpGet("Friends")]
         public async Task<ActionResult<ICollection<FriendDTO>>> GetFriends()
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            var friends = await _account.GetUserFriendsAsync(userId);
+            var friends = await _account.GetUserFriendsAsync(UserId);
 
             return Ok(friends);
         }
@@ -97,11 +80,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<ICollection<UserBookDTO>>> GetUserBooks()
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            var books = await _account.GetUserBooksAsync(userId);
+            var books = await _account.GetUserBooksAsync(UserId);
             return Ok(books);
         }
 
@@ -110,11 +89,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<ActionResult<ICollection<UpdateAccountBook>>> GetUserBooksUpdates()
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            var books = await _account.CheckUserUpdatesAsync(userId);
+            var books = await _account.CheckUserUpdatesAsync(UserId);
 
             return Ok(books);
         }
@@ -125,11 +100,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult> ChangeUserProfile([FromBody] EditProfileDTO profile)
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(UserId);
             if (user == null)
             {
                 return NotFound(new ErrorMessageDTO("User not found"));

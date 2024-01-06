@@ -2,6 +2,7 @@
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
+using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using StackExchange.Redis;
@@ -12,14 +13,14 @@ public class QuoteControllerUnitTests
 {
     readonly Mock<IBook> mockBookRepository;
     readonly Mock<UserManager<User>> mockUserManager;
-    readonly Mock<ILoadFile> mockLoadImage;
+    readonly Mock<LoadFileService> mockLoadImage;
     readonly BookController controller;
     private readonly Mock<IDatabase> _redis;
     public QuoteControllerUnitTests()
     {
         mockBookRepository = new Mock<IBook>();
         mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        mockLoadImage = new Mock<ILoadFile>();
+        mockLoadImage = new Mock<LoadFileService>();
 
         var redisConnection = new Mock<IConnectionMultiplexer>();
 

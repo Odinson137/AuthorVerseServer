@@ -7,9 +7,9 @@ using StackExchange.Redis;
 
 namespace AuthorVerseServer.Services;
 
-public class AudioCudService : BaseCudService, ICudOperation
+public class AudioCudService : BaseCudService, ICudOperations
 {
-    public AudioCudService(IConnectionMultiplexer redis, IChapterSection section) : base(redis, section)
+    public AudioCudService(IConnectionMultiplexer redis, ICreator creator) : base(redis, creator)
     {
         
     }
@@ -19,7 +19,7 @@ public class AudioCudService : BaseCudService, ICudOperation
         var changeType = await CheckCreateNewContentAsync(userId, number, flow);
 
         var file = (IFormFile)value;
-        var content = new AudioContentJM()
+        var content = new AudioContentJm()
         {
             SectionContent = GetBytesFromIFormFile(file),
             Expansion = Path.GetExtension(file.FileName),
@@ -37,7 +37,7 @@ public class AudioCudService : BaseCudService, ICudOperation
         await CheckUpdateNewContentAsync(userId, number, flow);
         
         var file = (IFormFile)value;
-        var content = new ImageContentJM()
+        var content = new ImageContentJm()
         {
             Operation = ChangeType.Update,
             SectionContent = GetBytesFromIFormFile(file),

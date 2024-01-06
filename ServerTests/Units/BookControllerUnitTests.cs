@@ -18,7 +18,7 @@ public class BookControllerUnitTests
 {
     readonly Mock<IBook> mockBookRepository;
     readonly Mock<UserManager<User>> mockUserManager;
-    readonly Mock<ILoadFile> mockLoadImage;
+    readonly Mock<LoadFileService> mockLoadImage;
     readonly BookController controller;
     private readonly Mock<IDatabase> _redis;
     private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
@@ -26,14 +26,14 @@ public class BookControllerUnitTests
     {
         mockBookRepository = new Mock<IBook>();
         mockUserManager = new Mock<UserManager<User>>(Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        mockLoadImage = new Mock<ILoadFile>();
+        mockLoadImage = new Mock<LoadFileService>();
         _mockJWTTokenService = new Mock<CreateJWTtokenService>();
         var redisConnection = new Mock<IConnectionMultiplexer>();
 
         _redis = new Mock<IDatabase>();
         redisConnection.Setup(mock => mock.GetDatabase(It.IsAny<int>(), null)).Returns(_redis.Object);
 
-        controller = new BookController(mockBookRepository.Object, redisConnection.Object, mockLoadImage.Object, _mockJWTTokenService.Object);
+        controller = new BookController(mockBookRepository.Object, redisConnection.Object, mockLoadImage.Object);
 
     }
 

@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
@@ -9,7 +10,7 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BookChapterController : ControllerBase
+    public class BookChapterController : AuthorVerseController
     {
         private readonly IBookChapter _bookChapter;
         private readonly CreateJWTtokenService _tokenService;
@@ -30,12 +31,12 @@ namespace AuthorVerseServer.Controllers
         {
             var bookChapters = await _bookChapter.GetBookReadingChaptersAsync(bookId);
 
-            string? userId = _tokenService.GetIdFromToken(this.User);
+            string? UserId = _tokenService.GetIdFromToken(this.User);
 
             int chapterNumber = 0;
-            if (!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(UserId))
             {
-                chapterNumber = await _bookChapter.GetUserReadingNumberAsync(bookId, userId);
+                chapterNumber = await _bookChapter.GetUserReadingNumberAsync(bookId, UserId);
             }
 
             var userChapters = new PageBookChaptersDTO
@@ -53,13 +54,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> AddNewChapter(string title, int lastChapterId)
         {
-            string? userId = _tokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("Token failed");
-            }
-
-            ChapterInfo? chapterInfo = await _bookChapter.GetChapterNumberAsync(lastChapterId, userId);
+            ChapterInfo? chapterInfo = await _bookChapter.GetChapterNumberAsync(lastChapterId, UserId);
             if (chapterInfo == null)
             {
                 return NotFound("Chapter not found");
@@ -85,12 +80,6 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult> PublicateChapter(int chapterId)
         {
-            string? userId = _tokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("Token failed");
-            }
-
             await _bookChapter.PublicateChapterAsync(chapterId);
 
             // система уведомлений пользователям о новой вышедшей главе
@@ -105,13 +94,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<ICollection<ShortAuthorChapterDTO>>> GetAuthorChaptersAsync(int bookId)
         {
-            string? userId = _tokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("Token failed");
-            }
-
-            var chapters = await _bookChapter.GetAuthorChaptersAsync(bookId, userId);
+            var chapters = await _bookChapter.GetAuthorChaptersAsync(bookId, UserId);
 
             return Ok(chapters);
         }
@@ -123,13 +106,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<ICollection<DetaildAuthorChapterDTO>>> GetAuthorDetaildChapterAsync(int bookId)
         {
-            string? userId = _tokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("Token failed");
-            }
-
-            var chapter = await _bookChapter.GetAuthorDetaildChapterAsync(bookId, userId);
+            var chapter = await _bookChapter.GetAuthorDetaildChapterAsync(bookId, UserId);
 
             if (chapter == null)
             {
@@ -145,13 +122,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult> UpdateChapter(int chapterId, string? place = null, string? description = null)
         {
-            string? userId = _tokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("Token failed");
-            }
-
-            var chapter = await _bookChapter.GetBookChapterAsync(chapterId, userId);
+            var chapter = await _bookChapter.GetBookChapterAsync(chapterId, UserId);
 
             if (chapter == null)
             {
@@ -179,13 +150,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult> DeleteChapter(int chapterId)
         {
-            string? userId = _tokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("Token failed");
-            }
-
-            if (await _bookChapter.IsAuthorAsync(chapterId, userId) == false)
+            if (await _bookChapter.IsAuthorAsync(chapterId, UserId) == false)
             {
                 return NotFound("Chapter is not found");
             }

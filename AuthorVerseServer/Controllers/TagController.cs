@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -8,7 +9,7 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TagController : ControllerBase
+    public class TagController : AuthorVerseController
     {
         private readonly ITag _tag;
         private readonly IDistributedCache _redis;

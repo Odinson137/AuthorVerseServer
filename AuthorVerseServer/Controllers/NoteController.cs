@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.Interfaces;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +7,7 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class NoteController : ControllerBase
+    public class NoteController : AuthorVerseController
     {
         private readonly INote _note;
 

@@ -6,6 +6,7 @@
 	<s:Boolean x:Key="/Default/Environment/InlayHints/GeneralInlayHintsOptions/EnableInlayHints/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=35e9d1c9_002D10d6_002D46d7_002D9dc1_002D43bd6becae5b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CreateBookManager_AddNullDataToRedis_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreateManagerIntegrationTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreatorIntegrationTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.ChapterSectionControllerIntegrationTests.GetSectionTransferInfo_ReturnOk_ReturnsOkResult&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

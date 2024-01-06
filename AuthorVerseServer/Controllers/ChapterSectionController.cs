@@ -3,9 +3,10 @@ using AuthorVerseServer.Data.Patterns;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
+using AuthorVerseServer.Interfaces.ServiceInterfaces.SectionCreateManager;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
+using StackExchange.Redis;
 
 namespace AuthorVerseServer.Controllers
 {
@@ -15,12 +16,17 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IChapterSection _section;
         private readonly ISectionCreateManager _manager;
+        private readonly IDatabase _redis;
+        private readonly ICudOperations _choiceService;
 
         public ChapterSectionController(IChapterSection chapterSection, 
-            ISectionCreateManager manager)
+            ISectionCreateManager manager, IConnectionMultiplexer connectionMultiplexer, 
+            [FromKeyedServices("choice")] ICudOperations choiceService)
         {
             _section = chapterSection;
             _manager = manager;
+            _choiceService = choiceService;
+            _redis = connectionMultiplexer.GetDatabase();
         }
 
 
@@ -127,171 +133,6 @@ namespace AuthorVerseServer.Controllers
         {
             var section = await _section.GetVideoContentAsync(contentId);
             return Ok(section);
-        }
-
-        /// <summary>
-        /// Registers the user in the chapter creation manager
-        /// </summary>
-        /// <returns>if user already had in process to create the chapter, return CreateManagerDTO else nothing</returns>
-        [Authorize]
-        [HttpPost("CreateManager/{chapterId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<ICollection<string>?>> CreateBookManager(int chapterId)
-        {
-            var value = await _manager.CreateManagerAsync(UserId, chapterId);
-            return Ok(value);
-        }
-
-        /// <summary>
-        /// It should check whether the section with the number and the flow exist in db or contained in redis
-        /// And if section is contained on redis, then replace it with new object
-        /// </summary>
-        /// <param name="number">the chapter section number</param>
-        /// <param name="flow">the flow in which user create a new section</param>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpPost("CreateTextSection")]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> CreateNewTextSection(int number, int flow, string text)
-        {
-            try
-            {
-                await _manager.AddSectionToRedisAsync(UserId, number, flow, "text", text);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost("CreateImageSection")]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> CreateNewImageSection(int number, int flow, IFormFile imageFile)
-        {
-            try
-            {
-                await _manager.AddSectionToRedisAsync(UserId, number, flow, "image", imageFile);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost("CreateAudioSection")]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> CreateNewAudioSection(int number, int flow, IFormFile file)
-        {
-            try
-            {
-                await _manager.AddSectionToRedisAsync(UserId, number, flow, "audio", file);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            return Ok();
-        }
-        
-        [Authorize]
-        [HttpPut("UpdateTextSection")]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> UpdateImageSection(int number, int flow, string text)
-        {
-            try
-            {
-                await _manager.UpdateSectionToRedisAsync(UserId, number, flow, "text", text);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPut("UpdateVideoSection")]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> UpdateVideoSection(int number, int flow, IFormFile formFile)
-        {
-            try
-            {
-                await _manager.UpdateSectionToRedisAsync(UserId, number, flow, "image", formFile);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPut("UpdateAudioSection")]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> UpdateAudioSection(int number, int flow, IFormFile formFile)
-        {
-            try
-            {
-                await _manager.UpdateSectionToRedisAsync(UserId, number, flow, "audio", formFile);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            return Ok();
-        }
-        
-        [Authorize]
-        [HttpDelete("DeleteSection")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> DeleteSection(int number, int flow)
-        {
-            try
-            {
-                await _manager.DeleteSectionFromRedisAsync(UserId, number, flow);
-            } catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpPost("FinallySave")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<ActionResult> SaveSectionFromManager()
-        {
-            try
-            {
-                await _manager.ManagerSaveAsync(UserId);
-            }
-            catch (Exception e)
-            {
-                BadRequest(e.Message);
-            }
-
-            return Ok();
         }
     }
 }

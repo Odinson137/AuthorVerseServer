@@ -7,9 +7,9 @@ using StackExchange.Redis;
 
 namespace AuthorVerseServer.Services;
 
-public class ImageCudService : BaseCudService, ICudOperation
+public class ImageCudService : BaseCudService, ICudOperations
 {
-    public ImageCudService(IConnectionMultiplexer redis, IChapterSection section) : base(redis, section)
+    public ImageCudService(IConnectionMultiplexer redis, ICreator creator) : base(redis, creator)
     {
     }
     
@@ -18,7 +18,7 @@ public class ImageCudService : BaseCudService, ICudOperation
         var changeType = await CheckCreateNewContentAsync(userId, number, flow);
 
         var file = (IFormFile)value;
-        var content = new ImageContentJM()
+        var content = new ImageContentJm()
         {
             SectionContent = GetBytesFromIFormFile(file),
             Expansion = Path.GetExtension(file.FileName),
@@ -36,7 +36,7 @@ public class ImageCudService : BaseCudService, ICudOperation
         await CheckUpdateNewContentAsync(userId, number, flow);
         
         var file = (IFormFile)value;
-        var content = new ImageContentJM()
+        var content = new ImageContentJm()
         {
             Operation = ChangeType.Update,
             SectionContent = GetBytesFromIFormFile(file),

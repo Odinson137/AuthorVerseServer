@@ -1,6 +1,6 @@
 ﻿namespace AuthorVerseServer.Models.ContentModels
 {
-    public class ImageContent : ContentBase
+    public class FileContent : ContentBase
     {
         public required string Url { get; set; }
     }

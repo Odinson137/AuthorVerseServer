@@ -65,4 +65,11 @@ namespace AuthorVerseServer.DTO
         public required ContentBase Content { get; set; }
         public ICollection<SectionChoiceDTO>? SectionChoices { get; set; }
     }
+
+    public class TransferInfoDTO
+    {
+        public ICollection<int> Chapters { get; set; }
+        public ICollection<int> Numbers { get; set; }
+        public ICollection<int> Flows { get; set; }
+    }
 }

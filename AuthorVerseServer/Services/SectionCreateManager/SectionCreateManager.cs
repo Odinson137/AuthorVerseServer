@@ -1,37 +1,32 @@
-﻿using AuthorVerseServer.Data.JsonModels;
+﻿using AsyncAwaitBestPractices;
+using AuthorVerseServer.Data.Enums;
+using AuthorVerseServer.Data.JsonModels;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
-using Newtonsoft.Json;
-using StackExchange.Redis;
-using AsyncAwaitBestPractices;
-using AuthorVerseServer.Data.Enums;
-using AuthorVerseServer.Interfaces.ServiceInterfaces.SectionCreateManager;
 using AuthorVerseServer.Models.ContentModels;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 
-namespace AuthorVerseServer.Services
+namespace AuthorVerseServer.Services.SectionCreateManager
 {
     public class SectionCreateManager : ISectionCreateManager
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IChapterSection _section;
+        private readonly ICreator _creator;
         private readonly IDatabase _redis;
         private readonly LoadFileService _loadFile;
         private readonly ILogger<SectionCreateManager> _logger;
 
-        public SectionCreateManager(IServiceProvider serviceProvider, IChapterSection section, 
-            IConnectionMultiplexer connectionMultiplexer,
-            LoadFileService loadFile, ILogger<SectionCreateManager> logger)
+        public SectionCreateManager(IConnectionMultiplexer connectionMultiplexer,
+            LoadFileService loadFile, ILogger<SectionCreateManager> logger, ICreator creator)
         {
-            _serviceProvider = serviceProvider;
-            _section = section;
+            _creator = creator;
             _loadFile = loadFile;
             _logger = logger;
+            _creator = creator;
             _redis = connectionMultiplexer.GetDatabase();
         }
-
 
         public async ValueTask<ICollection<string>?> CreateManagerAsync(string userId, int chapterId)
         {
@@ -51,6 +46,14 @@ namespace AuthorVerseServer.Services
                 collection.Add(contentValue!);
             }
 
+
+            var hashEntries = await _redis.HashGetAllAsync($"choiceManager:{userId}");
+            
+            foreach (var choice in hashEntries)
+            {
+                collection.Add(choice.ToString());
+            }
+            
             return collection;
         }
 
@@ -62,6 +65,7 @@ namespace AuthorVerseServer.Services
                 throw new Exception("The creating session has time out");
             }
 
+            // часть кода для сохранения контента секций 
             var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
             foreach (var content in manager)
             {
@@ -70,19 +74,48 @@ namespace AuthorVerseServer.Services
 
                 var contentValue = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
 
-                var contentDTO = JsonConvert.DeserializeObject<ContentBaseJM>(contentValue!, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All })!;
+                var contentDto = JsonConvert.DeserializeObject<ContentBaseJm>(contentValue!,
+                    new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All })!;
 
-                if (contentDTO.Operation == ChangeType.Create)
+                if (contentDto.Operation == ChangeType.Create)
                 {
-                    await CreateContentAsync(contentDTO, chapterId, number, flow);
+                    await CreateContentAsync(contentDto, chapterId, number, flow);
                 } 
-                else if (contentDTO.Operation == ChangeType.Update)
+                else if (contentDto.Operation == ChangeType.Update)
                 {
-                    await UpdateContentAsync(contentDTO, chapterId, number, flow);
+                    await UpdateContentAsync(contentDto, chapterId, number, flow);
                 } 
-                else if (contentDTO.Operation == ChangeType.Delete)
+                else if (contentDto.Operation == ChangeType.Delete)
                 {
-                    await DeleteContentAsync(contentDTO, chapterId, number, flow);
+                    await DeleteContentAsync(contentDto, chapterId, number, flow);
+                 
+                    // удалить выборы после удалении самой секции в redis
+                    // DeleteChoiceAfterSectionDelete(userId, number, flow);
+                }
+                else 
+                {
+                    throw new Exception("You still have not did it");
+                }
+            }
+            
+            // часть кода для сохранение данных о выборах в секциях и разветвлениях сюжета 
+            var choiceManager = await _redis.HashGetAllAsync($"choiceManager:{userId}");
+            foreach (var redisChoice in choiceManager)
+            {
+                var choice = JsonConvert.DeserializeObject<ChoiceContent>(redisChoice.Value!)!;
+                if (choice.Operation == ChangeType.Create)
+                {
+                    choice.SetChoiceKey = redisChoice.Name!;
+                    await CreateChoiceAsync(choice, chapterId, 
+                        choice.GetChoiceNumber(), choice.GetNumber(), choice.GetFlow());
+                } 
+                else if (choice.Operation == ChangeType.Update)
+                {
+                    // await UpdateContentAsync(choice, chapterId, number, flow);
+                } 
+                else if (choice.Operation == ChangeType.Delete)
+                {
+                    // await DeleteContentAsync(choice, chapterId, number, flow);
                 }
                 else 
                 {
@@ -90,15 +123,13 @@ namespace AuthorVerseServer.Services
                 }
             }
 
-            ClearRedisAsync(manager, userId).SafeFireAndForget(Print, false);
+            ClearRedisAsync(manager, userId).SafeFireAndForget(Print);
 
-            return await _section.SaveAsync();
+            return await _creator.SaveAsync();
         }
 
         private async Task ClearRedisAsync(SortedSetEntry[] manager, string userId)
         {
-            //var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
-
             foreach (var contentSection in manager)
             {
                 int number = (int)contentSection.Score;
@@ -108,16 +139,17 @@ namespace AuthorVerseServer.Services
             }
 
             await _redis.KeyDeleteAsync($"manager:{userId}");
+            await _redis.KeyDeleteAsync($"choiceManager:{userId}");
         }
 
-        private ValueTask<EntityEntry> CreateContentAsync<T>(T contentDTO, int chapterId, int number, int flow) where T : ContentBaseJM
+        private ValueTask<EntityEntry> CreateContentAsync<T>(T contentDto, int chapterId, int number, int flow) where T : ContentBaseJm
         {
-            var model = contentDTO!.CreateModel();
+            var model = contentDto.CreateModel();
 
-            if (contentDTO is IFileContent fileContent)
+            if (contentDto is IFileContent fileContent)
             {
                 _loadFile.CreateFileAsync(fileContent.SectionContent, fileContent.GetUrl(), fileContent.GetPath())
-                    .SafeFireAndForget(Print, false);
+                    .SafeFireAndForget(Print);
             }
 
             var section = new ChapterSection()
@@ -125,77 +157,86 @@ namespace AuthorVerseServer.Services
                 BookChapterId = chapterId,
                 ChoiceFlow = flow,
                 Number = number,
-                ContentType = contentDTO.GetContentType(),
+                ContentType = contentDto.GetContentType(),
                 ContentBase = model,
             };
 
-            return _section.AddContentAsync(section);
+            return _creator.AddContentAsync(section);
         }
 
-        private async Task UpdateContentAsync<T>(T contentDTO, int chapterId, int number, int flow) where T : ContentBaseJM
+        private async Task UpdateContentAsync<T>(T contentDto, int chapterId, int number, int flow) where T : ContentBaseJm
         {
-            var model = contentDTO!.CreateModel();
+            var model = contentDto.CreateModel();
 
-            var dbSection = await _section.GetSectionAsync(chapterId, number, flow);
+            var dbSection = await _creator.GetSectionAsync(chapterId, number, flow);
 
-            if (contentDTO is IFileContent fileContent)
+            if (contentDto is IFileContent fileContent)
             {
                 _loadFile.CreateFileAsync(fileContent.SectionContent, fileContent.GetUrl(), fileContent.GetPath())
-                    .SafeFireAndForget(Print, false);
+                    .SafeFireAndForget(Print);
 
-                //var dbContent = await UseContentType.GetContent(_section, dbSection.ContentType).Invoke(dbSection.ContentId);
                 _loadFile.DeleteFile(fileContent.GetPath(), fileContent.GetUrl());
             }
 
-            dbSection.ContentType = contentDTO.GetContentType();
+            dbSection.ContentType = contentDto.GetContentType();
 
-            if (contentDTO is TextContentJM textContent && dbSection.ContentBase is TextContent textModel)
+            if (contentDto is TextContentJm textContent && dbSection.ContentBase is TextContent textModel)
             {
                 textModel.Text = textContent.SectionContent;
             }
             else
             {
-                _section.DeleteContent(dbSection.ContentBase);
+                _creator.DeleteContent(dbSection.ContentBase);
                 dbSection.ContentBase = model;
             }
         }
 
-        private async Task DeleteContentAsync<T>(T contentDTO, int chapterId, int number, int flow) where T : ContentBaseJM
+        private async Task DeleteContentAsync<T>(T contentDto, int chapterId, int number, int flow) where T : ContentBaseJm
         {
-            var dbSection = await _section.GetSectionAsync(chapterId, number, flow);
+            var dbSection = await _creator.GetSectionAsync(chapterId, number, flow);
 
-            if (contentDTO is IFileContent fileContent)
+            if (contentDto is IFileContent fileContent)
             {
                 _loadFile.DeleteFile(fileContent.GetPath(), fileContent.GetUrl());
             }
 
-            _section.DeleteContent(dbSection.ContentBase);
+            _creator.DeleteContent(dbSection.ContentBase);
 
-            _section.DeleteSection(dbSection);
+            _creator.DeleteSection(dbSection);
         }
-
 
         private void Print(Exception ex)
         {
             _logger.LogError($"Ошибка при сохранение данных. Ошибка: {ex}");
         }
 
-        public async Task AddSectionToRedisAsync(string userId, int number, int flow, string serviceKey, object value)
+        private async Task CreateChoiceAsync(ChoiceContent choiceContent, int chapterId, 
+            int choiceNumber, int number, int flow)
         {
-            var curService = _serviceProvider.GetRequiredKeyedService<ICudOperation>(serviceKey);
-            await curService.CreateSectionAsync(userId, number, flow, value);
+            var choice = new SectionChoice()
+            {
+                ChoiceNumber = choiceNumber,
+                ChapterId = chapterId,
+                Number = number,
+                Flow = flow,
+                ChoiceText = choiceContent.Content,
+                TargetChapterId = choiceContent.NextChapterId,
+                TargetNumber = choiceContent.NextNumber,
+                TargetFlow = choiceContent.NextFlow,
+            };
+            
+            var isExist = await _creator.CheckExistNextSectionAsync(chapterId, number, flow);
+            if (!isExist)
+            {
+                throw new Exception("The next section for the choice does not exist");
+            }
+            
+            await _creator.AddContentAsync(choice);
         }
-        
-        public async Task UpdateSectionToRedisAsync(string userId, int number, int flow, string serviceKey, object value)
-        {
-            var curService = _serviceProvider.GetRequiredKeyedService<ICudOperation>(serviceKey);
-            await curService.UpdateSectionAsync(userId, number, flow, value);
-        }
-        
-        public async Task DeleteSectionFromRedisAsync(string userId, int number, int flow)
-        {
-            var curService = _serviceProvider.GetRequiredService<BaseCudService>();
-            await curService.DeleteSectionFromRedisAsync(userId, number, flow);
-        }
+
+        // private void DeleteChoiceAfterSectionDelete(string userId, int choiceNumber, int number, int flow)
+        // {
+        //     _redis.HashDeleteAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}", CommandFlags.FireAndForget);
+        // }
     }
 }

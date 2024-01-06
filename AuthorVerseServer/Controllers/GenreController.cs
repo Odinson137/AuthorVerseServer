@@ -1,4 +1,6 @@
-﻿using AuthorVerseServer.Data;
+﻿using AsyncAwaitBestPractices;
+using AuthorVerseServer.Data;
+using AuthorVerseServer.Data.ControllerSettings;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +11,7 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class GenreController : ControllerBase
+    public class GenreController : AuthorVerseController
     {
         private readonly IGenre _genre;
         private readonly IDistributedCache _redis;
@@ -50,12 +52,12 @@ namespace AuthorVerseServer.Controllers
             await _genre.AddGenre(name);
             await _genre.SaveAsync();
 
-            _redis.Remove("genres");
+            _redis.RemoveAsync("genres").SafeFireAndForget();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok("Genre succecsully installed");
+            return Ok("Genre successfully installed");
         }
     }
 }

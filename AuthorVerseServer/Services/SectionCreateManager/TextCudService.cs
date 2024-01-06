@@ -7,11 +7,11 @@ using StackExchange.Redis;
 
 namespace AuthorVerseServer.Services;
 
-public class TextCudService : BaseCudService, ICudOperation
+public class TextCudService : BaseCudService, ICudOperations
 {
     // private readonly IDatabase _redis;
     
-    public TextCudService(IConnectionMultiplexer redis, IChapterSection section) : base(redis, section)
+    public TextCudService(IConnectionMultiplexer redis, ICreator creator) : base(redis, creator)
     {
         // _redis = redis;
     }
@@ -20,7 +20,7 @@ public class TextCudService : BaseCudService, ICudOperation
     {
         var changeType = await CheckCreateNewContentAsync(userId, number, flow);
 
-        var content = new TextContentJM()
+        var content = new TextContentJm()
         {
             SectionContent = (string)value,
             Operation = changeType,
@@ -36,7 +36,7 @@ public class TextCudService : BaseCudService, ICudOperation
     {
         await CheckUpdateNewContentAsync(userId, number, flow);
 
-        var content = new TextContentJM()
+        var content = new TextContentJm()
         {
             Operation = ChangeType.Update,
             SectionContent = (string)value,

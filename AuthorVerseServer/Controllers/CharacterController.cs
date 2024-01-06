@@ -6,18 +6,19 @@ using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using AuthorVerseServer.Data.ControllerSettings;
 
 namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CharacterController : ControllerBase
+    public class CharacterController : AuthorVerseController
     {
         private readonly ICharacter _character;
         private readonly CreateJWTtokenService _token;
-        private readonly ILoadFile _loadImage;
+        private readonly LoadFileService _loadImage;
 
-        public CharacterController(ICharacter character, CreateJWTtokenService token, ILoadFile loadImage)
+        public CharacterController(ICharacter character, CreateJWTtokenService token, LoadFileService loadImage)
         {
             _character = character;
             _token = token;
@@ -30,11 +31,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<BookCharacterDTO>>> GetBookCharacter(int bookId)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByBookIdAsync(bookId, userId) == false)
+            if (await _character.IsAuthorByBookIdAsync(bookId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             var characters = await _character.GetCharactersAsync(bookId);
@@ -48,11 +45,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<ICollection<BookCharacterDTO>>> GetBookCharacterByName(int bookId, string name)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByBookIdAsync(bookId, userId) == false)
+            if (await _character.IsAuthorByBookIdAsync(bookId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             var characters = await _character.GetCharactersByNameAsync(bookId, name);
@@ -66,11 +59,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<int>> AddCharacterToBook(int bookId, string name)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByBookIdAsync(bookId, userId) == false)
+            if (await _character.IsAuthorByBookIdAsync(bookId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             if (await _character.ExistNameAsync(bookId, name) == true)
@@ -96,11 +85,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> AddCharacterToChapter(int chapterId, int characterId)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByCharacterIdAsync(characterId, userId) == false)
+            if (await _character.IsAuthorByCharacterIdAsync(characterId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             if (await _character.ExistCharacterChaption(chapterId, characterId) == true)
@@ -125,11 +110,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> UpdateCharacter(UpdateCharacterDTO characterDTO)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByCharacterIdAsync(characterDTO.CharacterId, userId) == false)
+            if (await _character.IsAuthorByCharacterIdAsync(characterDTO.CharacterId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             var character = await _character.GetCharacterAsync(characterDTO.CharacterId);
@@ -151,11 +132,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> UpdateCharacterImage(UpdateCharacterImageDTO characterDTO)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByCharacterIdAsync(characterDTO.CharacterId, userId) == false)
+            if (await _character.IsAuthorByCharacterIdAsync(characterDTO.CharacterId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             var character = await _character.GetCharacterAsync(characterDTO.CharacterId);
@@ -180,11 +157,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteCharacterFromChapter(int chapterId, int characterId)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByCharacterIdAsync(characterId, userId) == false)
+            if (await _character.IsAuthorByCharacterIdAsync(characterId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             await _character.DeleteCharacterFromChapterAsync(chapterId, characterId);
@@ -199,11 +172,7 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> DeleteCharacterFromBook(int characterId)
         {
-            string? userId = _token.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
-            if (await _character.IsAuthorByCharacterIdAsync(characterId, userId) == false)
+            if (await _character.IsAuthorByCharacterIdAsync(characterId, UserId) == false)
                 return BadRequest("You are not the Author!");
 
             await _character.DeleteCharacterFromChaptersAsync(characterId);

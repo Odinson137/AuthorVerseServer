@@ -19,27 +19,23 @@ public class AccountControllerUnitTests
     private readonly Mock<IAccount> _mockAccount;
     private readonly AccountController _accountController;
     private readonly Mock<UserManager<User>> _mockUserManager;
-    private readonly Mock<CreateJWTtokenService> _mockJWTTokenService;
-    private readonly Mock<ILoadFile> _mockLoadImage;
+    private readonly Mock<LoadFileService> _mockLoadImage;
 
     public AccountControllerUnitTests()
     {
         _mockAccount = new Mock<IAccount>();
-        _mockLoadImage = new Mock<ILoadFile>();
+        _mockLoadImage = new Mock<LoadFileService>();
         _mockUserManager = new Mock<UserManager<User>>(
             Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
-        _mockJWTTokenService = new Mock<CreateJWTtokenService>();
 
         _accountController = new AccountController(
-            _mockAccount.Object, _mockJWTTokenService.Object, _mockUserManager.Object, _mockLoadImage.Object);
+            _mockAccount.Object, _mockUserManager.Object, _mockLoadImage.Object);
     }
 
     [Fact]
     public async Task GetUserProfile_InvalidToken_ShouldReturnBadRequest()
     {
         // Arrange
-
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
         _mockAccount.Setup(a => a.GetUserAsync(It.IsAny<string>())).ReturnsAsync(new UserProfileDTO());
 
         // Act
@@ -54,7 +50,6 @@ public class AccountControllerUnitTests
     {
         // Arrange
 
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
         _mockAccount.Setup(a => a.GetUserAsync(It.IsAny<string>())).ReturnsAsync((UserProfileDTO?)null);
 
         // Act
@@ -68,7 +63,6 @@ public class AccountControllerUnitTests
     public async Task GetUserProfile_Ok_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
         _mockAccount.Setup(a => a.GetUserAsync(It.IsAny<string>())).ReturnsAsync(new UserProfileDTO());
 
         // Act
@@ -82,7 +76,7 @@ public class AccountControllerUnitTests
     public async Task GetUserProfile_CheckObjectResult_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserAsync(It.IsAny<string>())).ReturnsAsync(new UserProfileDTO());
 
         // Act
@@ -96,7 +90,6 @@ public class AccountControllerUnitTests
     public async Task GetSelectedBooks_UserIdNotCorrect_ShouldReturBadRequest()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("");
         _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<SelectedUserBookDTO>());
 
         // Act
@@ -110,7 +103,6 @@ public class AccountControllerUnitTests
     public async Task GetSelectedBooks_ObjectIsOk_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
         _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<SelectedUserBookDTO>());
 
         // Act
@@ -124,7 +116,6 @@ public class AccountControllerUnitTests
     public async Task GetSelectedBooks_ObjectIsList_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
         _mockAccount.Setup(a => a.GetUserSelectedBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<SelectedUserBookDTO>());
 
         // Act
@@ -143,7 +134,7 @@ public class AccountControllerUnitTests
         string searchComment = "";
         string userId = "admin";
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
+        
         _mockAccount.Setup(a => a.GetUserCommentsAsync(
             commentType, page, searchComment, "admin")).ReturnsAsync(new CommentPageDTO());
 
@@ -165,7 +156,7 @@ public class AccountControllerUnitTests
     //    string searchComment = "";
     //    string userId = "admin";
     //    // Arrange
-    //    _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+    //    
     //    _mockAccount.Setup(a => a.GetUserCommentsAsync(
     //        commentType, page, searchComment, "admin")).ReturnsAsync(new CommentPageDTO());
 
@@ -187,7 +178,7 @@ public class AccountControllerUnitTests
         string searchComment = "";
         string userId = "admin";
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserCommentsAsync(
             commentType, page, searchComment, "admin")).ReturnsAsync(new CommentPageDTO());
 
@@ -209,7 +200,7 @@ public class AccountControllerUnitTests
         CommentType commentType = It.IsAny<CommentType>();
         string searchComment = "коммент";
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserCommentsAsync(
             commentType, page, searchComment, "admin")).ReturnsAsync(new CommentPageDTO());
 
@@ -227,7 +218,7 @@ public class AccountControllerUnitTests
         CommentType commentType = It.IsAny<CommentType>();
         string searchComment = "коммент";
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserCommentsAsync(
             commentType, page, searchComment, "admin")).ReturnsAsync(new CommentPageDTO());
 
@@ -244,7 +235,7 @@ public class AccountControllerUnitTests
     public async Task GetFriends_UserIdNotCorrect_ShouldReturBadRequest()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
+        
         _mockAccount.Setup(a => a.GetUserFriendsAsync(It.IsAny<string>())).ReturnsAsync(new List<FriendDTO>());
 
         // Act
@@ -258,7 +249,7 @@ public class AccountControllerUnitTests
     public async Task GetFriends_OkResult_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserFriendsAsync(It.IsAny<string>())).ReturnsAsync(new List<FriendDTO>());
 
         // Act
@@ -272,7 +263,7 @@ public class AccountControllerUnitTests
     public async Task GetFriends_OkObjectResult_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserFriendsAsync(It.IsAny<string>())).ReturnsAsync(new List<FriendDTO>());
 
         // Act
@@ -287,7 +278,7 @@ public class AccountControllerUnitTests
     public async Task GetUserBooks_UserIdNotCorrect_ShouldReturBadRequest()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
+        
         _mockAccount.Setup(a => a.GetUserBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<UserBookDTO>());
 
         // Act
@@ -301,7 +292,7 @@ public class AccountControllerUnitTests
     public async Task GetUserBooks_OkResult_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<UserBookDTO>());
 
         // Act
@@ -315,7 +306,7 @@ public class AccountControllerUnitTests
     public async Task GetUserBooks_OkObjectResult_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.GetUserBooksAsync(It.IsAny<string>())).ReturnsAsync(new List<UserBookDTO>());
 
         // Act
@@ -329,7 +320,7 @@ public class AccountControllerUnitTests
     public async Task GetUserBooksUpdates_UserIdNotCorrect_ShouldReturBadRequest()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns(string.Empty);
+        
         _mockAccount.Setup(a => a.CheckUserUpdatesAsync(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
 
         // Act
@@ -343,7 +334,7 @@ public class AccountControllerUnitTests
     public async Task GetUserBooksUpdates_OkResult_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.CheckUserUpdatesAsync(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
 
         // Act
@@ -358,7 +349,7 @@ public class AccountControllerUnitTests
     public async Task GetUserBooksUpdates_OkObjectResult_ShouldReturOkResult()
     {
         // Arrange
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockAccount.Setup(a => a.CheckUserUpdatesAsync(It.IsAny<string>())).ReturnsAsync(new List<UpdateAccountBook>());
 
         // Act
@@ -374,7 +365,7 @@ public class AccountControllerUnitTests
         // Arrange
         var profileUser = new EditProfileDTO();
 
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("");
+        
 
         // Act
         var result = await _accountController.ChangeUserProfile(profileUser) as ObjectResult;
@@ -388,7 +379,7 @@ public class AccountControllerUnitTests
     {
         // Arrange
         var profileUser = new EditProfileDTO();
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
 
         // Act
@@ -403,7 +394,7 @@ public class AccountControllerUnitTests
     {
         // Arrange
         var profileUser = new EditProfileDTO();
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
 
         var failedIdentityResult = new IdentityResult();
@@ -425,7 +416,7 @@ public class AccountControllerUnitTests
     {
         // Arrange
         var profileUser = new EditProfileDTO();
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
 
         var failedIdentityResult = new IdentityResult();
@@ -454,7 +445,7 @@ public class AccountControllerUnitTests
             Logo = formFileMock.Object
         };
 
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User());
 
         var failedIdentityResult = new IdentityResult();
@@ -482,7 +473,7 @@ public class AccountControllerUnitTests
         // Arrange
         var profileUser = new EditProfileDTO();
 
-        _mockJWTTokenService.Setup(cl => cl.GetIdFromToken(It.IsAny<ClaimsPrincipal>())).Returns("admin");
+        
         _mockUserManager.Setup(a => a.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(new User() { LogoUrl = "need_to_clear"});
 
         var failedIdentityResult = new IdentityResult();

@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
@@ -12,19 +13,17 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BookController : ControllerBase
+    public class BookController : AuthorVerseController
     {
         private readonly IBook _book;
         private readonly IDatabase _redis;
-        private readonly ILoadFile _loadImage;
-        private readonly CreateJWTtokenService _jWTtokenService;
+        private readonly LoadFileService _loadImage;
 
-        public BookController(IBook book, IConnectionMultiplexer redisConnection, ILoadFile loadImage, CreateJWTtokenService jWTtokenService)
+        public BookController(IBook book, IConnectionMultiplexer redisConnection, LoadFileService loadImage)
         {
             _book = book;
             _redis = redisConnection.GetDatabase();
             _loadImage = loadImage;
-            _jWTtokenService = jWTtokenService;
         }
 
         [HttpGet("Count")]
@@ -115,10 +114,6 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<int>> CreateBook([FromBody] CreateBookDTO bookDTO)
         {
-            string? userId = _jWTtokenService.GetIdFromToken(this.User);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Token user is not correct");
-
             if (bookDTO.GenresId.Count == 0)
             {
                 return BadRequest("Genres are not select");
@@ -129,7 +124,7 @@ namespace AuthorVerseServer.Controllers
 
             Book book = new Book()
             {
-                AuthorId = userId,
+                AuthorId = UserId,
                 Title = bookDTO.Title,
                 Description = bookDTO.Description,
                 AgeRating = bookDTO.AgeRating,

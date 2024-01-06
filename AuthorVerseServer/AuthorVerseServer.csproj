@@ -60,7 +60,6 @@
 
   <ItemGroup>
     <Folder Include="Data\Attributes\" />
-    <Folder Include="Data\CreaterModels\" />
     <Folder Include="wwwroot\api\audio\" />
     <Folder Include="wwwroot\api\videos\" />
   </ItemGroup>

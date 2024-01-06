@@ -5,7 +5,7 @@ using System.IO;
 
 namespace AuthorVerseServer.Services
 {
-    public class LoadFileService : ILoadFile
+    public class LoadFileService
     {
 
         public string GetUniqueName(IFormFile file)

@@ -42,7 +42,7 @@ namespace AuthorVerseServer.Data
         public DbSet<CharacterChapter> CharacterChapters { get; set; }
         public DbSet<TextContent> TextContents { get; set; }
         public DbSet<AudioContent> AudioContents { get; set; }
-        public DbSet<ImageContent> ImageContents { get; set; }
+        public DbSet<FileContent> ImageContents { get; set; }
         public DbSet<VideoContent> VideoContents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -88,6 +88,9 @@ namespace AuthorVerseServer.Data
             //modelBuilder.Ignore<ContentBase>();
 
             modelBuilder.Entity<Friendship>().HasKey(fs => new { fs.User1Id, fs.User2Id, fs.Status });
+            
+            modelBuilder.Entity<ChapterSection>().HasKey(fs => new { fs.BookChapterId, fs.Number, fs.ChoiceFlow });
+            modelBuilder.Entity<SectionChoice>().HasKey(fs => new { fs.ChoiceNumber, fs.ChapterId, fs.Number, fs.Flow });
 
             modelBuilder.Entity<Book>()
                 .HasMany(b => b.Genres)
@@ -282,13 +285,13 @@ namespace AuthorVerseServer.Data
             modelBuilder.Entity<ChapterSection>()
                 .HasMany(c => c.SectionChoices)
                 .WithOne(c => c.ChapterSection)
-                .HasForeignKey(m => m.ChapterSectionId)
+                .HasForeignKey(m => new { m.ChapterId, m.Number, m.Flow })
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SectionChoice>()
                 .HasOne(m => m.TargetSection)
                 .WithMany()
-                .HasForeignKey(m => m.TargetSectionId)
+                .HasForeignKey(m => new { m.TargetChapterId, m.TargetNumber, m.TargetFlow })
                 .OnDelete(DeleteBehavior.NoAction);
 
 
@@ -324,17 +327,14 @@ namespace AuthorVerseServer.Data
                 .HasIndex(g => g.ChoiceFlow);
 
             modelBuilder.Entity<SectionChoice>()
-                .HasIndex(g => g.ChapterSectionId);
+                .HasIndex(g => new { g.ChapterId, g.Number, g.Flow });
             modelBuilder.Entity<SectionChoice>()
-                .HasIndex(g => g.TargetSectionId);
+                .HasIndex(g => new { g.TargetChapterId, g.TargetNumber, g.TargetFlow });
 
             modelBuilder.Entity<Character>()
                 .HasIndex(g => g.BookId);
             modelBuilder.Entity<Character>()
                 .HasIndex(g => g.NormalizedName);
-            //modelBuilder.Entity<Character>()
-            //    .HasIndex(g => g.BookChapterId);
-
 
             modelBuilder.Entity<Comment>()
                 .HasIndex(g => g.UserId);            

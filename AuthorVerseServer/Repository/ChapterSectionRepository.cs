@@ -1,11 +1,8 @@
 ﻿using AuthorVerseServer.Data;
+using AuthorVerseServer.Data.JsonModels;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Models;
-using AuthorVerseServer.Models.ContentModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AuthorVerseServer.Repository
 {
@@ -17,55 +14,31 @@ namespace AuthorVerseServer.Repository
             _context = context;
         }
 
-        public Task<int> SaveAsync()
+        public Task<TransferInfoDTO> GetTransferInfoAsync(int bookId)
         {
-            return _context.SaveChangesAsync();
+            var uniqueValues = _context.ChapterSections
+                .Where(c => c.BookChapter.BookId == bookId)
+                .GroupBy(c => 1) 
+                .Select(group => new TransferInfoDTO
+                {
+                    Chapters = group.Select(c => c.BookChapterId).Distinct().ToList(),
+                    Numbers = group.Select(c => c.Number).Distinct().ToList(),
+                    Flows = group.Select(c => c.ChoiceFlow).Distinct().ToList()
+                });
+
+            return uniqueValues.FirstAsync();
         }
 
-        public void DeleteContent(ContentBase content)
-        {
-            _context.Remove(content);
-        }
-
-        public void DeleteSection(ChapterSection chapter)
-        {
-            _context.ChapterSections.Remove(chapter);
-
-            //return _context.ChapterSections
-            //    .Where(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow)
-            //    .ExecuteDeleteAsync();
-        }
-
-        public Task<ChapterSection> GetSectionAsync(int chapterId, int number, int flow)
-        {
-            return _context.ChapterSections
-                .Include(c => c.ContentBase)
-                .SingleAsync(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow);
-        }
-
-        /// <summary>
-        /// Check a new section can be added to the db
-        /// </summary>
-        /// <param name="chapterId"></param>
-        /// <param name="flow">The flow that describe current user choice</param>
-        /// <returns></returns>
-        public Task<int> CheckAddingNewSectionAsync(int chapterId, int flow)
-        {
-            var value = _context.ChapterSections
-                .Where(c => c.BookChapterId == chapterId)
-                .Where(c => c.ChoiceFlow == flow)
-                .MaxAsync(c => c.Number);
-            return value;
-        }
-
-        public Task<bool> CheckUpdatingNewSectionAsync(int chapterId, int number, int flow)
+        public Task<int> ChangeVisibilityAsync(int chapterId, int number, int flow, bool newValue)
         {
             return _context.ChapterSections
                 .Where(c => c.BookChapterId == chapterId)
                 .Where(c => c.Number == number)
                 .Where(c => c.ChoiceFlow == flow)
-                .AnyAsync();
+                .ExecuteUpdateAsync(setter => setter.SetProperty(
+                    x => x.Visibility, newValue));
         }
+
 
         public Task<ChoiceBaseWithModelDTO?> GetChoiceWithModelAsync(int chapterId, int flow, int lastChoiceNumber)
         {
@@ -213,12 +186,6 @@ namespace AuthorVerseServer.Repository
                 });
 
             return section.SingleAsync();
-        }
-
-
-        public ValueTask<EntityEntry> AddContentAsync<T>(T content)
-        {
-            return _context.AddAsync(content!);
         }
     }
 }

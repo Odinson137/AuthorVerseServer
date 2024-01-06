@@ -1,15 +1,16 @@
-﻿using AuthorVerseServer.DTO;
+﻿using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using StackExchange.Redis;
+using Newtonsoft.Json;
 
 namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ForumMessageController : ControllerBase
+    public class ForumMessageController : AuthorVerseController
     {
         private readonly IForumMessage _forum;
         private readonly IDatabase _redis;

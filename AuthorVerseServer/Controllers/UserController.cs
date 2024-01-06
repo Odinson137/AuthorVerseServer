@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
+using AuthorVerseServer.Data.ControllerSettings;
 using AuthorVerseServer.Data.Enums;
 using StackExchange.Redis;
 using Newtonsoft.Json;
@@ -14,7 +15,7 @@ namespace AuthorVerseServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    public class UserController : AuthorVerseController
     {
         private readonly IUser _user;
         private readonly UserManager<User> _userManager;
