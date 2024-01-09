@@ -1,7 +1,6 @@
 ﻿using AuthorVerseServer.Data.ControllerSettings;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Authorization;

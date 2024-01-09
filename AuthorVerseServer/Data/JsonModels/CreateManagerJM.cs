@@ -15,9 +15,10 @@ namespace AuthorVerseServer.Data.JsonModels
             set => _choiceValues = value.Split(":").Select(int.Parse).ToArray();
         }
 
-        public int GetChoiceNumber() => _choiceValues[0];
+        public int GetChapterId() => _choiceValues[0];
         public int GetNumber() => _choiceValues[1];
         public int GetFlow() => _choiceValues[2];
+        public int GetChoiceNumber() => _choiceValues[3];
         public int NextChapterId
         {
             get => _nextChapterId == 0 ? chapterId : _nextChapterId;

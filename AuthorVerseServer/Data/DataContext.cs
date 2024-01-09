@@ -44,6 +44,7 @@ namespace AuthorVerseServer.Data
         public DbSet<AudioContent> AudioContents { get; set; }
         public DbSet<FileContent> ImageContents { get; set; }
         public DbSet<VideoContent> VideoContents { get; set; }
+        public DbSet<Advertisement> Advertisements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -281,12 +282,11 @@ namespace AuthorVerseServer.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
 
-
             modelBuilder.Entity<ChapterSection>()
                 .HasMany(c => c.SectionChoices)
                 .WithOne(c => c.ChapterSection)
                 .HasForeignKey(m => new { m.ChapterId, m.Number, m.Flow })
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<SectionChoice>()
                 .HasOne(m => m.TargetSection)

@@ -1,8 +1,10 @@
-﻿using AuthorVerseServer.Data;
+﻿using System.Formats.Tar;
+using AuthorVerseServer.Data;
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace AuthorVerseServer.Repository
 {
@@ -20,16 +22,17 @@ namespace AuthorVerseServer.Repository
                 rating.UserCommentedId == userId && rating.CommentId == commentId);
         }
 
-        public Task AddRatingAsync(Rating rating)
+        public ValueTask AddRatingAsync(Rating rating)
         {
             _context.CommentRatings.AddAsync(rating);
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
         public Task DeleteRatingAsync(int commentId, RatingEntityType entityType)
         {
-            _context.CommentRatings.Where(x => x.CommentId == commentId && x.Discriminator == entityType).ExecuteDeleteAsync();
-            return Task.CompletedTask;
+            return _context.CommentRatings
+                .Where(x => x.CommentId == commentId && x.Discriminator == entityType)
+                .ExecuteDeleteAsync();
         }
 
         public Task<LikeRating> GetRatingAsync(string userId, int commentId)
@@ -47,10 +50,9 @@ namespace AuthorVerseServer.Repository
 
         public Task ChangeRatingAsync(int commentId, RatingEntityType entityType, LikeRating rating)
         {
-            _context.CommentRatings
+            return _context.CommentRatings
                 .Where(rating => rating.CommentId == commentId && rating.Discriminator == entityType)
                 .ExecuteUpdateAsync(setter => setter.SetProperty(r => r.LikeRating, rating));
-            return Task.CompletedTask;
         }
 
 

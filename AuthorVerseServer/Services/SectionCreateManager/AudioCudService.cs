@@ -34,12 +34,12 @@ public class AudioCudService : BaseCudService, ICudOperations
 
     public async ValueTask UpdateSectionAsync(string userId, int number, int flow, object value)
     {
-        await CheckUpdateNewContentAsync(userId, number, flow);
+        var operation = await CheckUpdateNewContentAsync(userId, number, flow);
         
         var file = (IFormFile)value;
         var content = new ImageContentJm()
         {
-            Operation = ChangeType.Update,
+            Operation = operation,
             SectionContent = GetBytesFromIFormFile(file),
             Expansion = Path.GetExtension(file.FileName),
         };

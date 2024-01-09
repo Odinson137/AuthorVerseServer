@@ -1,5 +1,4 @@
 ﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.Data.JsonModels;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +57,7 @@ namespace AuthorVerseServer.Repository
                     ContentType = c.ContentType,
                     SectionChoices = c.SectionChoices!.Select(sc => new SectionChoiceDTO
                     {
+                        ChoiceNumber = sc.ChoiceNumber,
                         ChoiceFlow = sc.TargetSection.ChoiceFlow,
                         Number = sc.TargetSection.Number,
                         ChoiceText = sc.ChoiceText,
@@ -84,6 +84,7 @@ namespace AuthorVerseServer.Repository
                     ContentType = c.ContentType,
                     SectionChoices = c.SectionChoices!.Select(sc => new SectionChoiceDTO
                     {
+                        ChoiceNumber = sc.ChoiceNumber,
                         ChoiceFlow = sc.TargetSection.ChoiceFlow,
                         Number = sc.TargetSection.Number,
                         ChoiceText = sc.ChoiceText,

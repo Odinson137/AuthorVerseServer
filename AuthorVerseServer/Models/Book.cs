@@ -1,9 +1,5 @@
-﻿using AuthorVerseServer.Data;
-using AuthorVerseServer.Data.Enums;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using AuthorVerseServer.Data.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthorVerseServer.Models
 {

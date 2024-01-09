@@ -13,6 +13,6 @@ namespace AuthorVerseServer.Models
         public int ContentId { get; set; }
         public required ContentBase ContentBase { get; set; }
         public bool Visibility { get; set; } = true;
-        public ICollection<SectionChoice>? SectionChoices { get; set; }
+        public ICollection<SectionChoice> SectionChoices { get; set; } = new List<SectionChoice>();
     }
 }

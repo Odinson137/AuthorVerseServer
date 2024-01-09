@@ -4,9 +4,31 @@
 	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/FiltersState/=NamingFilter/@EntryIndexedValue">On</s:String>
 	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/FiltersState/=SpellingFilter/@EntryIndexedValue">On</s:String>
 	<s:Boolean x:Key="/Default/Environment/InlayHints/GeneralInlayHintsOptions/EnableInlayHints/@EntryValue">True</s:Boolean>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=35e9d1c9_002D10d6_002D46d7_002D9dc1_002D43bd6becae5b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CreateBookManager_AddNullDataToRedis_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/CreateUnitTestDialog/TestProjectMapping/=B1C3C753_002D0D0B_002D413B_002D809C_002D79EB4DAF0FB4/@EntryIndexedValue">3A9FF8DD-0027-425F-BC78-04CE4B443CC8</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/CreateUnitTestDialog/TestTemplateMapping/=xUnit/@EntryIndexedValue">33ff99d8-b1ad-4ed5-a4fd-376b97c2c841</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=275d2c86_002De877_002D46b2_002Da5ca_002Da5118ef12f27/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GetBookAdvertisement_Ok_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.AdvertisementsIntegrationTests.GetBookAdvertisement_Ok_ReturnsOkResult&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2932f6f0_002D2f50_002D4fcd_002D86e0_002Dcb6632b6cc76/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="DeleteSection_DeleteFromDb_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreatorIntegrationTests.DeleteSection_DeleteFromDb_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreatorIntegrationTests.SectionOperationsExecute_AddThreeAndDelete_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreatorIntegrationTests.SectionOperationsExecute_AddThreeAndDeleteInDb_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreatorIntegrationTests.SectionOperationsExecute_AddThreeUpdateAndDeleteInDb_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.AdvertisementsIntegrationTests.GetBookAdvertisement_Ok_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.AdvertisementsIntegrationTests.AddAdvertisement_CreateNewAdversitement_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.AdvertisementsIntegrationTests.GetAllAdvertisement_Ok_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.AdvertisementsIntegrationTests.Delete_Ok_ReturnsOkResult&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=873ad518_002D6af0_002D4d63_002D9c14_002Db44f1849241d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="AddChoice_AddingValueToRedis_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreatorIntegrationTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.ChapterSectionControllerIntegrationTests.GetSectionTransferInfo_ReturnOk_ReturnsOkResult&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+&lt;/SessionState&gt;</s:String>
+	
+	
+	
+	</wpf:ResourceDictionary>

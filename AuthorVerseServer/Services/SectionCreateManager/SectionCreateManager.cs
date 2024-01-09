@@ -1,10 +1,12 @@
-﻿using AsyncAwaitBestPractices;
+﻿using System.Text.RegularExpressions;
+using AsyncAwaitBestPractices;
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Data.JsonModels;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Models.ContentModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -46,7 +48,6 @@ namespace AuthorVerseServer.Services.SectionCreateManager
                 collection.Add(contentValue!);
             }
 
-
             var hashEntries = await _redis.HashGetAllAsync($"choiceManager:{userId}");
             
             foreach (var choice in hashEntries)
@@ -65,6 +66,37 @@ namespace AuthorVerseServer.Services.SectionCreateManager
                 throw new Exception("The creating session has time out");
             }
 
+            // часть кода для сохранение данных о выборах в секциях и разветвлениях сюжета 
+            var choiceManager = await _redis.HashGetAllAsync($"choiceManager:{userId}");
+            foreach (var redisChoice in choiceManager)
+            {
+                var choice = JsonConvert.DeserializeObject<ChoiceContent>(redisChoice.Value!)!;
+                
+                choice.SetChoiceKey = redisChoice.Name!;
+                
+                if (choice.Operation == ChangeType.Create)
+                {
+                    await CreateChoiceAsync(userId, choice, chapterId, 
+                        choice.GetChoiceNumber(), choice.GetNumber(), choice.GetFlow());
+                } 
+                else if (choice.Operation == ChangeType.Update)
+                {
+                    // можно написать Create и после этого пометить возвращаемую сущность как Modified
+                    await UpdateChoiceAsync(choice, chapterId, 
+                        choice.GetChoiceNumber(), choice.GetNumber(), choice.GetFlow());
+                } 
+                else if (choice.Operation == ChangeType.Delete)
+                {
+                    await DeleteChoiceAsync(userId, choice, chapterId, 
+                        choice.GetChoiceNumber(), choice.GetNumber(), choice.GetFlow());
+                }
+                else 
+                {
+                    throw new Exception("You still have not did it");
+                }
+            }
+
+            
             // часть кода для сохранения контента секций 
             var manager = await _redis.SortedSetRangeByRankWithScoresAsync($"manager:{userId}");
             foreach (var content in manager)
@@ -88,9 +120,6 @@ namespace AuthorVerseServer.Services.SectionCreateManager
                 else if (contentDto.Operation == ChangeType.Delete)
                 {
                     await DeleteContentAsync(contentDto, chapterId, number, flow);
-                 
-                    // удалить выборы после удалении самой секции в redis
-                    // DeleteChoiceAfterSectionDelete(userId, number, flow);
                 }
                 else 
                 {
@@ -98,31 +127,11 @@ namespace AuthorVerseServer.Services.SectionCreateManager
                 }
             }
             
-            // часть кода для сохранение данных о выборах в секциях и разветвлениях сюжета 
-            var choiceManager = await _redis.HashGetAllAsync($"choiceManager:{userId}");
-            foreach (var redisChoice in choiceManager)
+            if (manager.Length == 0 && choiceManager.Length == 0)
             {
-                var choice = JsonConvert.DeserializeObject<ChoiceContent>(redisChoice.Value!)!;
-                if (choice.Operation == ChangeType.Create)
-                {
-                    choice.SetChoiceKey = redisChoice.Name!;
-                    await CreateChoiceAsync(choice, chapterId, 
-                        choice.GetChoiceNumber(), choice.GetNumber(), choice.GetFlow());
-                } 
-                else if (choice.Operation == ChangeType.Update)
-                {
-                    // await UpdateContentAsync(choice, chapterId, number, flow);
-                } 
-                else if (choice.Operation == ChangeType.Delete)
-                {
-                    // await DeleteContentAsync(choice, chapterId, number, flow);
-                }
-                else 
-                {
-                    throw new Exception("You still have not did it");
-                }
+                throw new Exception("Nothing to save");
             }
-
+            
             ClearRedisAsync(manager, userId).SafeFireAndForget(Print);
 
             return await _creator.SaveAsync();
@@ -168,8 +177,6 @@ namespace AuthorVerseServer.Services.SectionCreateManager
         {
             var model = contentDto.CreateModel();
 
-            var dbSection = await _creator.GetSectionAsync(chapterId, number, flow);
-
             if (contentDto is IFileContent fileContent)
             {
                 _loadFile.CreateFileAsync(fileContent.SectionContent, fileContent.GetUrl(), fileContent.GetPath())
@@ -177,6 +184,8 @@ namespace AuthorVerseServer.Services.SectionCreateManager
 
                 _loadFile.DeleteFile(fileContent.GetPath(), fileContent.GetUrl());
             }
+            
+            var dbSection = await _creator.GetSectionAsync(chapterId, number, flow);
 
             dbSection.ContentType = contentDto.GetContentType();
 
@@ -200,6 +209,7 @@ namespace AuthorVerseServer.Services.SectionCreateManager
                 _loadFile.DeleteFile(fileContent.GetPath(), fileContent.GetUrl());
             }
 
+            _creator.DeleteChoices(dbSection.SectionChoices);
             _creator.DeleteContent(dbSection.ContentBase);
 
             _creator.DeleteSection(dbSection);
@@ -210,9 +220,44 @@ namespace AuthorVerseServer.Services.SectionCreateManager
             _logger.LogError($"Ошибка при сохранение данных. Ошибка: {ex}");
         }
 
-        private async Task CreateChoiceAsync(ChoiceContent choiceContent, int chapterId, 
+        private async Task CreateChoiceAsync(string userId, ChoiceContent choiceContent, int chapterId, 
             int choiceNumber, int number, int flow)
         {
+            var choice = new SectionChoice()
+            {
+                ChoiceNumber = choiceNumber,
+                ChapterId = chapterId,
+                Number = number,
+                Flow = flow,
+                ChoiceText = choiceContent.Content,
+                TargetChapterId = choiceContent.NextChapterId,
+                TargetNumber = choiceContent.NextNumber,
+                TargetFlow = choiceContent.NextFlow,
+            };
+
+            var sectionContent =
+                await _redis.StringGetAsync($"content:{userId}:{choiceContent.NextNumber}:{choiceContent.NextFlow}");
+
+            if (sectionContent.IsNullOrEmpty)
+            {
+                var isExist = await _creator.CheckExistNextSectionAsync(choiceContent.NextChapterId,
+                    choiceContent.NextNumber, choiceContent.NextFlow);
+                if (!isExist)
+                {
+                    throw new Exception("The next section for the choice does not exist");
+                }
+            }
+
+            await _creator.AddContentAsync(choice);
+        }
+
+        // можно не писать
+        private async Task UpdateChoiceAsync(ChoiceContent choiceContent, int chapterId, 
+            int choiceNumber, int number, int flow)
+        {
+            // доставать нынешний элемент из бд, и заменять элементы и смотреть, поменялся ли конечный путь.
+            // И если да, то удалять тот элемент
+            
             var choice = new SectionChoice()
             {
                 ChoiceNumber = choiceNumber,
@@ -231,12 +276,39 @@ namespace AuthorVerseServer.Services.SectionCreateManager
                 throw new Exception("The next section for the choice does not exist");
             }
             
-            await _creator.AddContentAsync(choice);
+            var a = await _creator.AddContentAsync(choice);
+            a.State = EntityState.Modified;
         }
+        
+        private async Task DeleteChoiceAsync(string userId, ChoiceContent choiceContent, int chapterId, 
+            int choiceNumber, int number, int flow)
+        {
+            // нужно проверить, не удаляю ли я этот выбор далее, чтоб не возникла ошибка с двойным удалением одной и
+            // тойже сущности в бд
+            var checkSectionDelete = 
+                await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
+            
+            if (checkSectionDelete.HasValue // если оно есть и если секция операция удаления
+                && new Regex($"\"operation\":\\s*{(int)ChangeType.Delete}").Match(checkSectionDelete!).Success)
+            {
+                return;
+            }
+            
+            var choice = new SectionChoice()
+            {
+                ChoiceNumber = choiceNumber,
+                ChapterId = chapterId,
+                Number = number,
+                Flow = flow,
+                ChoiceText = choiceContent.Content,
+                TargetChapterId = choiceContent.NextChapterId,
+                TargetNumber = choiceContent.NextNumber,
+                TargetFlow = choiceContent.NextFlow,
+            };
 
-        // private void DeleteChoiceAfterSectionDelete(string userId, int choiceNumber, int number, int flow)
-        // {
-        //     _redis.HashDeleteAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}", CommandFlags.FireAndForget);
-        // }
+            var a = await _creator.AddContentAsync(choice);
+            a.State = EntityState.Deleted;
+        }
+        
     }
 }

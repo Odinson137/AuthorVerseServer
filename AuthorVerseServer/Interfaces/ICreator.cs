@@ -12,6 +12,7 @@ public interface ICreator
     public ValueTask<EntityEntry> AddContentAsync<T>(T content);
     public void DeleteContent(ContentBase content);
     public void DeleteSection(ChapterSection chapter);
+    public void DeleteChoices(ICollection<SectionChoice> sectionChoices);
     public Task<ChapterSection> GetSectionAsync(int chapterId, int number, int flow);
     // возвращает макимальный номер секции для данного потока
     public Task<int> CheckAddingNewSectionAsync(int chapterId, int flow);

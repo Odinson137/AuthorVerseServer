@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using AsyncAwaitBestPractices;
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.Data.JsonModels;
 using AuthorVerseServer.Interfaces;
@@ -29,9 +28,10 @@ public class ChoiceService : ICudChoiceOperations
         {
             throw new Exception("The creating session has time out");
         }
-        
-        var redisValue = 
-            await _redis.HashGetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}");
+
+        var redisValue =
+            await _redis.HashGetAsync($"choiceManager:{userId}", 
+                $"{choiceNumber}:{number}:{flow}:{choiceNumber}");
 
         var operation = ChangeType.Create;
         if (redisValue.HasValue)
@@ -44,11 +44,15 @@ public class ChoiceService : ICudChoiceOperations
         }
         else
         {
-            var choicesFlow = await _creator.CheckAddingNewChoiceAsync(chapterId, number, flow);
-            if (choicesFlow.Choices.Contains(choiceNumber))
+            var sectionContent = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
+            if (!sectionContent.HasValue)
             {
-                throw new Exception("A choice with this number already exists");
-            }
+                var choicesFlow = await _creator.CheckAddingNewChoiceAsync(chapterId, number, flow);
+                if (choicesFlow.Choices.Contains(choiceNumber))
+                {
+                    throw new Exception("A choice with this number already exists");
+                }
+            } 
         }
 
         var content = new ChoiceContent(chapterId)
@@ -60,7 +64,7 @@ public class ChoiceService : ICudChoiceOperations
             Operation = operation,
         };
 
-        await _redis.HashSetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}", 
+        await _redis.HashSetAsync($"choiceManager:{userId}", $"{chapterId}:{number}:{flow}:{choiceNumber}", 
             JsonConvert.SerializeObject(content), flags: CommandFlags.FireAndForget);
     }
 
@@ -75,8 +79,9 @@ public class ChoiceService : ICudChoiceOperations
         }
         
         var redisValue = 
-            await _redis.HashGetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}");
+            await _redis.HashGetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}:{choiceNumber}");
 
+        var operation = ChangeType.Update;
         if (redisValue.HasValue)
         {
             var isDeleted = new Regex($"\"operation\":\\s*{(int)ChangeType.Delete}").Match(redisValue!);
@@ -84,6 +89,12 @@ public class ChoiceService : ICudChoiceOperations
             if (isDeleted.Success)
             {
                 throw new Exception("The choice was deleted, and you can't update the choice");
+            }
+
+            var isCreated = new Regex($"\"operation\":\\s*{(int)ChangeType.Create}").Match(redisValue!);
+            if (isCreated.Success)
+            {
+                operation = ChangeType.Create;
             }
         }
         else
@@ -101,10 +112,10 @@ public class ChoiceService : ICudChoiceOperations
             NextChapterId = nextChapterId,
             NextNumber = nextNumber,
             NextFlow = nextFlow,
-            Operation = ChangeType.Update,
+            Operation = operation,
         };
 
-        await _redis.HashSetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}", 
+        await _redis.HashSetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}:{choiceNumber}", 
             JsonConvert.SerializeObject(content), flags: CommandFlags.FireAndForget);
     }
 
@@ -116,9 +127,9 @@ public class ChoiceService : ICudChoiceOperations
         {
             throw new Exception("The creating session has time out");
         }
-                
+        
         var redisValue = 
-            await _redis.HashGetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}");
+            await _redis.HashGetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}:{choiceNumber}");
 
         if (redisValue.HasValue)
         {
@@ -144,7 +155,7 @@ public class ChoiceService : ICudChoiceOperations
             Operation = ChangeType.Delete,
         };
 
-        await _redis.HashSetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}", 
+        await _redis.HashSetAsync($"choiceManager:{userId}", $"{choiceNumber}:{number}:{flow}:{choiceNumber}", 
             JsonConvert.SerializeObject(content), flags: CommandFlags.FireAndForget);
     }
 }

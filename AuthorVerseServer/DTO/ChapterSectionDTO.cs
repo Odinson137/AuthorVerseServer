@@ -32,6 +32,7 @@ namespace AuthorVerseServer.DTO
 
     public class SectionChoiceDTO
     {
+        public required int ChoiceNumber { get; set; }
         public int ChoiceFlow { get; set; }
         public int Number { get; set; }
         public required string ChoiceText { get; set; }

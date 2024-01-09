@@ -34,11 +34,11 @@ public class TextCudService : BaseCudService, ICudOperations
 
     public async ValueTask UpdateSectionAsync(string userId, int number, int flow, object value)
     {
-        await CheckUpdateNewContentAsync(userId, number, flow);
+        var operation = await CheckUpdateNewContentAsync(userId, number, flow);
 
         var content = new TextContentJm()
         {
-            Operation = ChangeType.Update,
+            Operation = operation,
             SectionContent = (string)value,
         };
 

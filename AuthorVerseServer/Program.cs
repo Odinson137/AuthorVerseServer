@@ -40,6 +40,7 @@ services.AddScoped<IForumMessage, ForumMessageRepository>();
 services.AddScoped<ICommentRating, CommentRatingRepository>();
 services.AddScoped<ICreator, CreatorRepository>();
 services.AddScoped<ISectionCreateManager, SectionCreateManager>();
+services.AddScoped<IAdvertisement, AdvertisementRepository>();
 
 services.AddScoped<BaseCudService>();
 services.AddScoped<ICudChoiceOperations, ChoiceService>();

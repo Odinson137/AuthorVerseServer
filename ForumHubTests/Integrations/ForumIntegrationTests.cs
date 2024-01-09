@@ -137,7 +137,7 @@ namespace ForumHubTests.Integrations
             var connection = await AuthorizeAsync();
             string message = "Hello from test";
 
-            var answerMessage = new { MessageId = 1, ViewName = "Yuri Test", Text = "Это мой первый тести..." };
+            var answerMessage = new { MessageId = 1, ViewName = "Yuri Test", Text = "Р­С‚Рѕ РјРѕР№ РїРµСЂРІС‹Р№ С‚РµСЃС‚Рё..." };
 
             // Assert
             await connection.InvokeAsync("SendMessage", message, answerMessage);

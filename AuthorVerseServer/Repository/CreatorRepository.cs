@@ -37,11 +37,19 @@ namespace AuthorVerseServer.Repository
             _context.ChapterSections.Remove(chapter);
         }
 
+        public void DeleteChoices(ICollection<SectionChoice> sectionChoices)
+        {
+            _context.RemoveRange(sectionChoices);
+        }
+
         public Task<ChapterSection> GetSectionAsync(int chapterId, int number, int flow)
         {
-            return _context.ChapterSections
+            var value = _context.ChapterSections
                 .Include(c => c.ContentBase)
+                .Include(c => c.SectionChoices)
                 .SingleAsync(c => c.BookChapterId == chapterId && c.Number == number && c.ChoiceFlow == flow);
+            
+            return value;
         }
 
         /// <summary>
@@ -87,10 +95,10 @@ namespace AuthorVerseServer.Repository
 
         public Task<bool> CheckExistNextSectionAsync(int chapterId, int number, int flow)
         {
-            var value = _context.SectionChoices
-                .Where(c => c.ChapterId == chapterId)
+            var value = _context.ChapterSections
+                .Where(c => c.BookChapterId == chapterId)
                 .Where(c => c.Number == number)
-                .Where(c => c.Flow == flow)
+                .Where(c => c.ChoiceFlow == flow)
                 .AnyAsync();
 
             return value;

@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using StackExchange.Redis;
 
 namespace AuthorVerseServer.Services
 {
@@ -37,6 +38,7 @@ namespace AuthorVerseServer.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, "Admin")
             };
 
             var token = new JwtSecurityToken(
@@ -54,11 +56,16 @@ namespace AuthorVerseServer.Services
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, userId)
             };
+
+            if (userId == "admin")
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "admin")); 
+            }
 
             var token = new JwtSecurityToken(
                 _configuration["Jwt:Issuer"],

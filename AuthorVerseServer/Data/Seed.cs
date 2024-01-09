@@ -1,5 +1,4 @@
 ﻿using AuthorVerseServer.Data.Enums;
-using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Models.ContentModels;
 using Microsoft.AspNetCore.Identity;
@@ -1042,6 +1041,14 @@ namespace AuthorVerseServer.Data
 
                 await context.ForumMessages.AddRangeAsync(message, message1);
 
+                Advertisement[] advertisements = [
+                    new Advertisement("6659581042.jpg", "https://magicheskaya-bitva.com", DateTime.Now.AddYears(1)), 
+                    new Advertisement("6659581044.jpg", "https://magicheskaya-bitva.com", DateTime.Now.AddYears(1)), 
+                    new Advertisement("magfigthing.jpg", "https://magicheskaya-bitva.com", DateTime.Now.AddYears(1))
+                ];
+                
+                await context.Advertisements.AddRangeAsync(advertisements);
+                
                 await context.SaveChangesAsync();
             }
         }

@@ -203,7 +203,7 @@ public class CreatorController : AuthorVerseController
             }
             catch (Exception e)
             {
-                BadRequest(e.Message);
+                return BadRequest(e.Message);
             }
 
             return Ok();

@@ -59,16 +59,16 @@ public class BaseCudService
         else if (checkBeforeAsync.IsNullOrEmpty)
         {
             var checkDb = await _creator.CheckAddingNewSectionAsync(chapterId, flow);
-            if (checkDb != number - 1)
-            {
-                throw new Exception("The section cannot be added to the db");
-            }
+            // if (checkDb != number - 1)
+            // {
+            //     throw new Exception("The section cannot be added to the db");
+            // }
         }
 
         return changeType;
     }
     
-    private protected async Task CheckUpdateNewContentAsync(string userId, int number, int flow)
+    private protected async Task<ChangeType> CheckUpdateNewContentAsync(string userId, int number, int flow)
     {
         // достаём номер главы
         var managerInfo = await _redis.StringGetAsync($"managerInfo:{userId}");
@@ -80,43 +80,50 @@ public class BaseCudService
         // если ли есть текущий элемент и если это удаление, то плохо, так как нельзя редактировать то, что было удалено - ошибка
         var checkContent = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
 
+        ChangeType changeType = ChangeType.Update;
         if (checkContent.HasValue)
         {
-            if (JObject.Parse(checkContent!)["operation"]!.ToObject<ChangeType>() == ChangeType.Delete)
+            var value = JObject.Parse(checkContent!)["operation"]!.ToObject<ChangeType>();
+            changeType = value switch
             {
-                throw new Exception("The section with this number and in this flow already exists");
-            }
+                ChangeType.Delete =>
+                    throw new Exception("The section with this number and in this flow already exists"),
+                ChangeType.Create => ChangeType.Create,
+                    _ => changeType
+            };
         }
         else if (await _creator.CheckUpdatingNewSectionAsync(chapterId, number, flow) == false)
         {
-            throw new Exception("The section cannot be added to the db");
+            throw new Exception("The section cannot be updated to the db");
         }
+        
+        return changeType;
     }
 
     internal async ValueTask DeleteSectionFromRedisAsync(string userId, int number, int flow)
     {
         var managerInfo = await _redis.StringGetAsync($"managerInfo:{userId}");
-        if (!int.TryParse(managerInfo, out int chapterId))
+        if (!int.TryParse(managerInfo, out var chapterId))
         {
             throw new Exception("The creating session has time out");
         }
 
-        var existNextKey = await _redis.KeyExistsAsync($"content:{userId}:{number+1}:{flow}");
+        var existNextKey = await _redis.StringGetAsync($"content:{userId}:{number+1}:{flow}");
 
-        if (existNextKey)
+        if (existNextKey.HasValue && JObject.Parse(existNextKey!)["operation"]!.ToObject<ChangeType>() != ChangeType.Delete)
         {
             throw new Exception("This is no the last section");
         }
 
         var content = await _redis.StringGetAsync($"content:{userId}:{number}:{flow}");
 
-        if (content.IsNullOrEmpty)
+        if (content.IsNullOrEmpty || JObject.Parse(content!)["operation"]!.ToObject<ChangeType>() == ChangeType.Update)
         {
             // если в редисе ничего не содержится, то проверить в бд есть ли такой элемент и добавить в редис контент на удаление
-            if (await _creator.CheckAddingNewSectionAsync(chapterId, flow) != number)
-            {
-                throw new Exception("The section cannot be deleted from the db");
-            }
+            // if (await _creator.CheckAddingNewSectionAsync(chapterId, flow) != number)
+            // {
+            //     throw new Exception("The section cannot be deleted from the db");
+            // }
 
             // добавить контент на удаление
             var contentBase = new ContentBaseJm()

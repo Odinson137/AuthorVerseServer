@@ -15,17 +15,11 @@ namespace AuthorVerseServer.Controllers
     public class ChapterSectionController : AuthorVerseController
     {
         private readonly IChapterSection _section;
-        private readonly ISectionCreateManager _manager;
         private readonly IDatabase _redis;
-        private readonly ICudOperations _choiceService;
 
-        public ChapterSectionController(IChapterSection chapterSection, 
-            ISectionCreateManager manager, IConnectionMultiplexer connectionMultiplexer, 
-            [FromKeyedServices("choice")] ICudOperations choiceService)
+        public ChapterSectionController(IChapterSection chapterSection, ConnectionMultiplexer connectionMultiplexer)
         {
             _section = chapterSection;
-            _manager = manager;
-            _choiceService = choiceService;
             _redis = connectionMultiplexer.GetDatabase();
         }
 

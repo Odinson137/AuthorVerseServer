@@ -18,15 +18,17 @@ namespace AuthorVerseServer.Services
             return $"Image_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
         }
 
+
+
+#if DEBUG
         public async Task CreateFileAsync(IFormFile file, string nameFile, string imagesFolder)
         {
-            await using (var stream = File.Create($@"./wwwroot/api/{imagesFolder}/{nameFile}"))
+            await using (var stream = File.Create($@"../../../wwwroot/api/{imagesFolder}/{nameFile}"))
             {
-                 await file.CopyToAsync(stream);
+                await file.CopyToAsync(stream);
             }
         }
 
-#if DEBUG
         public async Task CreateFileAsync(byte[] file, string nameFile, string imagesFolder)
         {
             await using (var stream = File.Create($@"../../../wwwroot/api/{imagesFolder}/{nameFile}"))
@@ -41,6 +43,15 @@ namespace AuthorVerseServer.Services
         }
 
 #else
+        public async Task CreateFileAsync(IFormFile file, string nameFile, string imagesFolder)
+        {
+            await using (var stream = File.Create($@"./wwwroot/api/{imagesFolder}/{nameFile}"))
+            {
+                await file.CopyToAsync(stream);
+            }
+        }
+
+
         public async Task CreateFileAsync(byte[] file, string nameFile, string imagesFolder)
         {
             await using (var stream = File.Create($@"./wwwroot/api/{imagesFolder}/{nameFile}"))
