@@ -41,6 +41,7 @@ services.AddScoped<ICommentRating, CommentRatingRepository>();
 services.AddScoped<ICreator, CreatorRepository>();
 services.AddScoped<ISectionCreateManager, SectionCreateManager>();
 services.AddScoped<IAdvertisement, AdvertisementRepository>();
+services.AddScoped<IArt, ArtRepository>();
 
 services.AddScoped<BaseCudService>();
 services.AddScoped<ICudChoiceOperations, ChoiceService>();

@@ -16,11 +16,12 @@ namespace AuthorVerseServer.Models
         public string AuthorId { get; set; } = null!;
         public User Author { get; set; } = null!;
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+        public ICollection<Art> Arts { get; set; } = new List<Art>();
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
-        public ICollection<ForumMessage> ForumMessages { get; set; } = new List<ForumMessage>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Character> Characters { get; set; } = new List<Character>();
         public ICollection<BookChapter> BookChapters { get; set; } = new List<BookChapter>();
+        public ICollection<ForumMessage> ForumMessages { get; set; } = new List<ForumMessage>();
         public ICollection<UserSelectedBook> UserSelectedBooks { get; set; } = new List<UserSelectedBook>();
         public ICollection<BookQuote> BookQuotes { get; set; } = new List<BookQuote>();
         public DateTime PublicationData { get; } = DateTime.Now; // можно наверное убрать и просто смотреть на дату загрузки первой главыи данной книги

@@ -45,6 +45,7 @@ namespace AuthorVerseServer.Data
         public DbSet<FileContent> ImageContents { get; set; }
         public DbSet<VideoContent> VideoContents { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; }
+        public DbSet<Art> Arts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -294,7 +295,21 @@ namespace AuthorVerseServer.Data
                 .HasForeignKey(m => new { m.TargetChapterId, m.TargetNumber, m.TargetFlow })
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Arts)
+                .WithOne(u => u.User)
+                .HasForeignKey(u => u.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Book>()
+                .HasMany(u => u.Arts)
+                .WithOne(u => u.Book)
+                .HasForeignKey(u => u.BookId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            
             modelBuilder.Entity<Book>()
                 .HasIndex(g => g.NormalizedTitle);
             modelBuilder.Entity<Book>()

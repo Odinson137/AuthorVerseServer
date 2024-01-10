@@ -18,6 +18,7 @@ namespace AuthorVerseServer.Models
         public ICollection<Note> Notes { get; set; } = new List<Note>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<BookQuote> BookQuotes { get; set; } = new List<BookQuote>();
+        public ICollection<Art> Arts { get; set; } = new List<Art>();
         public ICollection<Friendship> InitiatorFriendships { get; set; } = new List<Friendship>();
         public ICollection<Friendship> TargetFriendships { get; set; } = new List<Friendship>();
         public RegistrationMethod Method { get; set; } = RegistrationMethod.Email;

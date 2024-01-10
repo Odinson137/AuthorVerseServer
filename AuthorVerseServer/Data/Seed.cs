@@ -1049,6 +1049,14 @@ namespace AuthorVerseServer.Data
                 
                 await context.Advertisements.AddRangeAsync(advertisements);
                 
+                Art[] arts = [
+                    new Art("6659581042.jpg", admin, firstBook), 
+                    new Art("6659581044.jpg", admin, firstBook), 
+                    new Art("magfigthing.jpg", admin, firstBook)
+                ];
+                
+                await context.Arts.AddRangeAsync(arts);
+                
                 await context.SaveChangesAsync();
             }
         }

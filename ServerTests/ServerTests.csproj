@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\api\advertisement\" />
+    <Folder Include="wwwroot\api\arts\" />
     <Folder Include="wwwroot\api\audio\" />
     <Folder Include="wwwroot\api\sectionImages\" />
   </ItemGroup>
