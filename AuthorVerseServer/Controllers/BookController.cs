@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.Data.ControllerSettings;
+﻿using AsyncAwaitBestPractices;
+using AuthorVerseServer.Data.ControllerSettings;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
@@ -91,6 +92,10 @@ namespace AuthorVerseServer.Controllers
         public async Task<ActionResult<BookPageDTO>> GetCertainBooksPage(
             int tagId = 0, int genreId = 0, int page = 1, string searchText = "")
         {
+            _redis.HashIncrementAsync($"searcher",
+                    $"tagId-{tagId}:genreId-{genreId}", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             if (--page < 0)
                 return BadRequest("Page is smaller than zero");
 
@@ -132,7 +137,7 @@ namespace AuthorVerseServer.Controllers
             if (bookDTO.BookCoverImage != null)
             {
                 string nameFile = _loadImage.GetUniqueName(bookDTO.BookCoverImage);
-                await _loadImage.CreateFileAsync(bookDTO.BookCoverImage, nameFile, "Images");
+                await _loadImage.CreateFileAsync(bookDTO.BookCoverImage, nameFile, "images");
                 book.BookCover = nameFile;
             }
 
@@ -214,6 +219,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<DetailBookDTO>> GetDetailBook(int bookId)
         {
+            _redis.HashIncrementAsync($"bookPage",
+                    $"bookId-{bookId}", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             var book = await _book.GetBookById(bookId);
 
             if (book == null)
@@ -236,7 +245,7 @@ namespace AuthorVerseServer.Controllers
         [HttpGet("SimilarBooks")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ICollection<MinimalBook>>> GetSimilarBookd(int bookId)
+        public async Task<ActionResult<ICollection<MinimalBook>>> GetSimilarBook(int bookId)
         {
             var book = await _book.GetBookGenresTagsAsync(bookId);
             if (book == null)

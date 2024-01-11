@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using AuthorVerseServer.Services;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
+using AsyncAwaitBestPractices;
 using AuthorVerseServer.Data.ControllerSettings;
 using AuthorVerseServer.Data.Enums;
 using StackExchange.Redis;
@@ -117,6 +118,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<string>> Login([FromBody] UserLoginDTO authUser)
         {
+            _redis.HashIncrementAsync($"user",
+                    $"loginByEmail", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             User? user = await _userManager.FindByNameAsync(authUser.UserName);
 
             if (user != null)
@@ -147,6 +152,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult<ErrorMessageDTO>> Registration(UserRegistrationDTO registeredUser)
         {
+            _redis.HashIncrementAsync($"user",
+                    $"registration", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             User? checkUser = await _userManager.FindByNameAsync(registeredUser.UserName);
             var userCache = await _redis.StringGetAsync($"user:{registeredUser.UserName}");
 
@@ -173,6 +182,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult> RegWithGoogle([FromBody] AuthRequestModel token)
         {
+            _redis.HashIncrementAsync($"user",
+                    $"regByGoogle", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
             if (userInfo == null) return BadRequest(new ErrorMessageDTO { Message = "Error token" });
 
@@ -209,6 +222,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400, Type = typeof(ErrorMessageDTO))]
         public async Task<ActionResult<UserGoogleVerify>> SignInWithGoogle([FromBody] AuthRequestModel token)
         {
+            _redis.HashIncrementAsync($"user",
+                    $"loginByGoogle", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             var userInfo = DecodeGoogleTokenService.VerifyGoogleIdToken(token.Token);
             if (userInfo == null) return BadRequest(new ErrorMessageDTO { Message = "Error token" });
 
@@ -237,6 +254,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<UserVerify>> SignInWithMicrosoft([FromBody] UserProfile userInfo)
         {
+            _redis.HashIncrementAsync($"user",
+                    $"loginByMicrosoft", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser == null)
             {
@@ -265,6 +286,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult> RegWithMicrosoft([FromBody] UserProfile userInfo)
         {
+            _redis.HashIncrementAsync($"user",
+                    $"regByMicrosoft", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+            
             var microsoftUser = await _user.GetMicrosoftUser(userInfo.UserPrincipalName);
             if (microsoftUser != null)
             {

@@ -30,13 +30,10 @@ namespace AuthorVerseServer.Controllers
 
         [HttpGet("Profile")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(400, Type = typeof(string))]
         [ProducesResponseType(404, Type = typeof(string))]
         public async Task<ActionResult<UserProfileDTO>> GetUserProfile()
         {
             UserProfileDTO profile = await _account.GetUserAsync(UserId);
-            if (profile == null)
-                return NotFound("User's not found");
 
             return Ok(profile);
         }

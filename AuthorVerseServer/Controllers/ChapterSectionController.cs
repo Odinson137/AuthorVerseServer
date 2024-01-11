@@ -1,9 +1,8 @@
-﻿using AuthorVerseServer.Data.ControllerSettings;
+﻿using AsyncAwaitBestPractices;
+using AuthorVerseServer.Data.ControllerSettings;
 using AuthorVerseServer.Data.Patterns;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
-using AuthorVerseServer.Interfaces.ServiceInterfaces;
-using AuthorVerseServer.Interfaces.ServiceInterfaces.SectionCreateManager;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
@@ -17,7 +16,7 @@ namespace AuthorVerseServer.Controllers
         private readonly IChapterSection _section;
         private readonly IDatabase _redis;
 
-        public ChapterSectionController(IChapterSection chapterSection, ConnectionMultiplexer connectionMultiplexer)
+        public ChapterSectionController(IChapterSection chapterSection, IConnectionMultiplexer connectionMultiplexer)
         {
             _section = chapterSection;
             _redis = connectionMultiplexer.GetDatabase();
@@ -27,12 +26,12 @@ namespace AuthorVerseServer.Controllers
         [HttpGet("GetAllWithModelContentBy")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<AllContentWithModelDTO>> GetAllWithModelContentSections(int chapterId, int flow)
+        public async Task<ActionResult<AllContentWithModelDTO>> GetAllWithModelContentSections(int chapterId, int flow, int lastChoiceNumber = 0)
         {
-            var choiceContent = await _section.GetChoiceWithModelAsync(chapterId, flow, 0);
+            var choiceContent = await _section.GetChoiceWithModelAsync(chapterId, flow, lastChoiceNumber);
             int choiceNumber = choiceContent?.Number ?? int.MaxValue;
 
-            var contents = await _section.GetImmediatelyReadSectionsAsync(chapterId, flow, choiceNumber, 0);
+            var contents = await _section.GetImmediatelyReadSectionsAsync(chapterId, flow, choiceNumber, lastChoiceNumber);
 
             var allContent = new AllContentWithModelDTO()
             {
@@ -40,8 +39,25 @@ namespace AuthorVerseServer.Controllers
                 ContentsDTO = contents,
             };
 
+            if (lastChoiceNumber != 0)
+            {
+                _redis.HashIncrementAsync($"choicer:{chapterId}",
+                        $"flow-{flow}:number-{lastChoiceNumber}", 1, CommandFlags.FireAndForget)
+                    .SafeFireAndForget();
+            }
+            
             return Ok(allContent);
         }
+        
+        [Authorize]
+        [HttpGet("GetChoiceStatistic")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<int>> GetStatistic(int chapterId)
+        {
+            var result = await _redis.HashGetAllAsync($"choicer:{chapterId}");
+            return Ok(result);
+        }
+
 
         [HttpGet("GetAllContentBy")]
         [ProducesResponseType(200)]
@@ -63,9 +79,18 @@ namespace AuthorVerseServer.Controllers
                 var section = await UseContentType.GetContent(_section, content.ContentType).Invoke(content.ContentId);
                 allContent.SectionsDTO.Add(section);
             }
-
+            
+            if (lastChoiceNumber != 0)
+            {
+                _redis.HashIncrementAsync($"choicer:{chapterId}",
+                        $"flow-{flow}:number-{lastChoiceNumber}", 1, CommandFlags.FireAndForget)
+                    .SafeFireAndForget();
+            }
+            
             return Ok(allContent);
         }
+        
+
 
         [HttpGet("GetManagerBy")]
         [ProducesResponseType(200)]
@@ -80,6 +105,13 @@ namespace AuthorVerseServer.Controllers
                 ContentsDTO = contentIds,
                 Choice = choiceContent,
             };
+            
+            if (lastChoiceNumber != 0)
+            {
+                _redis.HashIncrementAsync($"choicer:{chapterId}",
+                        $"flow-{flow}:number-{lastChoiceNumber}", 1, CommandFlags.FireAndForget)
+                    .SafeFireAndForget();
+            }
 
             return Ok(managerDTO);
         }

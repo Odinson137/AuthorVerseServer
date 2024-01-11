@@ -35,7 +35,7 @@ namespace AuthorVerseServer.Controllers
 
                 await _redis.SetStringAsync("genres", JsonConvert.SerializeObject(genresDb), new DistributedCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1)
                 });
 
                 return Ok(genresDb);

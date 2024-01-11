@@ -1,4 +1,5 @@
-﻿using AuthorVerseServer.Data.ControllerSettings;
+﻿using AsyncAwaitBestPractices;
+using AuthorVerseServer.Data.ControllerSettings;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
@@ -25,6 +26,10 @@ namespace AuthorVerseServer.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<ICollection<ForumMessageDTO>>> GetMessages(int bookId, int page = 1)
         {
+            _redis.HashIncrementAsync($"forum",
+                    $"bookId-{bookId}", 1, CommandFlags.FireAndForget)
+                .SafeFireAndForget();
+
             if (--page < 0)
             {
                 return BadRequest("Page in not correct");

@@ -5,19 +5,23 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Net;
+using StackExchange.Redis;
 
 namespace ServerTests.Integrations
 {
     public class ChapterSectionControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
+        private readonly IDatabase _redis;
         // private readonly CreateJWTtokenService _token;
 
         public ChapterSectionControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
             var configuration = factory.Services.GetRequiredService<IConfiguration>();
-
-            var token = new CreateJWTtokenService(configuration);
+            var connection = factory.Services.GetRequiredService<IConnectionMultiplexer>();
+            _redis = connection.GetDatabase();
+            
+            // var token = new CreateJWTtokenService(configuration);
             _client = factory.CreateClient();
 
             // var jwtToken = token.GenerateJwtToken("admin");
@@ -249,6 +253,26 @@ namespace ServerTests.Integrations
             Assert.NotNull(allContent.Choice);
         }
         
+        [Fact]
+        public async Task GetStatistics_Ok_ReturnsOkResult()
+        {
+            // Arrange
 
+            // Act
+            var resp1 = await _client.GetAsync($"/api/ChapterSection/GetAllWithModelContentBy?chapterId=1&flow=1");
+            var resp2 = await _client.GetAsync($"/api/ChapterSection/GetAllWithModelContentBy?chapterId=1&flow=2&lastChoiceNumber=5");
+            
+            var response = await _client.GetAsync($"/api/ChapterSection/GetChoiceStatistic?chapterId=1");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var value = await _redis.HashGetAsync("choicer:1", "flow-2:number-5");
+            Assert.True((int)value > 0);
+        }
+
+        
+        
+        
     }
 }
