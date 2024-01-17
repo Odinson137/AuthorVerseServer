@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcClientApp";
+
+package forum;
+
+message Request{
+  string key = 1;
+}
+
+message Response {
+  int32 messageId = 1;
+}
+
+message Void {}
+
+service Forum {
+  rpc InsertMessage (Request) returns (Response);
+  rpc PatchMessage (Request) returns (Void);
+  rpc DeleteMessage (Request) returns (Void);
+}

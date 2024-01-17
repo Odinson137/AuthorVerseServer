@@ -6,20 +6,17 @@
 	<s:Boolean x:Key="/Default/Environment/InlayHints/GeneralInlayHintsOptions/EnableInlayHints/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/UnitTesting/CreateUnitTestDialog/TestProjectMapping/=B1C3C753_002D0D0B_002D413B_002D809C_002D79EB4DAF0FB4/@EntryIndexedValue">3A9FF8DD-0027-425F-BC78-04CE4B443CC8</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/CreateUnitTestDialog/TestTemplateMapping/=xUnit/@EntryIndexedValue">33ff99d8-b1ad-4ed5-a4fd-376b97c2c841</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=05aef1a8_002Defb5_002D4a36_002Dada9_002D0a33d30d6372/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="GetAllContentSections_ShouldReturnPathOfContentIncludingChoice_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=702d6d1b_002D5a0f_002D4170_002D95c1_002Daaa4a76a28d3/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="AddMessage_AddToNullParent_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.ChapterSectionControllerIntegrationTests.GetAllContentSections_ShouldReturnPathOfContentIncludingChoice_ReturnsOkResult&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.ChapterSectionControllerIntegrationTests.GetAllWithModelContentSections_ShouldReturnPathOfContentIncludingChoice_ReturnsOkResult&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.ChapterSectionControllerIntegrationTests.GetStatistics_Ok_ReturnsOkResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.ForumServiceIntegrationTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::3A9FF8DD-0027-425F-BC78-04CE4B443CC8::net8.0::ForumHubTests.Integrations.ForumIntegrationTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=873ad518_002D6af0_002D4d63_002D9c14_002Db44f1849241d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="AddChoice_AddingValueToRedis_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.SectionCreatorIntegrationTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
+	
+	
+	
 	
 	
 	

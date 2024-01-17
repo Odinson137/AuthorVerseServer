@@ -58,8 +58,8 @@ namespace AuthorVerseServer.Services
 
             var claims = new List<Claim>
             {
+                new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, userId)
             };
 
             if (userId == "admin")

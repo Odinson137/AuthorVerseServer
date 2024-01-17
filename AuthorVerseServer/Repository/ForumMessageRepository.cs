@@ -35,29 +35,27 @@ namespace AuthorVerseServer.Repository
             return value;
         }
 
-        public Task DeleteMessageAsync(int messageId)
+        public Task<int> DeleteMessageAsync(int messageId)
         {
-            _context.ForumMessages
+            return _context.ForumMessages
                 .Where(message => message.MessageId == messageId)
                 .ExecuteDeleteAsync();
-            return Task.CompletedTask;
         }
 
 
-        public Task ChangeParentMessage(int messageId)
+        public Task<int> ChangeParentMessage(int messageId)
         {
-            _context.ForumMessages
+            return _context.ForumMessages
                 .Where(message => message.ParrentMessageId == messageId)
                 .ExecuteUpdateAsync(setter => setter
                     .SetProperty(b => b.ParrentMessageId, (int?)null));
-            return Task.CompletedTask;
         }
 
-        public Task<ForumMessage> GetForumMessageAsync(int messageId)
+        public Task<ForumMessage?> GetForumMessageAsync(int messageId)
         {
             var message = _context.ForumMessages
                 .Where(message => message.MessageId == messageId)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
             return message;
         }
 
@@ -87,6 +85,14 @@ namespace AuthorVerseServer.Repository
         public IDbContextTransaction StartTransaction()
         {
             return _context.Database.BeginTransaction();
+        }
+
+        public Task<int> ChangeMessageTextAsync(int messageId, string newText)
+        {
+            return _context.ForumMessages
+                .Where(m => m.MessageId == messageId)
+                .ExecuteUpdateAsync(c => 
+                    c.SetProperty(m => m.Text, newText));
         }
 
         public Task<List<ForumMessageDTO>> GetToParentMessagesAsync(int bookId, int lastMessageId, int parentMessageId)

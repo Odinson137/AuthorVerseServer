@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using AuthorVerseServer.Data;
 using AuthorVerseServer.Interfaces;
@@ -17,11 +18,15 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json.Serialization;
+using AuthorVerseServer.Services.ForumServices;
+using GreeterServiceApp.Services;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var services = builder.Services;
 var configuration = builder.Configuration;
-
 
 // Add services to the container.
 services.AddScoped<IChapterSection, ChapterSectionRepository>();
@@ -55,6 +60,19 @@ services.AddTransient<GenerateRandomNameService>();
 services.AddTransient<CreateJWTtokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+services.Configure<KestrelServerOptions>(options =>
+{
+    options.ListenAnyIP(7069, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1;
+    });
+    
+    options.ListenAnyIP(5288, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http2;
+    });
+});
 
 services.AddLogging(loggingBuilder =>
 {
@@ -218,9 +236,9 @@ services.AddAuthorization(options =>
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
 
-var app = builder.Build();
+builder.Services.AddGrpc();
 
-//#if !DEBUG
+var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -277,5 +295,10 @@ app.MapControllers();
 app.UseCors("AllowReactApp");
 app.UseCors("AllowForumApp");
 
+app.MapGrpcService<ForumService>();
+app.MapGrpcService<GreeterService>();
+app.MapGet("/", () =>"Hello World!");
+
 app.Run();
+
 public partial class Program { }

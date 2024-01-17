@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "GreeterServiceApp";
+
+package greet;
+
+// определение сервиса
+service Greeter {
+  // отправка сообщения
+  rpc SayHello (HelloRequest) returns (HelloReply);
+}
+
+// сообщение от клиента содержит name
+message HelloRequest {
+  string name = 1;
+}
+
+// сообщение клиенту содержит message
+message HelloReply {
+  string message = 1;
+}

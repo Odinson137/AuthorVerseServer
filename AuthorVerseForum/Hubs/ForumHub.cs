@@ -4,6 +4,9 @@ using StackExchange.Redis;
 using AuthorVerseForum.Services;
 using AuthorVerseForum.Data.Enums;
 using Newtonsoft.Json;
+using Grpc.Net.Client;
+using GrpcClientApp;
+
 
 namespace AuthorVerseForum.Hubs
 {
@@ -12,15 +15,20 @@ namespace AuthorVerseForum.Hubs
     {
         private readonly IDatabase _redis;
         private readonly UncodingJwtoken _jwtoken;
-        private readonly HttpClient _client;
+        private readonly Forum.ForumClient _client;
         private readonly ILogger<ForumHub> _logger;
 
-        public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken, HttpClient client, ILogger<ForumHub> logger)
+        public ForumHub(IConnectionMultiplexer redisConnection, UncodingJwtoken jwtoken, ILogger<ForumHub> logger)
         {
             _redis = redisConnection.GetDatabase();
             _jwtoken = jwtoken;
-            _client = client;
+            //_client = client;
             _logger = logger;
+
+            var channel = GrpcChannel.ForAddress(ServerUri);
+            _client = new Forum.ForumClient(channel);
+            
+            _logger.LogInformation(ServerUri);
         }
 
         private string GetConnectionId()
@@ -36,7 +44,22 @@ namespace AuthorVerseForum.Hubs
                 return $"{user.Name} {user.LastName}";
         }
 
-        private string GetServerUri(string key)
+        private static string ServerUri
+        {
+            get
+            {
+                #if !DEBUG
+                    string apiUrl = $"http://server:5288";
+                #else
+                    string apiUrl = $"http://localhost:5288";
+                #endif
+                
+                // var apiUrl = "http://localhost:5288";
+                return apiUrl;
+            }
+        }
+
+        private static string GetServerUri(string key)
         {
             #if !DEBUG
                 string apiUrl = $"http://server:8080/api/ForumMessage?key={key}";
@@ -124,49 +147,60 @@ namespace AuthorVerseForum.Hubs
 
         private async Task<int> SendMessageToServerAsync(string key)
         {
-            var response = await _client.PostAsync(GetServerUri(key), null);
+            //var response = await _client.PostAsync(GetServerUri(key), null);
+            var response = await _client.InsertMessageAsync(new Request()
+            {
+                Key = key,
+            });
 
-            if (response.IsSuccessStatusCode)
+            if (response != null)
             {
                 _logger.LogInformation("Сообщение успешно отправлено!");
-                var content = await response.Content.ReadAsStringAsync();
-                return int.Parse(content);
+                return response.MessageId;
             }
             else
             {
-                _logger.LogError($"Ошибка: {response.Content}");
+                _logger.LogError($"Ошибка: {response}");
                 return 0;
             }
         }
 
         private async Task<int> SendMessageToPutTextAsync(string key)
         {
-            var response = await _client.PutAsync(GetServerUri(key), null);
+            var response = await _client.PatchMessageAsync(new Request()
+            {
+                Key = key,
+            });
 
-            if (response.IsSuccessStatusCode)
+            //var response = await _client.PutAsync(GetServerUri(key), null);
+
+            if (response != null)
             {
                 _logger.LogInformation("Сообщение успешно изменено!");
                 return 1;
             }
             else
             {
-                _logger.LogError($"Ошибка: {response.Content}");
+                _logger.LogError($"Ошибка: {response}");
                 return 0;
             }
         }
 
         private async Task<int> SendMessageToDeleteAsync(string key)
         {
-            var response = await _client.DeleteAsync(GetServerUri(key));
+            var response = await _client.DeleteMessageAsync(new Request()
+            {
+                Key = key,
+            });
 
-            if (response.IsSuccessStatusCode)
+            if (response != null)
             {
                 _logger.LogInformation("Сообщение успешно удалено!");
                 return 1;
             }
             else
             {
-                _logger.LogError($"Ошибка: {response.Content}");
+                _logger.LogError($"Ошибка: {response}");
                 return 0;
             }
         }
@@ -232,6 +266,7 @@ namespace AuthorVerseForum.Hubs
             _logger.LogInformation($"Book id - {bookId}");
             
             string userId = _jwtoken.GetUserId(token); 
+            _logger.LogInformation($"UserId - {userId}");
 
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token) || bookId <= 0)
             {

@@ -84,4 +84,7 @@ app.MapControllers();
 app.UseCors("AllowReactApp");
 
 app.MapHub<ForumHub>("/forum");
+
+app.MapGet("/", () =>"Hello, I'm Forum!");
+
 app.Run();
