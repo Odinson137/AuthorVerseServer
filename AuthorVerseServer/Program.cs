@@ -1,4 +1,3 @@
-using System.Net;
 using Microsoft.EntityFrameworkCore;
 using AuthorVerseServer.Data;
 using AuthorVerseServer.Interfaces;
@@ -7,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using AuthorVerseServer.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AuthorVerseServer.GraphQL.Mapping;
+using AuthorVerseServer.GraphQL.Queries;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
@@ -19,8 +20,6 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json.Serialization;
 using AuthorVerseServer.Services.ForumServices;
-using GreeterServiceApp.Services;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,6 +57,8 @@ services.AddScoped<LoadFileService>();
 services.AddTransient<MailService>();
 services.AddTransient<GenerateRandomNameService>();
 services.AddTransient<CreateJWTtokenService>();
+
+services.AddAutoMapper(typeof(MappingProfile));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
@@ -192,13 +193,6 @@ services.AddCors(options =>
             .AllowAnyHeader()
             .AllowCredentials();
     });
-    options.AddPolicy("AllowForumApp", builder =>
-    {
-        builder.WithOrigins("http://localhost:7069/")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
 });
 
 services.AddIdentity<User, IdentityRole>(options =>
@@ -236,7 +230,14 @@ services.AddAuthorization(options =>
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
 
-builder.Services.AddGrpc();
+services.AddGrpc();
+
+services.AddGraphQLServer()
+    .AddQueryType<BookQuery>()
+    .AddProjections()
+    .AddFiltering()
+    .AddSorting();
+
 
 var app = builder.Build();
 
@@ -293,11 +294,12 @@ app.UseCookiePolicy();
 app.MapControllers();
 
 app.UseCors("AllowReactApp");
-app.UseCors("AllowForumApp");
+
+app.MapGraphQL();
 
 app.MapGrpcService<ForumService>();
-app.MapGrpcService<GreeterService>();
 app.MapGet("/", () =>"Hello World!");
+
 
 app.Run();
 

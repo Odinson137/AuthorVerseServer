@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
+using Tag = AuthorVerseServer.Models.Tag;
 
 namespace AuthorVerseServer.Data
 {

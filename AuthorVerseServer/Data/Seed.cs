@@ -3,6 +3,8 @@ using AuthorVerseServer.Models;
 using AuthorVerseServer.Models.ContentModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Path = System.IO.Path;
+using Tag = AuthorVerseServer.Models.Tag;
 
 namespace AuthorVerseServer.Data
 {
