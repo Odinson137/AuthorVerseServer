@@ -6,12 +6,19 @@
 	<s:Boolean x:Key="/Default/Environment/InlayHints/GeneralInlayHintsOptions/EnableInlayHints/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/UnitTesting/CreateUnitTestDialog/TestProjectMapping/=B1C3C753_002D0D0B_002D413B_002D809C_002D79EB4DAF0FB4/@EntryIndexedValue">3A9FF8DD-0027-425F-BC78-04CE4B443CC8</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/CreateUnitTestDialog/TestTemplateMapping/=xUnit/@EntryIndexedValue">33ff99d8-b1ad-4ed5-a4fd-376b97c2c841</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=702d6d1b_002D5a0f_002D4170_002D95c1_002Daaa4a76a28d3/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="AddMessage_AddToNullParent_ReturnsOkResult" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a5b6602f_002D9ed1_002D4e11_002D998b_002D7985fa272a0d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CreateBook_WithValidInput_ReturnsBookId #5" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::1FFE1276-3F71-4682-A937-F604F987B271::net8.0::ServerTests.Integrations.ForumServiceIntegrationTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::3A9FF8DD-0027-425F-BC78-04CE4B443CC8::net8.0::ForumHubTests.Integrations.ForumIntegrationTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::D87004C0-1658-4A77-B3E4-1E925753E9DB::net8.0::GraphQLTests.Inegrations.BookTests.CreateBook_WithValidInput_ReturnsBookId&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::D87004C0-1658-4A77-B3E4-1E925753E9DB::net8.0::GraphQLTests.Inegrations.BookTests.GetBooks_WithFilter_ReturnsFilteredBooks&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::D87004C0-1658-4A77-B3E4-1E925753E9DB::net8.0::GraphQLTests.Inegrations.BookTests.PatchBook_SuccessfullyUpdated_ReturnsBookId&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::D87004C0-1658-4A77-B3E4-1E925753E9DB::net8.0::GraphQLTests.Inegrations.BookTests.CreateBook_SuccessfullyCreated_ReturnsBookId&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
+	
+	
+	
+	
 	
 	
 	

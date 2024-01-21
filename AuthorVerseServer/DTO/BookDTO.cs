@@ -46,6 +46,25 @@ namespace AuthorVerseServer.DTO
         public AgeRating AgeRating { get; set; }
     }
 
+    public class UpdateBookDTO
+    {
+        [Required(ErrorMessage = "Title is required")]
+        [MaxLength(200)]
+        public string Title { get; set; } = null!;
+        [Required(ErrorMessage = "Description is required")]
+        [MinLength(50, ErrorMessage = "Description length is lower than 50 letter")]
+        [MaxLength(1000, ErrorMessage = "Description length more than 1000 characters")]
+        public string Description { get; set; } = null!;
+        [Required(ErrorMessage = "Genre is required")]
+        public ICollection<int> GenresId { get; set; } = null!;
+        [Required(ErrorMessage = "Tag is required")]
+        public ICollection<int> TagsId { get; set; } = null!;
+        [Required(ErrorMessage = "Age rating is required")]
+        public AgeRating AgeRating { get; set; }
+        [GraphQLIgnore]
+        public IFormFile? BookCoverImage { get; set; }
+    }
+    
     public class CreateBookDTO
     {
         [Required(ErrorMessage = "Title is required")]
@@ -61,6 +80,7 @@ namespace AuthorVerseServer.DTO
         public ICollection<int> TagsId { get; set; } = null!;
         [Required(ErrorMessage = "Age rating is required")]
         public AgeRating AgeRating { get; set; }
+        [GraphQLIgnore]
         public IFormFile? BookCoverImage { get; set; }
     }
 

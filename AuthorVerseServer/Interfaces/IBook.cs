@@ -9,6 +9,7 @@ public interface IBook
     Task<int> SaveAsync();
     Task<List<Book>> GetBooksAsync();
     Task<int> GetCountBooks();
+    Task<Book> GetBookIncludeTagAndGenreAsync(int bookId);
     Task<List<PopularBook>> GetPopularBooks();
     Task<List<PopularBook>> GetLastBooks();
     Task<List<BookDTO>> GetCertainBooksPage(int tag, int genre, int page, string searchText);

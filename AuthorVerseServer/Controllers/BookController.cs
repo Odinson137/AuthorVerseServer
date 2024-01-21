@@ -1,6 +1,9 @@
-﻿using AsyncAwaitBestPractices;
+﻿using System.ComponentModel;
+using AsyncAwaitBestPractices;
 using AuthorVerseServer.Data.ControllerSettings;
+using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.DTO;
+using AuthorVerseServer.GraphQL.Types;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
@@ -17,6 +20,7 @@ namespace AuthorVerseServer.Controllers
     {
         private readonly IBook _book;
         private readonly IDatabase _redis;
+        private readonly ILogger<BookController> _logger;
         private readonly LoadFileService _loadImage;
 
         public BookController(IBook book, IConnectionMultiplexer redisConnection, LoadFileService loadImage)
@@ -173,6 +177,114 @@ namespace AuthorVerseServer.Controllers
             await _book.SaveAsync();
 
             return Ok(book.BookId);
+        }
+        
+        [Authorize]
+        [HttpPost("Patch")]
+        [Description("Требуется отправить в модели именно те поля, которые вы хотите изменить")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<int>> PathBook([FromBody] UpdateBookDTO bookDTO, int bookId)
+        {
+            _logger.LogInformation("Update book");
+
+            var book = await _book.GetBookIncludeTagAndGenreAsync(bookId);
+            
+            if (book == null)
+            {
+                throw new ArgumentException("Book not found");
+            }
+
+            if (book.AuthorId != UserId)
+            {
+                throw new Exception("You are not the author");
+            }
+            
+            if (!string.IsNullOrEmpty(bookDTO.Title))
+            {
+                book.Title = bookDTO.Title;
+            }
+            
+            if (!string.IsNullOrEmpty(bookDTO.Description))
+            {
+                book.Description = bookDTO.Description;
+            }
+
+            if (bookDTO.TagsId != null)
+            {
+                if (bookDTO.TagsId.Count < 3)
+                {
+                    throw new ArgumentException("The tag's count must be at least 3");
+                } 
+
+                var tagsId = book.Tags.Select(c => c.TagId).ToList();
+                foreach (var tagId in bookDTO.TagsId)
+                {
+                    if (tagsId.Remove(tagId)) continue;
+                    var tag = await _book.GetTagById(tagId);
+
+                    if (tag != null)
+                    {
+                        book.Tags.Add(tag);
+                    }
+                    else
+                    {
+                        throw new Exception("Tag not found");
+                    }
+
+                }
+
+                foreach (var tagId in tagsId)
+                {
+                    book.Tags.Remove(book.Tags.First(c => c.TagId == tagId));
+                }
+            }
+            
+            if (bookDTO.GenresId != null)                                                                  
+            {                                                                                               
+                if (bookDTO.GenresId.Count < 3)                                                            
+                {                                                                                           
+                    throw new ArgumentException("The genre's count must be at least 3");                      
+                }                                                                                           
+                                                                                                            
+                var genresId = book.Genres.Select(c => c.GenreId).ToList();                                       
+                foreach (var genreId in bookDTO.GenresId)                                                    
+                {                                                                                           
+                    if (genresId.Remove(genreId)) continue;                                                   
+                    var genre = await _book.GetGenreById(genreId);                       
+                                                                                                            
+                    if (genre != null)                                                                        
+                    {                                                                                       
+                        book.Genres.Add(genre);                                                                 
+                    } else                                                                                  
+                    {                                                                                       
+                        throw new Exception("Genre not found");                                               
+                    }                                                                                       
+                }                                                                                           
+                                                                                                            
+                foreach (var genreId in genresId)                                                               
+                {                                                                                           
+                    book.Genres.Remove(book.Genres.First(c => c.GenreId == genreId));                               
+                }                                                                                           
+            }                                                                                               
+            
+            if (bookDTO.AgeRating != AgeRating.NotSelected)
+            {
+                book.AgeRating = bookDTO.AgeRating;
+            }
+
+            if (bookDTO.BookCoverImage != null)
+            {
+                var nameFile = _loadImage.GetUniqueName(bookDTO.BookCoverImage);
+                await _loadImage.CreateFileAsync(bookDTO.BookCoverImage, nameFile, "images");
+                book.BookCover = nameFile;
+            }
+            
+            await _book.SaveAsync();
+
+            return book.BookId;
         }
 
         [HttpGet("MainPopularBooks")]

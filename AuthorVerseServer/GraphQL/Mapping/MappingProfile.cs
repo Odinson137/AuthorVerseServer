@@ -12,8 +12,20 @@ public class MappingProfile : Profile
         CreateMap<Book, QueryBookDTO>();
         CreateMap<User, QueryUserDTO>();
         
-        CreateMap<Book, QueryBookDTOJust>()
-            .ForPath(dest => dest.Author, 
-                opt => opt.MapFrom(src => src.Author));
+        CreateMap<Book, QueryBookDTO>()
+            .ForMember(dest => dest.AuthorUserName, 
+                opt => opt.MapFrom(src => src.Author.UserName))
+            .ForMember(dest => dest.AuthorName, 
+                opt => opt.MapFrom(src => src.Author.Name))
+            .ForMember(dest => dest.AuthorLastName, 
+                opt => opt.MapFrom(src => src.Author.LastName))
+            .ForMember(dest => dest.AuthorUserName, 
+                opt => opt.MapFrom(src => src.Author.UserName))
+            .ForMember(dest => dest.AuthorDescription, 
+                opt => opt.MapFrom(src => src.Author.Description))
+            .ForMember(dest => dest.AuthorEmail, 
+                opt => opt.MapFrom(src => src.Author.Email))
+            .ForMember(dest => dest.AuthorLogoUrl, 
+                opt => opt.MapFrom(src => src.Author.LogoUrl));
     }
 }

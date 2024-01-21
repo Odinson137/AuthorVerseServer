@@ -139,6 +139,14 @@ public class BookRepository : IBook
         return book;
     }
 
+    public async Task<Book> GetBookIncludeTagAndGenreAsync(int bookId)
+    {
+        return await _context.Books
+            .Where(b => b.BookId == bookId)
+            .Include(b => b.Genres)
+            .Include(b => b.Tags)
+            .FirstOrDefaultAsync();
+    }
     public Task<DetailBookDTO?> GetBookById(int bookId)
     {
         var book = _context.Books

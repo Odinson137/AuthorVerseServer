@@ -2,6 +2,7 @@
 {
     public enum AgeRating
     {
+        NotSelected = -1,
         All = 0,
         SixPlus = 6,
         TwelvePlus = 12,
