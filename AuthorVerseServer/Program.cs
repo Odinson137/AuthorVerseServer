@@ -9,6 +9,7 @@ using System.Text;
 using AuthorVerseServer.GraphQL.Mapping;
 using AuthorVerseServer.GraphQL.Mutations;
 using AuthorVerseServer.GraphQL.Queries;
+using AuthorVerseServer.GraphQL.Types;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AuthorVerseServer.Services;
 using AuthorVerseServer.Interfaces.ServiceInterfaces;
@@ -183,14 +184,6 @@ services.AddCors(options =>
             .AllowAnyHeader()
             .AllowCredentials();
     });
-    
-    options.AddPolicy("AllowTestsApp", builder =>
-    {
-        builder.WithOrigins("http://localhost")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
 });
 
 services.AddIdentity<User, IdentityRole>(options =>
@@ -228,6 +221,7 @@ services.AddAuthorization(options => { options.AddPolicy("AdminPolicy", policy =
 services.AddGrpc();
 
 services.AddGraphQLServer()
+    // .AddType<BookType>()
     .AddQueryType<BookQuery>()
     .AddMutationType<BookMutation>()
     .AddAuthorization()
@@ -299,7 +293,6 @@ app.UseCookiePolicy();
 app.MapControllers();
 
 app.UseCors("AllowReactApp");
-app.UseCors("AllowTestsApp");
 
 app.MapGraphQL();
 

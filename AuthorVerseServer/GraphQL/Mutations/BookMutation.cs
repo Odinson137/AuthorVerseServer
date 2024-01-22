@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using AsyncAwaitBestPractices;
 using AuthorVerseServer.Data;
 using AuthorVerseServer.Data.Enums;
 using AuthorVerseServer.GraphQL.Types;
@@ -6,18 +7,17 @@ using AuthorVerseServer.Models;
 using AuthorVerseServer.Services;
 using HotChocolate.Authorization;
 using Microsoft.EntityFrameworkCore;
-using CreateBookDTO = AuthorVerseServer.DTO.CreateBookDTO;
 
 namespace AuthorVerseServer.GraphQL.Mutations;
 
 public class BookMutation
 {
     private readonly ILogger<BookMutation> _logger;
-    private readonly LoadFileService _loadFile;
-    public BookMutation(ILogger<BookMutation> logger, LoadFileService loadFile)
+    private readonly LoadFileService _loadImage;
+    public BookMutation(ILogger<BookMutation> logger, LoadFileService loadImage)
     {
         _logger = logger;
-        _loadFile = loadFile;
+        _loadImage = loadImage;
     }
     
     [Authorize]
@@ -199,4 +199,87 @@ public class BookMutation
 
         return book.BookId;
     }
+
+    [Authorize]
+    [GraphQLName("image")]
+    public async Task<int> LoadBookImage(
+        [Service] DataContext context,
+        int bookId,
+        [GraphQLType(typeof(NonNullType<UploadType>))] IFile bookImage,
+        ClaimsPrincipal claimsPrincipal, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Upload image");
+
+        var userId = claimsPrincipal.Claims.First().Value;
+
+        var book = await context.Books.FindAsync(bookId, cancellationToken);
+
+        if (book == null || book.AuthorId != userId)
+            throw new Exception("Your book is not founded");
+
+        var nameFile = _loadImage.GetUniqueName("." + bookImage.Name.Split(".")[1]);
+        await _loadImage.CreateFileAsync(bookImage, nameFile, "images");
+        
+        if (!string.IsNullOrEmpty(book.BookCover))
+        {
+            Task.Run(() => 
+                _loadImage.DeleteFile(book.BookCover, "Images"), cancellationToken)
+                .SafeFireAndForget(ex => _logger.LogInformation($"Error: {ex}"));
+        }
+        
+        book.BookCover = nameFile;
+
+        await context.SaveChangesAsync(cancellationToken);
+        
+        return book.BookId;
+    }
+    
+    [Authorize]
+    [GraphQLName("deleteBook")]
+    public async Task<int> DeleteBook(
+        [Service] DataContext context,
+        int bookId,
+        ClaimsPrincipal claimsPrincipal, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Delete image");
+
+        var userId = claimsPrincipal.Claims.First().Value;
+
+        var book = await context.Books
+            .Where(b => b.BookId == bookId && b.AuthorId == userId)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        
+        if (book == null)
+        {
+            throw new Exception("Your book not found");
+        }
+
+        context.Remove(book);
+
+        await context.SectionChoices
+            .Where(c => c.ChapterSection != null && c.ChapterSection.BookChapter.BookId == bookId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        await context.Characters
+            .Where(c => c.BookId == bookId)
+            .ExecuteDeleteAsync(cancellationToken);
+        
+        await context.ForumMessages
+            .Where(c => c.BookId == bookId)
+            .ExecuteDeleteAsync(cancellationToken);
+        
+        await context.Comments
+            .Where(c => c.BookId == bookId)
+            .ExecuteDeleteAsync(cancellationToken);
+        
+        await context.BookQuotes
+            .Where(c => c.BookId == bookId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        
+        await context.SaveChangesAsync(cancellationToken);
+        
+        return 1;
+    }
+    
 }

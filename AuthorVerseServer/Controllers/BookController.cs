@@ -178,15 +178,16 @@ namespace AuthorVerseServer.Controllers
 
             return Ok(book.BookId);
         }
+
         
         [Authorize]
-        [HttpPost("Patch")]
+        [HttpPatch]
         [Description("Требуется отправить в модели именно те поля, которые вы хотите изменить")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<int>> PathBook([FromBody] UpdateBookDTO bookDTO, int bookId)
+        public async Task<ActionResult<int>> PatchBook([FromBody] UpdateBookDTO bookDTO, int bookId)
         {
             _logger.LogInformation("Update book");
 
@@ -285,6 +286,29 @@ namespace AuthorVerseServer.Controllers
             await _book.SaveAsync();
 
             return book.BookId;
+        }
+
+
+        [Authorize]
+        [HttpDelete]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> DeleteBook(int bookId)
+        {
+            _logger.LogInformation("Delete book");
+
+            var book = await _book.GetJustBookAsync(bookId, UserId);
+            
+            if (book == null)
+                return NotFound("Your book not found");
+
+            _book.RemoveAsync(book);
+
+            await _book.SaveAsync();
+            
+            return Ok();
         }
 
         [HttpGet("MainPopularBooks")]

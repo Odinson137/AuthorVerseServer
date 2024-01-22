@@ -1,4 +1,6 @@
-﻿namespace AuthorVerseServer.Interfaces;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+
+namespace AuthorVerseServer.Interfaces;
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Models;
 using MailKit.Search;
@@ -7,7 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage;
 public interface IBook
 {
     Task<int> SaveAsync();
-    Task<List<Book>> GetBooksAsync();
+    Task<Book?> GetJustBookAsync(int bookId, string userId);
+    void RemoveAsync(Book book);
+    // Task<List<Book>> GetBooksAsync();
+    // Task<bool> IsAuthorBookAsync(int bookId, string userId);
+    // Task<int> DeleteBookAsync(int bookId);
     Task<int> GetCountBooks();
     Task<Book> GetBookIncludeTagAndGenreAsync(int bookId);
     Task<List<PopularBook>> GetPopularBooks();

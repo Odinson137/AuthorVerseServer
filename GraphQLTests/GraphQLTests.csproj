@@ -30,4 +30,11 @@
 	<ProjectReference Include="..\AuthorVerseServer\AuthorVerseServer.csproj" />
 </ItemGroup>
 
+<ItemGroup>
+  <Content Update="Images\javascript-it-юмор-geek-5682739.jpeg">
+    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+  </Content>
+</ItemGroup>
+
 </Project>

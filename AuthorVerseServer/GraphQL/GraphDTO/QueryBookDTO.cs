@@ -34,21 +34,3 @@ public class QueryBookDTO
     public double Earnings { get; set; }
     public PublicationPermission Permission { get; set; } = PublicationPermission.Approved;
 }
-
-public class CreateBookGraphDTO
-{
-    public string? Title { get; set; }
-    public string? Description { get; set; }
-    public ICollection<int>? GenresId { get; set; }
-    public ICollection<int>? TagsId { get; set; }
-    public AgeRating AgeRating { get; set; }
-}
-
-public class UpdateBookGraphDTO
-{
-    public string? Title { get; set; }
-    public string? Description { get; set; }
-    public ICollection<int>? GenresId { get; set; }
-    public ICollection<int>? TagsId { get; set; }
-    public AgeRating AgeRating { get; set; }
-}

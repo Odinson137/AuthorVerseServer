@@ -2,8 +2,8 @@
 using AuthorVerseServer.DTO;
 using AuthorVerseServer.Interfaces;
 using AuthorVerseServer.Models;
-using MailKit.Search;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Tag = AuthorVerseServer.Models.Tag;
 
 namespace AuthorVerseServer.Repository;
@@ -20,6 +20,17 @@ public class BookRepository : IBook
     {
         return _context.Books.AsNoTracking().OrderBy(g => g.BookId).ToListAsync();
     }
+
+    public Task<Book?> GetJustBookAsync(int bookId, string userId)
+    {
+        return _context.Books.Where(b => b.BookId == bookId && b.AuthorId == userId).FirstOrDefaultAsync();
+    }
+
+    public void RemoveAsync(Book book)
+    {
+        _context.Remove(book);
+    }
+
 
     public Task<int> GetCountBooks()
     {

@@ -8,6 +8,12 @@ namespace AuthorVerseServer.Services
 {
     public class LoadFileService
     {
+        
+        // #if DEBUG
+        //         private string path = "../../../wwwroot/api";
+        // # else 
+                private string path = "./wwwroot/api";
+        // #endif
 
         public string GetUniqueName(IFormFile file)
         {
@@ -20,52 +26,28 @@ namespace AuthorVerseServer.Services
         }
 
 
-
-#if DEBUG
         public async Task CreateFileAsync(IFormFile file, string nameFile, string imagesFolder)
         {
-            await using (var stream = File.Create($@"../../../wwwroot/api/{imagesFolder}/{nameFile}"))
-            {
-                await file.CopyToAsync(stream);
-            }
+            await using var stream = File.Create($@"{path}/{imagesFolder}/{nameFile}");
+            await file.CopyToAsync(stream);
         }
 
         public async Task CreateFileAsync(byte[] file, string nameFile, string imagesFolder)
         {
-            await using (var stream = File.Create($@"../../../wwwroot/api/{imagesFolder}/{nameFile}"))
-            {
-                await stream.WriteAsync(file, 0, file.Length);
-            }
-        }
-
-        public void DeleteFile(string fileName, string folderPath)
-        {
-            File.Delete($@"../../../wwwroot/api/{folderPath}/{fileName}");
-        }
-
-#else
-        public async Task CreateFileAsync(IFormFile file, string nameFile, string imagesFolder)
-        {
-            await using (var stream = File.Create($@"./wwwroot/api/{imagesFolder}/{nameFile}"))
-            {
-                await file.CopyToAsync(stream);
-            }
-        }
-
-
-        public async Task CreateFileAsync(byte[] file, string nameFile, string imagesFolder)
-        {
-            await using (var stream = File.Create($@"./wwwroot/api/{imagesFolder}/{nameFile}"))
-            {
-                stream.Write(file, 0, file.Length);
-            }
+            await using var stream = File.Create($@"{path}/{imagesFolder}/{nameFile}");
+            await stream.WriteAsync(file, 0, file.Length);
         }
         
+        public async Task CreateFileAsync(IFile file, string nameFile, string imagesFolder, string? newPath = null)
+        {
+            await using var fileStream =
+                new FileStream($@"{newPath ?? path}/{imagesFolder}/{nameFile}", FileMode.Create);
+            await file.CopyToAsync(fileStream);
+        }
+
         public void DeleteFile(string fileName, string folderPath)
         {
-            File.Delete($@"./wwwroot/api/{folderPath}/{fileName}");
+            File.Delete($@"{path}/{folderPath}/{fileName}");
         }
-#endif
-
     }
 }

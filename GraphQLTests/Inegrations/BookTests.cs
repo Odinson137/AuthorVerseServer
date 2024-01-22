@@ -1,4 +1,5 @@
 using AuthorVerseServer.Services;
+using GraphQL;
 using GraphQL.Client.Abstractions;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
@@ -104,4 +105,41 @@ public class BookTests : IClassFixture<WebApplicationFactory<Program>>
         var bookId = response.Data["patchBook"];
         Assert.NotNull(bookId);
     }
+
+
+    //
+    // [Fact]
+    // public async Task LoadBookImage_WithFile_SuccessfullyUploaded_ReturnsBookId()
+    // {
+    //     // Arrange
+    //     var mutation = @"
+    //     mutation ($file: Upload!) {
+    //         image(bookImage: $file)
+    //     }";
+    //
+    //     var request = new GraphQLHttpRequest
+    //     {
+    //         Query = mutation,
+    //         Variables = new
+    //         {
+    //             file = "javascript-it-юмор-geek-5682739.jpeg"
+    //         }
+    //     };
+    //
+    //     using var formData = new MultipartFormDataContent();
+    //     formData.Add(
+    //         new ByteArrayContent(File.ReadAllBytes("../../../Images/javascript-it-юмор-geek-5682739.jpeg")), "file",
+    //         "javascript-it-юмор-geek-5682739.jpeg");
+    //
+    //     request.Variables = formData;
+    //     
+    //     // Act
+    //     var response = await _graphQLClient.SendMutationAsync<dynamic>(request);
+    //
+    //     // Assert
+    //     Assert.Null(response.Errors);
+    //     Assert.NotNull(response.Data);
+    //     var bookId = response.Data["image"];
+    //     Assert.NotNull(bookId);
+    // }
 }

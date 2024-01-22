@@ -71,6 +71,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Attributes\" />
+    <Folder Include="GraphQL\Types\" />
     <Folder Include="wwwroot\api\audio\" />
     <Folder Include="wwwroot\api\videos\" />
   </ItemGroup>
