@@ -48,4 +48,5 @@ Technologies used:
 .Net 8, EF, Identity, Redis, Docker, GraphQL, gRPC, MS SQL, MVC, SignalR, Repository pattern, DI, Unit tests, Integration tests, Stress tests
 
 **`End`**
+
 That's it. Good luck with your work!
