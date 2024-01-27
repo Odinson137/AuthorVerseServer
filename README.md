@@ -16,7 +16,7 @@ The project was conceived as educational, so instead of simple solutions, more c
 To run the project, you need Docker and an internet connection to download the Git repository. Once you download the repository, navigate to the project folder and enter the following command in the console:
 
 ```
-docker-compose run --build
+docker-compose up --build
 ```
 
 This command installs all the necessary images for the project, followed by the creation of the containers. After that, you can access this address:
