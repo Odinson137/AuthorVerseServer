@@ -140,7 +140,7 @@ services.AddSwaggerGen(c =>
 
 services.AddDbContext<DataContext>(options =>
 {
-#if !DEBUG
+#if DEBUG
     string str =
  $"Server=db;Initial Catalog=AuthorVerseDb;Persist Security Info=False;User ID=sa;Password=S3cur3P@ssW0rd!;Encrypt=False;TrustServerCertificate=False;Connection Timeout=50;MultipleActiveResultSets=True";
 #else
@@ -151,7 +151,7 @@ services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(str);
 });
 
-#if !DEBUG
+#if DEBUG
 services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("redis:6379,abortConnect=false"));
 
 services.AddStackExchangeRedisCache(options =>

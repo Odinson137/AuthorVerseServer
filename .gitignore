@@ -4,6 +4,8 @@ obj/
 /bin/
 /obj/
 
+.idea/	
+
 /AuthorVerseForum/bin
 /AuthorVerseForum/obj
 

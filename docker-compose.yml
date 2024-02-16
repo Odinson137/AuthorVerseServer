@@ -28,7 +28,7 @@ services:
     ports:
         - 6379:6379 
     networks:
-        - serverapp
+        - serverapp 
 
   server:
     container_name: authorverse-server
@@ -57,7 +57,7 @@ services:
       target: final
       dockerfile: AuthorVerseForum/Dockerfile
     ports:
-      - 7070:8080
+      - 7070:7070
     environment:
       - ASPNETCORE_ENVIRONMENT=development
     networks:

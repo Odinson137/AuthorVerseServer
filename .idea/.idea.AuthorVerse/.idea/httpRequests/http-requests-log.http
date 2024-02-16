@@ -1,0 +1,1 @@
+GRPC localhost:5288/forum.Forum/DeleteMessageGRPC localhost:5288/greet.Greeter/SayHelloGRPC localhost:5288/forum.Forum/DeleteMessageGRPC localhost:5288/greet.Greeter/SayHelloGRPC localhost:5288/greet.Greeter/SayHelloGRPC localhost:5216/greet.Greeter/SayHello
