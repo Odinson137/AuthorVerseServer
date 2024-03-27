@@ -1,4 +1,4 @@
-**`Description`**
+
 
 The idea of the website is to create a unified platform where authors can create various types of books, including text-only books, books with images, manga, manhwa, and audiobooks. The main feature of the project is the ability to branch the plot. Authors can create branching not only within a single chapter but also throughout their entire book, and they can create links to other books. This feature allows authors to create extensive works where each writer develops the branching part they want.
 
